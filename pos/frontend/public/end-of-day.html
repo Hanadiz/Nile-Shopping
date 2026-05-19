@@ -1,1 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nile POS - End of Day Report</title>
+    <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #f1f5f9;
+            padding: 24px;
+        }
+        .container { max-width: 1000px; margin: 0 auto; }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+        h1 { font-size: 24px; color: #1e293b; }
+        .back-btn {
+            background: white;
+            border: 1px solid #e2e8f0;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            text-decoration: none;
+            color: #475569;
+        }
+        .date-selector {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 24px;
+            display: flex;
+            gap: 16px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .date-selector input {
+            padding: 10px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+        }
+        .generate-btn {
+            padding: 10px 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        .report-card {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            margin-bottom: 24px;
+        }
+        .report-header {
+            background: #1e293b;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1px;
+            background: #e2e8f0;
+        }
+        .summary-item {
+            background: white;
+            padding: 20px;
+            text-align: center;
+        }
+        .summary-label { font-size: 12px; color: #64748b; margin-bottom: 8px; }
+        .summary-value { font-size: 28px; font-weight: 700; color: #1e293b; }
+        .payment-breakdown { padding: 20px; }
+        .payment-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        .cash-reconciliation {
+            background: #f8fafc;
+            padding: 20px;
+            border-radius: 16px;
+            margin: 20px;
+        }
+        .reconcile-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        .reconcile-input {
+            width: 150px;
+            padding: 8px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            text-align: right;
+        }
+        .difference { font-weight: 700; }
+        .difference.positive { color: #ef4444; }
+        .difference.negative { color: #10b981; }
+        .close-btn {
+            width: calc(100% - 40px);
+            margin: 0 20px 20px;
+            padding: 16px;
+            background: #ef4444;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .export-btn {
+            width: calc(100% - 40px);
+            margin: 0 20px 20px;
+            padding: 12px;
+            background: #10b981;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+        }
+        @media (max-width: 768px) {
+            .summary-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 End of Day Report</h1>
+            <a href="/index.html" class="back-btn">← Back</a>
+        </div>
 
+        <div class="date-selector">
+            <input type="date" id="reportDate" value="">
+            <button class="generate-btn" id="generateBtn">Generate Report</button>
+            <button class="generate-btn" id="printBtn" style="background:#475569;">🖨️ Print</button>
+        </div>
+
+        <div id="reportContent">
+            <!-- Report will be populated here -->
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            // Demo sales data
+            const demoData = {
+                '2024-01-15': {
+                    date: '2024-01-15',
+                    totalSales: 1427.50,
+                    transactionCount: 42,
+                    avgTicket: 33.99,
+                    cashSales: 580.00,
+                    cardSales: 720.50,
+                    giftCardSales: 127.00,
+                    returns: 45.00,
+                    taxCollected: 129.77,
+                    topProducts: [
+                        { name: 'Classic T-Shirt', units: 12, revenue: 359.88 },
+                        { name: 'Running Shoes', units: 8, revenue: 719.92 },
+                        { name: 'Smart Watch', units: 2, revenue: 399.98 }
+                    ],
+                    hourlyBreakdown: [85, 62, 48, 73, 112, 168, 205, 189, 142, 108, 95, 72]
+                },
+                '2024-01-14': {
+                    date: '2024-01-14',
+                    totalSales: 1890.25,
+                    transactionCount: 58,
+                    avgTicket: 32.59,
+                    cashSales: 720.00,
+                    cardSales: 1050.25,
+                    giftCardSales: 120.00,
+                    returns: 28.50,
+                    taxCollected: 171.84,
+                    topProducts: [
+                        { name: 'Slim Fit Jeans', units: 15, revenue: 899.85 },
+                        { name: 'Wireless Earbuds', units: 10, revenue: 799.90 }
+                    ],
+                    hourlyBreakdown: [95, 78, 55, 82, 135, 185, 220, 210, 165, 125, 100, 85]
+                }
+            };
+
+            let currentReport = null;
+            let actualCash = null;
+
+            function setDefaultDate() {
+                const today = new Date().toISOString().split('T')[0];
+                document.getElementById('reportDate').value = today;
+            }
+
+            function generateReport() {
+                const date = document.getElementById('reportDate').value;
+                let report = demoData[date];
+                
+                if (!report) {
+                    // Generate demo data for any date
+                    report = {
+                        date: date,
+                        totalSales: Math.floor(Math.random() * 2000) + 500,
+                        transactionCount: Math.floor(Math.random() * 80) + 20,
+                        avgTicket: 0,
+                        cashSales: Math.floor(Math.random() * 800) + 200,
+                        cardSales: Math.floor(Math.random() * 1000) + 300,
+                        giftCardSales: Math.floor(Math.random() * 200),
+                        returns: Math.floor(Math.random() * 100),
+                        taxCollected: 0,
+                        topProducts: [
+                            { name: 'Classic T-Shirt', units: Math.floor(Math.random() * 20) + 5, revenue: 0 },
+                            { name: 'Running Shoes', units: Math.floor(Math.random() * 15) + 3, revenue: 0 }
+                        ],
+                        hourlyBreakdown: Array(12).fill(0).map(() => Math.floor(Math.random() * 200) + 50)
+                    };
+                    report.avgTicket = report.totalSales / report.transactionCount;
+                    report.taxCollected = report.totalSales * 0.09;
+                    report.topProducts.forEach(p => p.revenue = p.units * (p.name === 'Classic T-Shirt' ? 29.99 : 89.99));
+                }
+                
+                currentReport = report;
+                renderReport(report);
+            }
+
+            function renderReport(report) {
+                const container = document.getElementById('reportContent');
+                const expectedCash = report.cashSales;
+                const cashDifference = actualCash !== null ? actualCash - expectedCash : 0;
+                
+                container.innerHTML = `
+                    <div class="report-card">
+                        <div class="report-header">
+                            <h2>Nile Shopping POS</h2>
+                            <p>End of Day Report - ${report.date}</p>
+                        </div>
+                        
+                        <div class="summary-grid">
+                            <div class="summary-item"><div class="summary-label">Total Sales</div><div class="summary-value">$${report.totalSales.toFixed(2)}</div></div>
+                            <div class="summary-item"><div class="summary-label">Transactions</div><div class="summary-value">${report.transactionCount}</div></div>
+                            <div class="summary-item"><div class="summary-label">Average Ticket</div><div class="summary-value">$${report.avgTicket.toFixed(2)}</div></div>
+                            <div class="summary-item"><div class="summary-label">Tax Collected</div><div class="summary-value">$${report.taxCollected.toFixed(2)}</div></div>
+                        </div>
+                        
+                        <div class="payment-breakdown">
+                            <h3>Payment Breakdown</h3>
+                            <div class="payment-row"><span>Cash</span><span>$${report.cashSales.toFixed(2)}</span></div>
+                            <div class="payment-row"><span>Credit/Debit Card</span><span>$${report.cardSales.toFixed(2)}</span></div>
+                            <div class="payment-row"><span>Gift Cards</span><span>$${report.giftCardSales.toFixed(2)}</span></div>
+                            <div class="payment-row"><span>Returns</span><span style="color:#ef4444;">-$${report.returns.toFixed(2)}</span></div>
+                            <div class="payment-row" style="font-weight:700; border-top:2px solid #e2e8f0; margin-top:8px; padding-top:12px;">
+                                <span>NET TOTAL</span><span>$${(report.totalSales - report.returns).toFixed(2)}</span>
+                            </div>
+                        </div>
+                        
+                        <div class="cash-reconciliation">
+                            <h3>Cash Reconciliation</h3>
+                            <div class="reconcile-row">
+                                <span>Expected Cash from Sales:</span>
+                                <span>$${expectedCash.toFixed(2)}</span>
+                            </div>
+                            <div class="reconcile-row">
+                                <span>Opening Float:</span>
+                                <span>$200.00</span>
+                            </div>
+                            <div class="reconcile-row">
+                                <span>Actual Cash in Drawer:</span>
+                                <span><input type="number" id="actualCashInput" class="reconcile-input" step="0.01" placeholder="Enter amount"></span>
+                            </div>
+                            <div class="reconcile-row" id="differenceRow" style="display:none;">
+                                <span>Difference:</span>
+                                <span id="differenceValue" class="difference"></span>
+                            </div>
+                        </div>
+                        
+                        <div class="payment-breakdown">
+                            <h3>Top Selling Products</h3>
+                            ${report.topProducts.map(p => `
+                                <div class="payment-row"><span>${p.name}</span><span>${p.units} units - $${p.revenue.toFixed(2)}</span></div>
+                            `).join('')}
+                        </div>
+                        
+                        <button class="export-btn" id="exportCSVBtn">📎 Export to CSV</button>
+                        <button class="close-btn" id="closeDayBtn">🔒 Close Day & Print Report</button>
+                    </div>
+                `;
+                
+                const actualInput = document.getElementById('actualCashInput');
+                if (actualInput) {
+                    actualInput.addEventListener('input', (e) => {
+                        actualCash = parseFloat(e.target.value);
+                        const diff = actualCash - expectedCash;
+                        const diffRow = document.getElementById('differenceRow');
+                        const diffValue = document.getElementById('differenceValue');
+                        
+                        if (!isNaN(actualCash)) {
+                            diffRow.style.display = 'flex';
+                            diffValue.textContent = `$${diff.toFixed(2)}`;
+                            diffValue.className = `difference ${diff !== 0 ? (diff > 0 ? 'positive' : 'negative') : ''}`;
+                        } else {
+                            diffRow.style.display = 'none';
+                        }
+                    });
+                }
+                
+                document.getElementById('exportCSVBtn')?.addEventListener('click', () => exportToCSV(report));
+                document.getElementById('closeDayBtn')?.addEventListener('click', () => closeDay(report));
+            }
+
+            function exportToCSV(report) {
+                const rows = [
+                    ['Nile Shopping POS - End of Day Report'],
+                    ['Date:', report.date],
+                    [],
+                    ['Metric', 'Value'],
+                    ['Total Sales', `$${report.totalSales.toFixed(2)}`],
+                    ['Transactions', report.transactionCount],
+                    ['Average Ticket', `$${report.avgTicket.toFixed(2)}`],
+                    ['Cash Sales', `$${report.cashSales.toFixed(2)}`],
+                    ['Card Sales', `$${report.cardSales.toFixed(2)}`],
+                    ['Gift Card Sales', `$${report.giftCardSales.toFixed(2)}`],
+                    ['Returns', `$${report.returns.toFixed(2)}`],
+                    ['Tax Collected', `$${report.taxCollected.toFixed(2)}`],
+                    [],
+                    ['Top Products'],
+                    ['Product', 'Units', 'Revenue'],
+                    ...report.topProducts.map(p => [p.name, p.units, `$${p.revenue.toFixed(2)}`])
+                ];
+                
+                const csv = rows.map(row => row.join(',')).join('\n');
+                const blob = new Blob([csv], { type: 'text/csv' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `eod_report_${report.date}.csv`;
+                a.click();
+                URL.revokeObjectURL(url);
+                showToast('Report exported to CSV', 'success');
+            }
+
+            function closeDay(report) {
+                if (actualCash === null) {
+                    showToast('Please enter actual cash amount before closing', 'error');
+                    return;
+                }
+                
+                const expectedCash = report.cashSales;
+                const difference = actualCash - expectedCash;
+                
+                const summary = `
+                    Day Closed: ${report.date}
+                    Total Sales: $${report.totalSales.toFixed(2)}
+                    Cash Difference: ${difference >= 0 ? '+' : ''}$${difference.toFixed(2)}
+                `;
+                
+                showToast(`Day closed successfully! ${summary}`, 'success');
+                
+                // Print report
+                window.print();
+                
+                // Reset for next day
+                setTimeout(() => {
+                    if (confirm('Start a new day?')) {
+                        window.location.href = '/index.html';
+                    }
+                }, 1000);
+            }
+
+            function showToast(message, type) {
+                const toast = document.createElement('div');
+                toast.textContent = message;
+                toast.style.cssText = `
+                    position: fixed; bottom: 20px; right: 20px;
+                    background: ${type === 'error' ? '#ef4444' : '#10b981'};
+                    color: white; padding: 12px 20px; border-radius: 12px;
+                    z-index: 1000; animation: slideIn 0.3s ease;
+                `;
+                document.body.appendChild(toast);
+                setTimeout(() => toast.remove(), 3000);
+            }
+
+            function init() {
+                setDefaultDate();
+                generateReport();
+                document.getElementById('generateBtn').addEventListener('click', generateReport);
+                document.getElementById('printBtn').addEventListener('click', () => window.print());
+            }
+            
+            init();
+        })();
+    </script>
+</body>
+</html>
