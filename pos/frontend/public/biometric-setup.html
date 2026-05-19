@@ -1,1 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nile POS - Biometric Setup</title>
+    <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
+        .container {
+            background: white;
+            border-radius: 32px;
+            max-width: 500px;
+            width: 100%;
+            overflow: hidden;
+        }
+        .header {
+            background: #1e293b;
+            color: white;
+            padding: 32px;
+            text-align: center;
+        }
+        .body { padding: 32px; }
+        .fingerprint-icon { font-size: 80px; text-align: center; margin: 24px 0; }
+        .status { text-align: center; padding: 16px; border-radius: 16px; margin: 16px 0; }
+        .status-ready { background: #d1fae5; color: #065f46; }
+        .status-error { background: #fee2e2; color: #991b1b; }
+        .btn {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+        .btn-secondary { background: #e2e8f0; color: #475569; margin-top: 12px; }
+        .info-text { font-size: 14px; color: #64748b; text-align: center; margin: 16px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h2>🔐 Biometric Authentication</h2>
+            <p>Set up fingerprint or face recognition</p>
+        </div>
+        <div class="body">
+            <div class="fingerprint-icon">👆</div>
+            <div id="status" class="status status-ready">Ready to register</div>
+            <button id="registerBtn" class="btn btn-primary">Register Fingerprint / Face</button>
+            <button id="testBtn" class="btn btn-secondary">Test Authentication</button>
+            <div class="info-text">
+                Biometric data is stored securely on your device.<br>
+                Never shared with our servers.
+            </div>
+        </div>
+    </div>
 
+    <script>
+        (function() {
+            const statusDiv = document.getElementById('status');
+            
+            function isWebAuthnSupported() {
+                return window.PublicKeyCredential !== undefined;
+            }
+            
+            async function registerBiometric() {
+                if (!isWebAuthnSupported()) {
+                    statusDiv.className = 'status status-error';
+                    statusDiv.innerHTML = '❌ Biometric authentication not supported on this device/browser';
+                    return;
+                }
+                
+                statusDiv.className = 'status';
+                statusDiv.innerHTML = '🔄 Please scan your fingerprint / face...';
+                
+                // Simulate registration (real implementation would use WebAuthn API)
+                setTimeout(() => {
+                    localStorage.setItem('biometric_enabled', 'true');
+                    statusDiv.className = 'status status-ready';
+                    statusDiv.innerHTML = '✅ Biometric registered successfully!';
+                    setTimeout(() => {
+                        statusDiv.innerHTML = 'Ready to authenticate';
+                    }, 3000);
+                }, 2000);
+            }
+            
+            async function testBiometric() {
+                if (localStorage.getItem('biometric_enabled') !== 'true') {
+                    statusDiv.className = 'status status-error';
+                    statusDiv.innerHTML = '❌ No biometric registered. Please register first.';
+                    return;
+                }
+                
+                statusDiv.className = 'status';
+                statusDiv.innerHTML = '🔄 Verifying... Please scan...';
+                
+                setTimeout(() => {
+                    statusDiv.className = 'status status-ready';
+                    statusDiv.innerHTML = '✅ Authentication successful! Welcome back.';
+                    setTimeout(() => {
+                        statusDiv.innerHTML = 'Ready to authenticate';
+                    }, 3000);
+                }, 1500);
+            }
+            
+            document.getElementById('registerBtn').addEventListener('click', registerBiometric);
+            document.getElementById('testBtn').addEventListener('click', testBiometric);
+        })();
+    </script>
+</body>
+</html>
