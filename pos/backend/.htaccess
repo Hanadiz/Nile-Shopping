@@ -1,1 +1,50 @@
+# Nile Shopping POS - Apache Configuration
+# Enable URL rewriting and security headers
 
+RewriteEngine On
+
+# Redirect to HTTPS in production
+# RewriteCond %{HTTPS} off
+# RewriteRule ^(.*)$ https://%{HTTP_HOST}/$1 [R=301,L]
+
+# API routing
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^api/v1/(.*)$ api/v1/$1.php [L]
+
+# Security Headers
+<IfModule mod_headers.c>
+    Header set X-Content-Type-Options "nosniff"
+    Header set X-Frame-Options "DENY"
+    Header set X-XSS-Protection "1; mode=block"
+    Header set Referrer-Policy "strict-origin-when-cross-origin"
+    
+    # CSP for production
+    # Header set Content-Security-Policy "default-src 'self'"
+</IfModule>
+
+# Disable directory browsing
+Options -Indexes
+
+# Protect sensitive files
+<FilesMatch "^\.">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+<FilesMatch "(config|database|constants)\.php$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# PHP error handling
+php_flag display_errors off
+php_value error_log logs/php_errors.log
+
+# Upload limits
+php_value upload_max_filesize 10M
+php_value post_max_size 10M
+php_value max_execution_time 300
+
+# CORS (already handled in CorsMiddleware)
+# Header set Access-Control-Allow-Origin "*"
