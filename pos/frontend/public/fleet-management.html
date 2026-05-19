@@ -1,1 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nile POS - Fleet Management</title>
+    <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #f1f5f9;
+            padding: 24px;
+        }
+        .container { max-width: 1400px; margin: 0 auto; }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+        h1 { font-size: 24px; color: #1e293b; }
+        .back-btn {
+            background: white;
+            border: 1px solid #e2e8f0;
+            padding: 8px 16px;
+            border-radius: 8px;
+            text-decoration: none;
+            color: #475569;
+        }
+        .register-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        .register-card {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+        }
+        .register-header {
+            padding: 16px 20px;
+            background: #1e293b;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+        }
+        .register-body { padding: 20px; }
+        .status-online { color: #10b981; font-weight: 600; }
+        .status-offline { color: #ef4444; font-weight: 600; }
+        .status-maintenance { color: #f59e0b; font-weight: 600; }
+        .stats-row { display: flex; justify-content: space-between; margin: 8px 0; }
+        .action-buttons { display: flex; gap: 8px; margin-top: 16px; }
+        .action-btn {
+            flex: 1;
+            padding: 8px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        .restart-btn { background: #f59e0b; color: white; }
+        .sync-btn { background: #667eea; color: white; }
+        .view-btn { background: #10b981; color: white; }
+        @media (max-width: 768px) {
+            .register-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚗 Register Fleet Management</h1>
+            <a href="/index.html" class="back-btn">← Back</a>
+        </div>
+        <div class="register-grid" id="registerGrid"></div>
+    </div>
 
+    <script>
+        (function() {
+            let registers = [
+                { id: 1, name: 'Main Counter', location: 'Front Store', status: 'online', lastSync: '2024-01-15 14:30:22', currentCashier: 'John Doe', todaySales: 1247.50, transactions: 42 },
+                { id: 2, name: 'Mobile POS 1', location: 'Sales Floor', status: 'online', lastSync: '2024-01-15 14:28:15', currentCashier: 'Jane Smith', todaySales: 892.30, transactions: 28 },
+                { id: 3, name: 'Kiosk', location: 'Entrance', status: 'offline', lastSync: '2024-01-15 12:15:00', currentCashier: null, todaySales: 345.20, transactions: 15 },
+                { id: 4, name: 'Back Office', location: 'Office', status: 'maintenance', lastSync: '2024-01-14 18:00:00', currentCashier: null, todaySales: 0, transactions: 0 }
+            ];
+
+            function renderRegisters() {
+                const grid = document.getElementById('registerGrid');
+                grid.innerHTML = registers.map(reg => `
+                    <div class="register-card">
+                        <div class="register-header">
+                            <span>${reg.name}</span>
+                            <span class="status-${reg.status}">${reg.status.toUpperCase()}</span>
+                        </div>
+                        <div class="register-body">
+                            <div class="stats-row"><span>Location:</span><span>${reg.location}</span></div>
+                            <div class="stats-row"><span>Last Sync:</span><span>${reg.lastSync}</span></div>
+                            <div class="stats-row"><span>Cashier:</span><span>${reg.currentCashier || '—'}</span></div>
+                            <div class="stats-row"><span>Today's Sales:</span><span>$${reg.todaySales.toFixed(2)}</span></div>
+                            <div class="stats-row"><span>Transactions:</span><span>${reg.transactions}</span></div>
+                            <div class="action-buttons">
+                                <button class="action-btn restart-btn" data-id="${reg.id}">⟳ Restart</button>
+                                <button class="action-btn sync-btn" data-id="${reg.id}">🔄 Sync</button>
+                                <button class="action-btn view-btn" data-id="${reg.id}">👁️ View</button>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+                
+                document.querySelectorAll('.restart-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const id = parseInt(btn.dataset.id);
+                        alert(`Restarting register ${id}...`);
+                    });
+                });
+                document.querySelectorAll('.sync-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const id = parseInt(btn.dataset.id);
+                        alert(`Syncing register ${id}...`);
+                    });
+                });
+                document.querySelectorAll('.view-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const id = parseInt(btn.dataset.id);
+                        const reg = registers.find(r => r.id === id);
+                        alert(`Register ${reg.name}\nStatus: ${reg.status}\nSales: $${reg.todaySales}\nTransactions: ${reg.transactions}`);
+                    });
+                });
+            }
+            
+            renderRegisters();
+            
+            // Auto-refresh every 30 seconds
+            setInterval(() => {
+                // Simulate status changes
+                registers = registers.map(reg => ({
+                    ...reg,
+                    lastSync: new Date().toLocaleString()
+                }));
+                renderRegisters();
+            }, 30000);
+        })();
+    </script>
+</body>
+</html>
