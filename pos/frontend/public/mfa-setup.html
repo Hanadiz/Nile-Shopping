@@ -1,1 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nile POS - MFA Setup</title>
+    <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #f1f5f9;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
+        .container {
+            background: white;
+            border-radius: 32px;
+            max-width: 500px;
+            width: 100%;
+            overflow: hidden;
+        }
+        .header {
+            background: #1e293b;
+            color: white;
+            padding: 32px;
+            text-align: center;
+        }
+        .body { padding: 32px; }
+        .qr-code {
+            background: white;
+            padding: 20px;
+            text-align: center;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            margin: 20px 0;
+        }
+        .qr-placeholder {
+            width: 200px;
+            height: 200px;
+            background: repeating-linear-gradient(45deg, #1e293b, #1e293b 10px, #334155 10px, #334155 20px);
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+        }
+        .secret-key {
+            background: #f8fafc;
+            padding: 12px;
+            border-radius: 8px;
+            font-family: monospace;
+            text-align: center;
+            letter-spacing: 2px;
+            margin: 16px 0;
+        }
+        .code-input {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin: 20px 0;
+        }
+        .code-digit {
+            width: 50px;
+            height: 60px;
+            text-align: center;
+            font-size: 24px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+        }
+        .btn {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+        .backup-codes { background: #fef3c7; padding: 16px; border-radius: 12px; margin-top: 20px; font-family: monospace; }
+        @media (max-width: 480px) {
+            .code-digit { width: 40px; height: 50px; font-size: 20px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h2>🔐 Multi-Factor Authentication</h2>
+            <p>Secure your account with 2FA</p>
+        </div>
+        <div class="body">
+            <div class="qr-code">
+                <div class="qr-placeholder">[QR CODE]<br>Scan with Google Authenticator</div>
+            </div>
+            <div class="secret-key">
+                Secret Key: NILE-2FA-ABCD-EFGH-1234
+            </div>
+            
+            <div class="code-input" id="codeInputs">
+                <input type="text" maxlength="1" class="code-digit" data-idx="0">
+                <input type="text" maxlength="1" class="code-digit" data-idx="1">
+                <input type="text" maxlength="1" class="code-digit" data-idx="2">
+                <input type="text" maxlength="1" class="code-digit" data-idx="3">
+                <input type="text" maxlength="1" class="code-digit" data-idx="4">
+                <input type="text" maxlength="1" class="code-digit" data-idx="5">
+            </div>
+            
+            <button id="verifyBtn" class="btn btn-primary">Verify & Enable 2FA</button>
+            
+            <div id="backupCodes" class="backup-codes" style="display:none;">
+                <strong>⚠️ Save these backup codes</strong><br>
+                1234-5678-9012<br>
+                2345-6789-0123<br>
+                3456-7890-1234
+            </div>
+        </div>
+    </div>
 
+    <script>
+        (function() {
+            let codeDigits = ['', '', '', '', '', ''];
+            
+            function setupCodeInputs() {
+                const inputs = document.querySelectorAll('.code-digit');
+                inputs.forEach((input, idx) => {
+                    input.addEventListener('input', (e) => {
+                        if (e.target.value.length === 1 && /^\d$/.test(e.target.value)) {
+                            codeDigits[idx] = e.target.value;
+                            if (idx < inputs.length - 1) {
+                                inputs[idx + 1].focus();
+                            } else {
+                                verifyCode();
+                            }
+                        }
+                    });
+                    input.addEventListener('keydown', (e) => {
+                        if (e.key === 'Backspace' && !input.value && idx > 0) {
+                            inputs[idx - 1].focus();
+                            codeDigits[idx - 1] = '';
+                        }
+                    });
+                });
+            }
+            
+            function verifyCode() {
+                const code = codeDigits.join('');
+                if (code.length === 6) {
+                    // Simulate verification
+                    setTimeout(() => {
+                        if (code === '123456') {
+                            document.getElementById('backupCodes').style.display = 'block';
+                            alert('2FA enabled successfully!');
+                            localStorage.setItem('mfa_enabled', 'true');
+                        } else {
+                            alert('Invalid code. Please try again.');
+                            codeDigits = ['', '', '', '', '', ''];
+                            document.querySelectorAll('.code-digit').forEach(input => input.value = '');
+                            document.querySelectorAll('.code-digit')[0].focus();
+                        }
+                    }, 500);
+                }
+            }
+            
+            setupCodeInputs();
+            document.getElementById('verifyBtn').addEventListener('click', verifyCode);
+        })();
+    </script>
+</body>
+</html>
