@@ -1,1 +1,301 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nile POS - Purchase Orders</title>
+    <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #f1f5f9;
+            padding: 24px;
+        }
+        .container { max-width: 1400px; margin: 0 auto; }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+        h1 { font-size: 24px; color: #1e293b; }
+        .back-btn, .new-btn {
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            text-decoration: none;
+        }
+        .back-btn { background: white; border: 1px solid #e2e8f0; color: #475569; }
+        .new-btn { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; font-weight: 600; }
+        .tabs { display: flex; gap: 8px; margin-bottom: 24px; border-bottom: 1px solid #e2e8f0; }
+        .tab { padding: 12px 24px; cursor: pointer; border: none; background: none; }
+        .tab.active { border-bottom: 2px solid #667eea; color: #667eea; font-weight: 600; }
+        .po-table {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+        }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 12px 16px; text-align: left; border-bottom: 1px solid #f1f5f9; }
+        th { background: #f8fafc; font-weight: 600; }
+        .status-draft { background: #e2e8f0; color: #475569; padding: 4px 8px; border-radius: 100px; font-size: 11px; display: inline-block; }
+        .status-sent { background: #fef3c7; color: #92400e; padding: 4px 8px; border-radius: 100px; font-size: 11px; display: inline-block; }
+        .status-received { background: #d1fae5; color: #065f46; padding: 4px 8px; border-radius: 100px; font-size: 11px; display: inline-block; }
+        .action-btn {
+            padding: 4px 8px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 0 2px;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .modal.active { display: flex; }
+        .modal-content {
+            background: white;
+            border-radius: 24px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .modal-header { padding: 20px; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; }
+        .modal-body { padding: 20px; }
+        .form-group { margin-bottom: 16px; }
+        .form-group label { display: block; margin-bottom: 6px; font-weight: 500; }
+        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px; border: 1px solid #e2e8f0; border-radius: 8px; }
+        .item-row { display: flex; gap: 8px; margin-bottom: 8px; }
+        .add-item { background: #e2e8f0; border: none; padding: 8px; border-radius: 8px; cursor: pointer; width: 100%; margin-top: 12px; }
+        @media (max-width: 768px) {
+            th, td { font-size: 12px; padding: 8px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📋 Purchase Orders</h1>
+            <div style="display: flex; gap: 12px;">
+                <a href="/index.html" class="back-btn">← Back</a>
+                <button class="new-btn" id="newPOBtn">+ New PO</button>
+            </div>
+        </div>
+
+        <div class="tabs">
+            <button class="tab active" data-status="all">All</button>
+            <button class="tab" data-status="draft">Draft</button>
+            <button class="tab" data-status="sent">Sent</button>
+            <button class="tab" data-status="received">Received</button>
+        </div>
+
+        <div class="po-table">
+            <table>
+                <thead><tr><th>PO #</th><th>Vendor</th><th>Date</th><th>Total</th><th>Status</th><th>Action</th></tr></thead>
+                <tbody id="poTableBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- PO Modal -->
+    <div id="poModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header"><h3 id="modalTitle">Create Purchase Order</h3><button class="close-modal">✕</button></div>
+            <div class="modal-body">
+                <form id="poForm">
+                    <div class="form-group"><label>Vendor</label><input type="text" id="vendor" required placeholder="Supplier name"></div>
+                    <div class="form-group"><label>Expected Date</label><input type="date" id="expectedDate"></div>
+                    <div id="itemsContainer">
+                        <div class="item-row"><input type="text" placeholder="Product" style="flex:2"><input type="number" placeholder="Qty" style="flex:1"><input type="text" placeholder="Price" style="flex:1"></div>
+                    </div>
+                    <button type="button" class="add-item" id="addItemBtn">+ Add Item</button>
+                    <div class="form-group"><label>Notes</label><textarea id="poNotes" rows="2"></textarea></div>
+                    <button type="submit" class="new-btn" style="width:100%; margin-top:16px;">Create PO</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Receive Modal -->
+    <div id="receiveModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header"><h3>Receive Order</h3><button class="close-modal">✕</button></div>
+            <div class="modal-body">
+                <div id="receiveInfo"></div>
+                <button id="confirmReceiveBtn" class="new-btn" style="width:100%;">Confirm Receipt & Update Stock</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            let purchaseOrders = [
+                { id: 'PO-001', vendor: 'Apple Inc.', date: '2024-01-10', expectedDate: '2024-01-20', total: 2499.99, status: 'received', items: [{ product: 'Smart Watch', qty: 5, price: 199.99 }], notes: '' },
+                { id: 'PO-002', vendor: 'Nike', date: '2024-01-12', expectedDate: '2024-01-25', total: 899.95, status: 'sent', items: [{ product: 'Running Shoes', qty: 10, price: 89.99 }], notes: '' }
+            ];
+            let nextId = 3;
+            let currentStatusFilter = 'all';
+            let currentReceivePO = null;
+
+            function renderPOs() {
+                let filtered = purchaseOrders;
+                if (currentStatusFilter !== 'all') {
+                    filtered = purchaseOrders.filter(po => po.status === currentStatusFilter);
+                }
+                
+                const tbody = document.getElementById('poTableBody');
+                tbody.innerHTML = filtered.map(po => `
+                    <tr>
+                        <td>${po.id}</td>
+                        <td>${po.vendor}</td>
+                        <td>${po.date}</td>
+                        <td>$${po.total.toFixed(2)}</td>
+                        <td><span class="status-${po.status}">${po.status}</span></td>
+                        <td>
+                            ${po.status === 'sent' ? `<button class="action-btn receive-btn" data-id="${po.id}">Receive</button>` : ''}
+                            <button class="action-btn view-btn" data-id="${po.id}">View</button>
+                        </td>
+                    </tr>
+                `).join('');
+                
+                document.querySelectorAll('.receive-btn').forEach(btn => {
+                    btn.addEventListener('click', () => receiveOrder(btn.dataset.id));
+                });
+                document.querySelectorAll('.view-btn').forEach(btn => {
+                    btn.addEventListener('click', () => viewOrder(btn.dataset.id));
+                });
+            }
+
+            function receiveOrder(id) {
+                currentReceivePO = purchaseOrders.find(po => po.id === id);
+                if (currentReceivePO) {
+                    document.getElementById('receiveInfo').innerHTML = `
+                        <div><strong>PO #:</strong> ${currentReceivePO.id}</div>
+                        <div><strong>Vendor:</strong> ${currentReceivePO.vendor}</div>
+                        <div><strong>Items:</strong></div>
+                        ${currentReceivePO.items.map(item => `<div>• ${item.product} x${item.qty}</div>`).join('')}
+                    `;
+                    document.getElementById('receiveModal').classList.add('active');
+                }
+            }
+
+            function confirmReceive() {
+                if (currentReceivePO) {
+                    currentReceivePO.status = 'received';
+                    const index = purchaseOrders.findIndex(po => po.id === currentReceivePO.id);
+                    purchaseOrders[index] = currentReceivePO;
+                    renderPOs();
+                    document.getElementById('receiveModal').classList.remove('active');
+                    alert(`Order received! Stock updated for ${currentReceivePO.items.length} products.`);
+                }
+            }
+
+            function viewOrder(id) {
+                const po = purchaseOrders.find(po => po.id === id);
+                if (po) {
+                    alert(`PO ${po.id}\nVendor: ${po.vendor}\nDate: ${po.date}\nTotal: $${po.total}\nStatus: ${po.status}\nItems: ${po.items.map(i => `${i.product} x${i.qty}`).join(', ')}`);
+                }
+            }
+
+            function createPO(event) {
+                event.preventDefault();
+                
+                const vendor = document.getElementById('vendor').value;
+                const expectedDate = document.getElementById('expectedDate').value;
+                const items = [];
+                const rows = document.querySelectorAll('.item-row');
+                let total = 0;
+                
+                rows.forEach(row => {
+                    const inputs = row.querySelectorAll('input');
+                    const product = inputs[0].value;
+                    const qty = parseInt(inputs[1].value);
+                    const price = parseFloat(inputs[2].value);
+                    if (product && qty && price) {
+                        items.push({ product, qty, price });
+                        total += qty * price;
+                    }
+                });
+                
+                if (items.length === 0) {
+                    alert('Please add at least one item');
+                    return;
+                }
+                
+                const newPO = {
+                    id: `PO-${String(nextId++).padStart(3, '0')}`,
+                    vendor: vendor,
+                    date: new Date().toISOString().split('T')[0],
+                    expectedDate: expectedDate,
+                    total: total,
+                    status: 'draft',
+                    items: items,
+                    notes: document.getElementById('poNotes').value
+                };
+                
+                purchaseOrders.push(newPO);
+                renderPOs();
+                document.getElementById('poModal').classList.remove('active');
+                document.getElementById('poForm').reset();
+                alert(`PO ${newPO.id} created! Total: $${total.toFixed(2)}`);
+            }
+
+            function addItemRow() {
+                const container = document.getElementById('itemsContainer');
+                const newRow = document.createElement('div');
+                newRow.className = 'item-row';
+                newRow.innerHTML = `<input type="text" placeholder="Product" style="flex:2"><input type="number" placeholder="Qty" style="flex:1"><input type="text" placeholder="Price" style="flex:1"><button type="button" class="remove-item" style="background:#ef4444; color:white; border:none; border-radius:4px; width:30px;">✕</button>`;
+                container.appendChild(newRow);
+                
+                newRow.querySelector('.remove-item').addEventListener('click', () => {
+                    newRow.remove();
+                });
+            }
+
+            function init() {
+                renderPOs();
+                
+                document.getElementById('newPOBtn').addEventListener('click', () => {
+                    document.getElementById('itemsContainer').innerHTML = '<div class="item-row"><input type="text" placeholder="Product" style="flex:2"><input type="number" placeholder="Qty" style="flex:1"><input type="text" placeholder="Price" style="flex:1"></div>';
+                    document.getElementById('poModal').classList.add('active');
+                });
+                document.getElementById('addItemBtn').addEventListener('click', addItemRow);
+                document.getElementById('poForm').addEventListener('submit', createPO);
+                document.getElementById('confirmReceiveBtn').addEventListener('click', confirmReceive);
+                
+                document.querySelectorAll('.tab').forEach(tab => {
+                    tab.addEventListener('click', () => {
+                        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                        tab.classList.add('active');
+                        currentStatusFilter = tab.dataset.status;
+                        renderPOs();
+                    });
+                });
+                
+                document.querySelectorAll('.close-modal').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        document.querySelectorAll('.modal').forEach(m => m.classList.remove('active'));
+                    });
+                });
+            }
+            
+            init();
+        })();
+    </script>
+</body>
+</html>
