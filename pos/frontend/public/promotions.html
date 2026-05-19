@@ -1,1 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nile POS - Promotions</title>
+    <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #f1f5f9;
+            padding: 24px;
+        }
+        .container { max-width: 1400px; margin: 0 auto; }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+        h1 { font-size: 24px; color: #1e293b; }
+        .back-btn, .new-btn {
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        .back-btn { background: white; border: 1px solid #e2e8f0; color: #475569; text-decoration: none; }
+        .new-btn { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; font-weight: 600; }
+        .promo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+        }
+        .promo-card {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            transition: transform 0.2s;
+        }
+        .promo-card:hover { transform: translateY(-2px); box-shadow: 0 10px 20px -5px rgba(0,0,0,0.1); }
+        .promo-header { padding: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+        .promo-title { font-size: 18px; font-weight: 700; }
+        .promo-code { font-family: monospace; font-size: 20px; margin: 12px 0; background: rgba(255,255,255,0.2); display: inline-block; padding: 4px 12px; border-radius: 100px; }
+        .promo-body { padding: 20px; }
+        .promo-dates { font-size: 12px; color: #64748b; margin: 12px 0; }
+        .status-active { color: #10b981; font-weight: 600; }
+        .status-expired { color: #ef4444; }
+        .delete-btn { background: #ef4444; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; margin-top: 12px; }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .modal.active { display: flex; }
+        .modal-content {
+            background: white;
+            border-radius: 24px;
+            max-width: 500px;
+            width: 90%;
+        }
+        .modal-header { padding: 20px; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; }
+        .modal-body { padding: 20px; }
+        .form-group { margin-bottom: 16px; }
+        .form-group label { display: block; margin-bottom: 6px; font-weight: 500; }
+        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px; border: 1px solid #e2e8f0; border-radius: 8px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏷️ Promotions & Coupons</h1>
+            <div style="display: flex; gap: 12px;">
+                <a href="/index.html" class="back-btn">← Back</a>
+                <button class="new-btn" id="newPromoBtn">+ Create Promotion</button>
+            </div>
+        </div>
+        <div class="promo-grid" id="promoGrid"></div>
+    </div>
 
+    <div id="promoModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header"><h3>Create Promotion</h3><button class="close-modal">✕</button></div>
+            <div class="modal-body">
+                <form id="promoForm">
+                    <div class="form-group"><label>Promotion Name</label><input type="text" id="name" required></div>
+                    <div class="form-group"><label>Coupon Code</label><input type="text" id="code" placeholder="SUMMER20" required></div>
+                    <div class="form-group"><label>Type</label>
+                        <select id="type">
+                            <option value="percentage">Percentage Off</option>
+                            <option value="fixed">Fixed Amount Off</option>
+                            <option value="bogo">Buy One Get One</option>
+                        </select>
+                    </div>
+                    <div class="form-group"><label>Value</label><input type="number" id="value" step="0.01" required></div>
+                    <div class="form-group"><label>Min Purchase ($)</label><input type="number" id="minPurchase" step="0.01" value="0"></div>
+                    <div class="form-group"><label>Start Date</label><input type="date" id="startDate" required></div>
+                    <div class="form-group"><label>End Date</label><input type="date" id="endDate" required></div>
+                    <button type="submit" class="new-btn" style="width:100%;">Create Promotion</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            let promotions = [
+                { id: 1, name: 'Summer Sale', code: 'SUMMER20', type: 'percentage', value: 20, minPurchase: 50, startDate: '2024-06-01', endDate: '2024-08-31', status: 'active' },
+                { id: 2, name: 'Welcome Offer', code: 'WELCOME10', type: 'fixed', value: 10, minPurchase: 30, startDate: '2024-01-01', endDate: '2024-12-31', status: 'active' },
+                { id: 3, name: 'BOGO Shoes', code: 'BOGOSHOE', type: 'bogo', value: 1, minPurchase: 0, startDate: '2024-01-01', endDate: '2024-01-20', status: 'expired' }
+            ];
+            let nextId = 4;
+
+            function checkStatus(promo) {
+                const today = new Date().toISOString().split('T')[0];
+                if (promo.endDate < today) return 'expired';
+                return 'active';
+            }
+
+            function renderPromotions() {
+                const grid = document.getElementById('promoGrid');
+                grid.innerHTML = promotions.map(promo => {
+                    const status = checkStatus(promo);
+                    const statusClass = status === 'active' ? 'status-active' : 'status-expired';
+                    const discountText = promo.type === 'percentage' ? `${promo.value}% OFF` : promo.type === 'fixed' ? `$${promo.value} OFF` : 'Buy One Get One Free';
+                    
+                    return `
+                        <div class="promo-card">
+                            <div class="promo-header">
+                                <div class="promo-title">${promo.name}</div>
+                                <div class="promo-code">${promo.code}</div>
+                            </div>
+                            <div class="promo-body">
+                                <div><strong>${discountText}</strong></div>
+                                <div>Min Purchase: $${promo.minPurchase}</div>
+                                <div class="promo-dates">Valid: ${promo.startDate} - ${promo.endDate}</div>
+                                <div class="${statusClass}">${status.toUpperCase()}</div>
+                                <button class="delete-btn" data-id="${promo.id}">Delete</button>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+                
+                document.querySelectorAll('.delete-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const id = parseInt(btn.dataset.id);
+                        promotions = promotions.filter(p => p.id !== id);
+                        renderPromotions();
+                    });
+                });
+            }
+
+            function createPromotion(event) {
+                event.preventDefault();
+                
+                const newPromo = {
+                    id: nextId++,
+                    name: document.getElementById('name').value,
+                    code: document.getElementById('code').value.toUpperCase(),
+                    type: document.getElementById('type').value,
+                    value: parseFloat(document.getElementById('value').value),
+                    minPurchase: parseFloat(document.getElementById('minPurchase').value),
+                    startDate: document.getElementById('startDate').value,
+                    endDate: document.getElementById('endDate').value,
+                    status: 'active'
+                };
+                
+                promotions.push(newPromo);
+                renderPromotions();
+                document.getElementById('promoModal').classList.remove('active');
+                document.getElementById('promoForm').reset();
+                alert(`Promotion ${newPromo.code} created!`);
+            }
+
+            function init() {
+                renderPromotions();
+                document.getElementById('newPromoBtn').addEventListener('click', () => {
+                    document.getElementById('promoForm').reset();
+                    document.getElementById('startDate').value = new Date().toISOString().split('T')[0];
+                    document.getElementById('endDate').value = new Date(Date.now() + 30*24*60*60*1000).toISOString().split('T')[0];
+                    document.getElementById('promoModal').classList.add('active');
+                });
+                document.getElementById('promoForm').addEventListener('submit', createPromotion);
+                document.querySelectorAll('.close-modal').forEach(btn => {
+                    btn.addEventListener('click', () => document.getElementById('promoModal').classList.remove('active'));
+                });
+            }
+            
+            init();
+        })();
+    </script>
+</body>
+</html>
