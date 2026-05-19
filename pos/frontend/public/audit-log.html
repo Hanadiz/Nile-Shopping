@@ -1,1 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nile POS - Audit Log</title>
+    <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #0f172a;
+            padding: 24px;
+        }
+        .container { max-width: 1400px; margin: 0 auto; }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+        h1 { font-size: 24px; color: #f1f5f9; }
+        .back-btn {
+            background: #1e293b;
+            border: 1px solid #334155;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            text-decoration: none;
+            color: #94a3b8;
+        }
+        .filters-bar {
+            background: #1e293b;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 24px;
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .filter-input {
+            padding: 10px;
+            background: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            color: #f1f5f9;
+        }
+        .export-btn {
+            padding: 10px 20px;
+            background: #10b981;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        .audit-table {
+            background: #1e293b;
+            border-radius: 20px;
+            overflow-x: auto;
+        }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 14px 16px; text-align: left; border-bottom: 1px solid #334155; color: #e2e8f0; }
+        th { background: #0f172a; font-weight: 600; color: #94a3b8; }
+        .severity-high { color: #ef4444; font-weight: 600; }
+        .severity-medium { color: #f59e0b; }
+        .severity-low { color: #10b981; }
+        @media (max-width: 768px) {
+            th, td { font-size: 12px; padding: 8px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔒 Security Audit Log</h1>
+            <a href="/index.html" class="back-btn">← Back to Register</a>
+        </div>
 
+        <div class="filters-bar">
+            <input type="text" id="searchInput" class="filter-input" placeholder="Search user or action..." style="flex:2">
+            <select id="severityFilter" class="filter-input">
+                <option value="all">All Severities</option>
+                <option value="high">High</option>
+                <option value="medium">Medium</option>
+                <option value="low">Low</option>
+            </select>
+            <input type="date" id="dateFrom" class="filter-input">
+            <input type="date" id="dateTo" class="filter-input">
+            <button id="exportBtn" class="export-btn">📎 Export CSV</button>
+        </div>
+
+        <div class="audit-table">
+            <table>
+                <thead>
+                    <tr><th>Timestamp</th><th>User</th><th>Action</th><th>Severity</th><th>IP Address</th><th>Details</th></tr>
+                </thead>
+                <tbody id="auditTableBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            let auditLogs = [
+                { timestamp: '2024-01-15 09:23:45', user: 'admin@nile.com', action: 'User Login', severity: 'low', ip: '192.168.1.1', details: 'Successful login from Chrome' },
+                { timestamp: '2024-01-15 10:15:22', user: 'cashier@store.com', action: 'Transaction Void', severity: 'medium', ip: '192.168.1.15', details: 'Voided transaction #TRX-001 ($142.97)' },
+                { timestamp: '2024-01-15 11:30:00', user: 'manager@nile.com', action: 'User Role Changed', severity: 'high', ip: '192.168.1.10', details: 'Promoted user john to supervisor' },
+                { timestamp: '2024-01-15 12:45:33', user: 'cashier@store.com', action: 'No-Sale Access', severity: 'medium', ip: '192.168.1.15', details: 'Opened cash drawer without transaction' },
+                { timestamp: '2024-01-15 13:20:17', user: 'admin@nile.com', action: 'Settings Changed', severity: 'medium', ip: '192.168.1.1', details: 'Updated tax rate from 8% to 10%' },
+                { timestamp: '2024-01-15 14:05:55', user: 'unknown', action: 'Failed Login Attempt', severity: 'high', ip: '203.0.113.45', details: '3 failed attempts for admin@nile.com' },
+                { timestamp: '2024-01-15 15:30:22', user: 'manager@nile.com', action: 'Refund Processed', severity: 'low', ip: '192.168.1.10', details: 'Refunded $89.99 for transaction #TRX-003' },
+                { timestamp: '2024-01-15 16:45:00', user: 'admin@nile.com', action: 'User Deleted', severity: 'high', ip: '192.168.1.1', details: 'Deleted inactive user jane_doe' }
+            ];
+
+            function renderAuditLogs() {
+                const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+                const severity = document.getElementById('severityFilter').value;
+                const dateFrom = document.getElementById('dateFrom').value;
+                const dateTo = document.getElementById('dateTo').value;
+                
+                let filtered = [...auditLogs];
+                
+                if (searchTerm) {
+                    filtered = filtered.filter(log => 
+                        log.user.toLowerCase().includes(searchTerm) || 
+                        log.action.toLowerCase().includes(searchTerm) ||
+                        log.details.toLowerCase().includes(searchTerm)
+                    );
+                }
+                if (severity !== 'all') {
+                    filtered = filtered.filter(log => log.severity === severity);
+                }
+                if (dateFrom) {
+                    filtered = filtered.filter(log => log.timestamp.split(' ')[0] >= dateFrom);
+                }
+                if (dateTo) {
+                    filtered = filtered.filter(log => log.timestamp.split(' ')[0] <= dateTo);
+                }
+                
+                const tbody = document.getElementById('auditTableBody');
+                tbody.innerHTML = filtered.map(log => `
+                    <tr>
+                        <td>${log.timestamp}</td>
+                        <td>${log.user}</td>
+                        <td>${log.action}</td>
+                        <td><span class="severity-${log.severity}">${log.severity.toUpperCase()}</span></td>
+                        <td>${log.ip}</td>
+                        <td>${log.details}</td>
+                    </tr>
+                `).join('');
+            }
+
+            function exportCSV() {
+                const rows = [['Timestamp', 'User', 'Action', 'Severity', 'IP Address', 'Details']];
+                auditLogs.forEach(log => {
+                    rows.push([log.timestamp, log.user, log.action, log.severity, log.ip, log.details]);
+                });
+                const csv = rows.map(row => row.join(',')).join('\n');
+                const blob = new Blob([csv], { type: 'text/csv' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `audit_log_${new Date().toISOString().split('T')[0]}.csv`;
+                a.click();
+                URL.revokeObjectURL(url);
+            }
+
+            function init() {
+                renderAuditLogs();
+                document.getElementById('searchInput').addEventListener('input', renderAuditLogs);
+                document.getElementById('severityFilter').addEventListener('change', renderAuditLogs);
+                document.getElementById('dateFrom').addEventListener('change', renderAuditLogs);
+                document.getElementById('dateTo').addEventListener('change', renderAuditLogs);
+                document.getElementById('exportBtn').addEventListener('click', exportCSV);
+            }
+            
+            init();
+        })();
+    </script>
+</body>
+</html>
