@@ -1,1 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nile POS - API Debugger</title>
+    <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #0f172a;
+            padding: 24px;
+        }
+        .container { max-width: 1400px; margin: 0 auto; }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            color: white;
+        }
+        h1 { font-size: 24px; }
+        .back-btn {
+            background: #1e293b;
+            border: 1px solid #334155;
+            padding: 8px 16px;
+            border-radius: 8px;
+            text-decoration: none;
+            color: #94a3b8;
+        }
+        .debug-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+        .request-panel, .response-panel {
+            background: #1e293b;
+            border-radius: 20px;
+            overflow: hidden;
+        }
+        .panel-header {
+            padding: 16px 20px;
+            background: #0f172a;
+            border-bottom: 1px solid #334155;
+            font-weight: 600;
+            color: #94a3b8;
+        }
+        .panel-body { padding: 20px; }
+        select, textarea, input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 16px;
+            background: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            color: #f1f5f9;
+            font-family: monospace;
+        }
+        .send-btn {
+            width: 100%;
+            padding: 12px;
+            background: #10b981;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        .response-area {
+            background: #0f172a;
+            border-radius: 8px;
+            padding: 16px;
+            font-family: monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+            color: #e2e8f0;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 100px;
+            font-size: 11px;
+            margin-left: 12px;
+        }
+        .status-200 { background: #10b981; color: white; }
+        .status-400 { background: #f59e0b; color: white; }
+        .status-401 { background: #ef4444; color: white; }
+        @media (max-width: 768px) {
+            .debug-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔧 API Debug Console</h1>
+            <a href="/index.html" class="back-btn">← Back</a>
+        </div>
 
+        <div class="debug-grid">
+            <div class="request-panel">
+                <div class="panel-header">Request Builder</div>
+                <div class="panel-body">
+                    <select id="method">
+                        <option value="GET">GET</option>
+                        <option value="POST">POST</option>
+                        <option value="PUT">PUT</option>
+                        <option value="DELETE">DELETE</option>
+                    </select>
+                    <input type="text" id="endpoint" placeholder="/api/v1/..." value="/api/v1/products">
+                    <textarea id="requestBody" rows="8" placeholder='{"key": "value"}'></textarea>
+                    <button id="sendRequest" class="send-btn">🚀 Send Request</button>
+                </div>
+            </div>
+
+            <div class="response-panel">
+                <div class="panel-header">
+                    Response
+                    <span id="statusBadge" class="status-badge"></span>
+                </div>
+                <div class="panel-body">
+                    <div class="response-area" id="responseArea">Ready to send requests...</div>
+                    <div style="margin-top: 16px; display: flex; gap: 12px;">
+                        <button id="copyResponse" style="flex:1; padding:8px; background:#475569; color:white; border:none; border-radius:8px;">📋 Copy</button>
+                        <button id="clearResponse" style="flex:1; padding:8px; background:#334155; color:white; border:none; border-radius:8px;">🗑️ Clear</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            const mockResponses = {
+                'GET:/api/v1/products': { status: 200, body: { products: [{ id: 1, name: 'Test Product', price: 29.99 }] } },
+                'POST:/api/v1/auth/login': { status: 200, body: { token: 'jwt_token_example', user: { id: 1, name: 'Admin' } } },
+                'POST:/api/v1/transactions/create': { status: 201, body: { transaction_id: 'TRX-001', status: 'completed' } }
+            };
+            
+            async function sendRequest() {
+                const method = document.getElementById('method').value;
+                const endpoint = document.getElementById('endpoint').value;
+                const requestBody = document.getElementById('requestBody').value;
+                
+                const responseArea = document.getElementById('responseArea');
+                const statusBadge = document.getElementById('statusBadge');
+                
+                responseArea.innerHTML = 'Sending request...';
+                
+                // Simulate API call
+                setTimeout(() => {
+                    const key = `${method}:${endpoint}`;
+                    const mock = mockResponses[key];
+                    
+                    if (mock) {
+                        statusBadge.textContent = `HTTP ${mock.status}`;
+                        statusBadge.className = `status-badge status-${mock.status}`;
+                        responseArea.innerHTML = JSON.stringify(mock.body, null, 2);
+                    } else {
+                        statusBadge.textContent = 'HTTP 404';
+                        statusBadge.className = 'status-badge status-400';
+                        responseArea.innerHTML = JSON.stringify({ error: 'Endpoint not found', message: 'No mock response configured for this endpoint' }, null, 2);
+                    }
+                }, 500);
+            }
+            
+            function copyResponse() {
+                const responseText = document.getElementById('responseArea').innerText;
+                navigator.clipboard.writeText(responseText);
+                alert('Response copied to clipboard');
+            }
+            
+            function init() {
+                document.getElementById('sendRequest').addEventListener('click', sendRequest);
+                document.getElementById('copyResponse').addEventListener('click', copyResponse);
+                document.getElementById('clearResponse').addEventListener('click', () => {
+                    document.getElementById('responseArea').innerHTML = 'Ready to send requests...';
+                    document.getElementById('statusBadge').textContent = '';
+                });
+                
+                // Example endpoints
+                const examples = [
+                    { method: 'GET', url: '/api/v1/products' },
+                    { method: 'POST', url: '/api/v1/auth/login', body: '{"email":"admin@nile.com","password":"admin123"}' },
+                    { method: 'POST', url: '/api/v1/transactions/create', body: '{"items":[{"id":1,"quantity":2}]}' }
+                ];
+                
+                // Add quick example buttons
+                const exampleContainer = document.createElement('div');
+                exampleContainer.style.marginBottom = '16px';
+                exampleContainer.innerHTML = '<div style="color:#94a3b8; margin-bottom:8px;">Quick Examples:</div>';
+                examples.forEach(ex => {
+                    const btn = document.createElement('button');
+                    btn.textContent = `${ex.method} ${ex.url}`;
+                    btn.style.cssText = 'margin-right:8px; margin-bottom:8px; padding:6px 12px; background:#334155; border:none; border-radius:6px; color:white; cursor:pointer;';
+                    btn.addEventListener('click', () => {
+                        document.getElementById('method').value = ex.method;
+                        document.getElementById('endpoint').value = ex.url;
+                        if (ex.body) document.getElementById('requestBody').value = ex.body;
+                    });
+                    exampleContainer.appendChild(btn);
+                });
+                document.querySelector('.request-panel .panel-body').insertBefore(exampleContainer, document.getElementById('method'));
+            }
+            
+            init();
+        })();
+    </script>
+</body>
+</html>
