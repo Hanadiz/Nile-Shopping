@@ -1,1 +1,286 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nile POS - Gift Cards</title>
+    <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 24px;
+            min-height: 100vh;
+        }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            color: white;
+        }
+        h1 { font-size: 24px; }
+        .back-btn {
+            background: rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.3);
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            text-decoration: none;
+            color: white;
+        }
+        .new-btn {
+            background: white;
+            color: #667eea;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .stat-card {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+        }
+        .stat-value { font-size: 28px; font-weight: 700; color: #667eea; }
+        .balance-check {
+            background: white;
+            border-radius: 20px;
+            padding: 24px;
+            margin-bottom: 24px;
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .balance-check input {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+        }
+        .giftcard-table {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+        }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 12px 16px; text-align: left; border-bottom: 1px solid #f1f5f9; }
+        th { background: #f8fafc; font-weight: 600; }
+        .status-active { color: #10b981; }
+        .status-used { color: #64748b; }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .modal.active { display: flex; }
+        .modal-content {
+            background: white;
+            border-radius: 24px;
+            max-width: 450px;
+            width: 90%;
+        }
+        .modal-header { padding: 20px; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; }
+        .modal-body { padding: 20px; }
+        .form-group { margin-bottom: 16px; }
+        .form-group label { display: block; margin-bottom: 6px; font-weight: 500; }
+        .form-group input, .form-group select { width: 100%; padding: 10px; border: 1px solid #e2e8f0; border-radius: 8px; }
+        .generated-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 16px;
+            text-align: center;
+            margin-top: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎁 Gift Cards</h1>
+            <div style="display: flex; gap: 12px;">
+                <a href="/index.html" class="back-btn">← Back</a>
+                <button class="new-btn" id="newGiftCardBtn">+ Issue Gift Card</button>
+            </div>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card"><div class="stat-value" id="totalIssued">$0</div><div class="stat-label">Total Issued</div></div>
+            <div class="stat-card"><div class="stat-value" id="totalRedeemed">$0</div><div class="stat-label">Total Redeemed</div></div>
+            <div class="stat-card"><div class="stat-value" id="activeBalance">$0</div><div class="stat-label">Active Balance</div></div>
+            <div class="stat-card"><div class="stat-value" id="cardsCount">0</div><div class="stat-label">Active Cards</div></div>
+        </div>
+
+        <div class="balance-check">
+            <input type="text" id="cardNumberCheck" placeholder="Enter card number to check balance">
+            <button id="checkBalanceBtn" style="padding:12px 24px; background:#667eea; color:white; border:none; border-radius:12px;">Check Balance</button>
+            <span id="balanceResult" style="font-weight:600;"></span>
+        </div>
+
+        <div class="giftcard-table">
+            <table>
+                <thead><tr><th>Card Number</th><th>Issued Date</th><th>Initial Amount</th><th>Balance</th><th>Status</th><th>Customer</th></tr></thead>
+                <tbody id="cardsTableBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Issue Modal -->
+    <div id="issueModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header"><h3>Issue Gift Card</h3><button class="close-modal">✕</button></div>
+            <div class="modal-body">
+                <form id="issueForm">
+                    <div class="form-group"><label>Amount ($)</label><input type="number" id="amount" step="0.01" required></div>
+                    <div class="form-group"><label>Customer Email (optional)</label><input type="email" id="customerEmail"></div>
+                    <div class="form-group"><label>Recipient Name</label><input type="text" id="recipientName"></div>
+                    <div class="form-group"><label>Message (optional)</label><textarea id="message" rows="2"></textarea></div>
+                    <button type="submit" class="new-btn" style="width:100%;">Issue & Generate</button>
+                </form>
+                <div id="generatedCard" class="generated-card" style="display:none;"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            let giftCards = [
+                { id: 1, number: 'GIFT-1234-5678', issuedDate: '2024-01-10', initialAmount: 100.00, balance: 45.50, status: 'active', customerEmail: 'john@example.com' },
+                { id: 2, number: 'GIFT-8765-4321', issuedDate: '2024-01-05', initialAmount: 50.00, balance: 0.00, status: 'used', customerEmail: 'jane@example.com' },
+                { id: 3, number: 'GIFT-1111-2222', issuedDate: '2024-01-12', initialAmount: 200.00, balance: 200.00, status: 'active', customerEmail: null }
+            ];
+            let nextId = 4;
+
+            function updateStats() {
+                const totalIssued = giftCards.reduce((s, c) => s + c.initialAmount, 0);
+                const totalRedeemed = giftCards.reduce((s, c) => s + (c.initialAmount - c.balance), 0);
+                const activeBalance = giftCards.filter(c => c.status === 'active').reduce((s, c) => s + c.balance, 0);
+                const activeCards = giftCards.filter(c => c.status === 'active').length;
+                
+                document.getElementById('totalIssued').textContent = `$${totalIssued.toFixed(2)}`;
+                document.getElementById('totalRedeemed').textContent = `$${totalRedeemed.toFixed(2)}`;
+                document.getElementById('activeBalance').textContent = `$${activeBalance.toFixed(2)}`;
+                document.getElementById('cardsCount').textContent = activeCards;
+            }
+
+            function renderCards() {
+                const tbody = document.getElementById('cardsTableBody');
+                tbody.innerHTML = giftCards.map(card => `
+                    <tr>
+                        <td>${card.number}</td>
+                        <td>${card.issuedDate}</td>
+                        <td>$${card.initialAmount.toFixed(2)}</td>
+                        <td>$${card.balance.toFixed(2)}</td>
+                        <td><span class="status-${card.status}">${card.status}</span></td>
+                        <td>${card.customerEmail || '—'}</td>
+                    </tr>
+                `).join('');
+                updateStats();
+            }
+
+            function generateCardNumber() {
+                return 'GIFT-' + Math.floor(Math.random() * 10000) + '-' + Math.floor(Math.random() * 10000);
+            }
+
+            function issueGiftCard(event) {
+                event.preventDefault();
+                
+                const amount = parseFloat(document.getElementById('amount').value);
+                if (isNaN(amount) || amount <= 0) {
+                    alert('Please enter a valid amount');
+                    return;
+                }
+                
+                const newCard = {
+                    id: nextId++,
+                    number: generateCardNumber(),
+                    issuedDate: new Date().toISOString().split('T')[0],
+                    initialAmount: amount,
+                    balance: amount,
+                    status: 'active',
+                    customerEmail: document.getElementById('customerEmail').value || null,
+                    recipientName: document.getElementById('recipientName').value
+                };
+                
+                giftCards.push(newCard);
+                renderCards();
+                
+                // Show generated card
+                const generatedDiv = document.getElementById('generatedCard');
+                generatedDiv.style.display = 'block';
+                generatedDiv.innerHTML = `
+                    <div>🎉 Gift Card Generated!</div>
+                    <div style="font-size:20px; font-weight:700; margin:12px 0;">${newCard.number}</div>
+                    <div>Amount: $${amount.toFixed(2)}</div>
+                    <button onclick="window.print()" style="margin-top:12px; padding:8px; background:white; color:#667eea; border:none; border-radius:8px;">Print Card</button>
+                `;
+                
+                document.getElementById('issueForm').reset();
+                setTimeout(() => {
+                    generatedDiv.style.display = 'none';
+                }, 10000);
+            }
+
+            function checkBalance() {
+                const cardNumber = document.getElementById('cardNumberCheck').value.trim();
+                const card = giftCards.find(c => c.number === cardNumber);
+                const resultSpan = document.getElementById('balanceResult');
+                
+                if (card && card.status === 'active') {
+                    resultSpan.innerHTML = `Balance: $${card.balance.toFixed(2)}`;
+                    resultSpan.style.color = '#10b981';
+                } else if (card && card.status === 'used') {
+                    resultSpan.innerHTML = 'Card has been fully redeemed';
+                    resultSpan.style.color = '#ef4444';
+                } else {
+                    resultSpan.innerHTML = 'Card not found';
+                    resultSpan.style.color = '#ef4444';
+                }
+            }
+
+            function init() {
+                renderCards();
+                
+                document.getElementById('newGiftCardBtn').addEventListener('click', () => {
+                    document.getElementById('generatedCard').style.display = 'none';
+                    document.getElementById('issueForm').reset();
+                    document.getElementById('issueModal').classList.add('active');
+                });
+                document.getElementById('issueForm').addEventListener('submit', issueGiftCard);
+                document.getElementById('checkBalanceBtn').addEventListener('click', checkBalance);
+                document.getElementById('cardNumberCheck').addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') checkBalance();
+                });
+                
+                document.querySelectorAll('.close-modal').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        document.getElementById('issueModal').classList.remove('active');
+                    });
+                });
+            }
+            
+            init();
+        })();
+    </script>
+</body>
+</html>
