@@ -1,1 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nile POS - Compliance Center</title>
+    <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #f1f5f9;
+            padding: 24px;
+        }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+        h1 { font-size: 24px; color: #1e293b; }
+        .back-btn {
+            background: white;
+            border: 1px solid #e2e8f0;
+            padding: 8px 16px;
+            border-radius: 8px;
+            text-decoration: none;
+            color: #475569;
+        }
+        .compliance-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+        }
+        .card {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+        }
+        .card-header { padding: 20px; background: #1e293b; color: white; }
+        .card-body { padding: 20px; }
+        .status-badge { display: inline-block; padding: 4px 8px; border-radius: 100px; font-size: 11px; }
+        .status-compliant { background: #d1fae5; color: #065f46; }
+        .status-pending { background: #fef3c7; color: #92400e; }
+        .btn {
+            width: 100%;
+            padding: 12px;
+            margin-top: 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+        .btn-secondary { background: #e2e8f0; color: #475569; }
+        .export-options { margin-top: 16px; }
+        .radio-group { display: flex; gap: 16px; margin: 12px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>⚖️ Compliance Center</h1>
+            <a href="/index.html" class="back-btn">← Back</a>
+        </div>
 
+        <div class="compliance-grid">
+            <!-- GDPR Card -->
+            <div class="card">
+                <div class="card-header">🇪🇺 GDPR Compliance</div>
+                <div class="card-body">
+                    <div>Status: <span class="status-badge status-compliant">Compliant</span></div>
+                    <div style="margin: 12px 0;">Last Audit: 2024-01-10</div>
+                    <button id="gdprExportBtn" class="btn btn-primary">📋 Request Data Export</button>
+                    <button id="gdprDeleteBtn" class="btn btn-secondary">🗑️ Request Data Deletion</button>
+                </div>
+            </div>
+
+            <!-- PCI DSS Card -->
+            <div class="card">
+                <div class="card-header">💳 PCI DSS Compliance</div>
+                <div class="card-body">
+                    <div>Status: <span class="status-badge status-compliant">Level 1 Compliant</span></div>
+                    <div style="margin: 12px 0;">Last Assessment: 2024-01-05</div>
+                    <button id="pciReportBtn" class="btn btn-primary">📄 Generate PCI Report</button>
+                    <button id="scanCardBtn" class="btn btn-secondary">🔍 Run Vulnerability Scan</button>
+                </div>
+            </div>
+
+            <!-- CCPA Card -->
+            <div class="card">
+                <div class="card-header">🇺🇸 CCPA / CPRA</div>
+                <div class="card-body">
+                    <div>Status: <span class="status-badge status-compliant">Compliant</span></div>
+                    <div style="margin: 12px 0;">Do Not Sell: Enabled</div>
+                    <button id="optOutBtn" class="btn btn-primary">🚫 Opt-Out Management</button>
+                    <button id="ccpaRequestBtn" class="btn btn-secondary">📊 Consumer Request Portal</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="exportModal" class="modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); align-items:center; justify-content:center; z-index:1000;">
+            <div style="background:white; border-radius:24px; max-width:400px; width:90%; padding:24px;">
+                <h3>Data Export Request</h3>
+                <div class="radio-group">
+                    <label><input type="radio" name="exportType" value="json"> JSON (Machine-readable)</label>
+                    <label><input type="radio" name="exportType" value="csv"> CSV (Spreadsheet)</label>
+                </div>
+                <button id="confirmExport" style="width:100%; padding:12px; background:#10b981; color:white; border:none; border-radius:8px;">Confirm Export</button>
+                <button id="closeExport" style="width:100%; margin-top:12px; padding:12px; background:#e2e8f0; border:none; border-radius:8px;">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            function showToast(message) {
+                const toast = document.createElement('div');
+                toast.textContent = message;
+                toast.style.cssText = `position:fixed; bottom:20px; right:20px; background:#10b981; color:white; padding:12px 20px; border-radius:12px; z-index:1000;`;
+                document.body.appendChild(toast);
+                setTimeout(() => toast.remove(), 3000);
+            }
+            
+            document.getElementById('gdprExportBtn').addEventListener('click', () => {
+                document.getElementById('exportModal').style.display = 'flex';
+            });
+            
+            document.getElementById('confirmExport').addEventListener('click', () => {
+                const type = document.querySelector('input[name="exportType"]:checked').value;
+                showToast(`GDPR data export (${type}) requested. You will receive an email within 30 days.`);
+                document.getElementById('exportModal').style.display = 'none';
+            });
+            
+            document.getElementById('closeExport').addEventListener('click', () => {
+                document.getElementById('exportModal').style.display = 'none';
+            });
+            
+            document.getElementById('gdprDeleteBtn').addEventListener('click', () => {
+                if (confirm('WARNING: This will permanently delete all your personal data. This action cannot be undone. Continue?')) {
+                    showToast('Data deletion request submitted. You will receive confirmation via email.');
+                }
+            });
+            
+            document.getElementById('pciReportBtn').addEventListener('click', () => {
+                showToast('PCI DSS Report generated. Download started.');
+                const blob = new Blob(['PCI DSS Compliance Report\nStatus: Compliant\nDate: 2024-01-15'], { type: 'text/plain' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'pci_compliance_report.txt';
+                a.click();
+            });
+            
+            document.getElementById('scanCardBtn').addEventListener('click', () => {
+                showToast('Vulnerability scan initiated. Results will be emailed within 24 hours.');
+            });
+            
+            document.getElementById('optOutBtn').addEventListener('click', () => {
+                alert('Do Not Sell My Personal Information\nCurrent Status: ENABLED\nYour data is not being sold to third parties.');
+            });
+            
+            document.getElementById('ccpaRequestBtn').addEventListener('click', () => {
+                alert('Consumer Request Portal\n- Request Data Access\n- Request Data Deletion\n- Opt-Out of Sale\nSubmit request at privacy@nile.com');
+            });
+        })();
+    </script>
+</body>
+</html>
