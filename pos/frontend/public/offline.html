@@ -1,1 +1,321 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nile POS - Offline Mode</title>
+    <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #f1f5f9;
+            padding: 24px;
+        }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+        h1 { font-size: 24px; color: #1e293b; }
+        .back-btn {
+            background: white;
+            border: 1px solid #e2e8f0;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            text-decoration: none;
+            color: #475569;
+        }
+        .status-card {
+            background: white;
+            border-radius: 20px;
+            padding: 24px;
+            margin-bottom: 24px;
+            text-align: center;
+        }
+        .online-status { color: #10b981; font-size: 48px; }
+        .offline-status { color: #f59e0b; font-size: 48px; }
+        .sync-btn {
+            margin-top: 16px;
+            padding: 12px 24px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .stat-card {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+        }
+        .stat-value { font-size: 32px; font-weight: 700; color: #667eea; }
+        .stat-label { font-size: 13px; color: #64748b; margin-top: 4px; }
+        .queue-table {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+        }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 12px 16px; text-align: left; border-bottom: 1px solid #f1f5f9; }
+        th { background: #f8fafc; font-weight: 600; }
+        .status-pending { background: #fef3c7; color: #92400e; padding: 4px 8px; border-radius: 100px; font-size: 11px; }
+        .status-synced { background: #d1fae5; color: #065f46; padding: 4px 8px; border-radius: 100px; font-size: 11px; }
+        .status-failed { background: #fee2e2; color: #991b1b; padding: 4px 8px; border-radius: 100px; font-size: 11px; }
+        .retry-btn {
+            padding: 4px 12px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        @media (max-width: 768px) {
+            th, td { font-size: 12px; padding: 8px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📡 Offline Mode Manager</h1>
+            <a href="/index.html" class="back-btn">← Back to Register</a>
+        </div>
+
+        <div class="status-card" id="statusCard">
+            <div id="statusIcon">📶</div>
+            <h2 id="statusText">Checking connection...</h2>
+            <button class="sync-btn" id="manualSyncBtn">⟳ Sync Now</button>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card"><div class="stat-value" id="pendingCount">0</div><div class="stat-label">Pending Sync</div></div>
+            <div class="stat-card"><div class="stat-value" id="syncedCount">0</div><div class="stat-label">Synced Today</div></div>
+            <div class="stat-card"><div class="stat-value" id="failedCount">0</div><div class="stat-label">Failed</div></div>
+            <div class="stat-card"><div class="stat-value" id="storageUsed">0 MB</div><div class="stat-label">Storage Used</div></div>
+        </div>
+
+        <div class="queue-table">
+            <table>
+                <thead>
+                    <tr><th>ID</th><th>Type</th><th>Created</th><th>Status</th><th>Action</th></tr>
+                </thead>
+                <tbody id="queueTableBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            let offlineQueue = [];
+            let isOnline = navigator.onLine;
+
+            function loadQueue() {
+                const saved = localStorage.getItem('offline_transaction_queue');
+                if (saved) {
+                    offlineQueue = JSON.parse(saved);
+                } else {
+                    // Demo pending transactions
+                    offlineQueue = [
+                        { id: 'txn_001', type: 'sale', amount: 142.97, created: '2024-01-15 14:30:00', status: 'pending', retries: 0, data: {} },
+                        { id: 'txn_002', type: 'sale', amount: 89.99, created: '2024-01-15 15:45:00', status: 'pending', retries: 0, data: {} },
+                        { id: 'txn_003', type: 'refund', amount: 29.99, created: '2024-01-14 11:20:00', status: 'failed', retries: 2, data: {} }
+                    ];
+                    saveQueue();
+                }
+                updateUI();
+            }
+
+            function saveQueue() {
+                localStorage.setItem('offline_transaction_queue', JSON.stringify(offlineQueue));
+            }
+
+            function updateUI() {
+                const pending = offlineQueue.filter(q => q.status === 'pending').length;
+                const synced = offlineQueue.filter(q => q.status === 'synced').length;
+                const failed = offlineQueue.filter(q => q.status === 'failed').length;
+                
+                document.getElementById('pendingCount').textContent = pending;
+                document.getElementById('syncedCount').textContent = synced;
+                document.getElementById('failedCount').textContent = failed;
+                
+                // Estimate storage (rough)
+                const storage = Math.round(JSON.stringify(offlineQueue).length / 1024);
+                document.getElementById('storageUsed').textContent = `${storage} KB`;
+                
+                renderQueueTable();
+                updateConnectionStatus();
+            }
+
+            function updateConnectionStatus() {
+                const statusIcon = document.getElementById('statusIcon');
+                const statusText = document.getElementById('statusText');
+                
+                if (isOnline) {
+                    statusIcon.innerHTML = '🟢';
+                    statusIcon.className = 'online-status';
+                    statusText.innerHTML = 'Online - Connected to server';
+                    document.getElementById('statusCard').style.borderLeft = '4px solid #10b981';
+                } else {
+                    statusIcon.innerHTML = '🔴';
+                    statusIcon.className = 'offline-status';
+                    statusText.innerHTML = 'Offline - Transactions will be queued';
+                    document.getElementById('statusCard').style.borderLeft = '4px solid #f59e0b';
+                }
+            }
+
+            function renderQueueTable() {
+                const tbody = document.getElementById('queueTableBody');
+                
+                if (offlineQueue.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:40px;">No queued transactions</td></tr>';
+                    return;
+                }
+                
+                tbody.innerHTML = offlineQueue.map(q => `
+                    <tr>
+                        <td>${q.id}</td>
+                        <td>${q.type}</td>
+                        <td>${q.created}</td>
+                        <td><span class="status-${q.status}">${q.status}</span></td>
+                        <td>${q.status === 'failed' ? `<button class="retry-btn" data-id="${q.id}">Retry</button>` : '—'}</td>
+                    </tr>
+                `).join('');
+                
+                document.querySelectorAll('.retry-btn').forEach(btn => {
+                    btn.addEventListener('click', () => retrySync(btn.dataset.id));
+                });
+            }
+
+            async function syncAll() {
+                if (!isOnline) {
+                    alert('Cannot sync while offline. Please check your connection.');
+                    return;
+                }
+                
+                const pending = offlineQueue.filter(q => q.status === 'pending');
+                if (pending.length === 0) {
+                    alert('No pending transactions to sync.');
+                    return;
+                }
+                
+                showToast(`Syncing ${pending.length} transactions...`, 'info');
+                
+                for (const transaction of pending) {
+                    await syncTransaction(transaction.id);
+                }
+                
+                showToast('Sync completed!', 'success');
+                updateUI();
+            }
+
+            async function syncTransaction(id) {
+                const index = offlineQueue.findIndex(q => q.id === id);
+                if (index === -1) return;
+                
+                const transaction = offlineQueue[index];
+                
+                try {
+                    // Simulate API call
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                    
+                    // Simulate success (80% success rate for demo)
+                    if (Math.random() > 0.2) {
+                        transaction.status = 'synced';
+                        showToast(`Transaction ${id} synced successfully`, 'success');
+                    } else {
+                        transaction.retries++;
+                        if (transaction.retries >= 3) {
+                            transaction.status = 'failed';
+                        }
+                        showToast(`Transaction ${id} sync failed (retry ${transaction.retries}/3)`, 'error');
+                    }
+                } catch (error) {
+                    transaction.retries++;
+                    if (transaction.retries >= 3) transaction.status = 'failed';
+                }
+                
+                offlineQueue[index] = transaction;
+                saveQueue();
+                updateUI();
+            }
+
+            function retrySync(id) {
+                const transaction = offlineQueue.find(q => q.id === id);
+                if (transaction) {
+                    transaction.status = 'pending';
+                    transaction.retries = 0;
+                    saveQueue();
+                    updateUI();
+                    syncTransaction(id);
+                }
+            }
+
+            function clearSynced() {
+                offlineQueue = offlineQueue.filter(q => q.status !== 'synced');
+                saveQueue();
+                updateUI();
+                showToast('Cleared synced transactions', 'success');
+            }
+
+            function showToast(message, type) {
+                const toast = document.createElement('div');
+                toast.textContent = message;
+                toast.style.cssText = `
+                    position: fixed; bottom: 20px; right: 20px;
+                    background: ${type === 'error' ? '#ef4444' : type === 'success' ? '#10b981' : '#667eea'};
+                    color: white; padding: 12px 20px; border-radius: 12px;
+                    z-index: 1000; animation: slideIn 0.3s ease;
+                `;
+                document.body.appendChild(toast);
+                setTimeout(() => toast.remove(), 3000);
+            }
+
+            function setupNetworkListeners() {
+                window.addEventListener('online', () => {
+                    isOnline = true;
+                    updateConnectionStatus();
+                    showToast('Connection restored! Syncing pending transactions...', 'success');
+                    syncAll();
+                });
+                
+                window.addEventListener('offline', () => {
+                    isOnline = false;
+                    updateConnectionStatus();
+                    showToast('You are offline. Transactions will be saved locally.', 'warning');
+                });
+            }
+
+            function init() {
+                loadQueue();
+                setupNetworkListeners();
+                document.getElementById('manualSyncBtn').addEventListener('click', syncAll);
+                
+                // Add clear button to header
+                const clearBtn = document.createElement('button');
+                clearBtn.textContent = 'Clear Synced';
+                clearBtn.style.cssText = 'background:#e2e8f0; border:none; padding:8px 16px; border-radius:8px; cursor:pointer;';
+                clearBtn.addEventListener('click', clearSynced);
+                document.querySelector('.header').appendChild(clearBtn);
+            }
+            
+            init();
+        })();
+    </script>
+</body>
+</html>
