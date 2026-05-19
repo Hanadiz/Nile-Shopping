@@ -1,1 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nile POS - Inventory Count</title>
+    <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #f1f5f9;
+            padding: 24px;
+        }
+        .container { max-width: 1400px; margin: 0 auto; }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+        h1 { font-size: 24px; color: #1e293b; }
+        .back-btn {
+            background: white;
+            border: 1px solid #e2e8f0;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            text-decoration: none;
+            color: #475569;
+        }
+        .start-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        .stats-bar {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .stat {
+            background: white;
+            border-radius: 16px;
+            padding: 16px;
+            text-align: center;
+        }
+        .stat-value { font-size: 28px; font-weight: 700; color: #667eea; }
+        .stat-label { font-size: 12px; color: #64748b; margin-top: 4px; }
+        .action-bar {
+            background: white;
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 24px;
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .search-box {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+        }
+        .filter-select {
+            padding: 10px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+        }
+        .products-table {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+        }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 12px 16px; text-align: left; border-bottom: 1px solid #f1f5f9; }
+        th { background: #f8fafc; font-weight: 600; }
+        .count-input {
+            width: 80px;
+            padding: 8px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .count-input.dirty { background: #fef3c7; border-color: #f59e0b; }
+        .variance-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 100px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        .variance-positive { background: #d1fae5; color: #065f46; }
+        .variance-negative { background: #fee2e2; color: #991b1b; }
+        .variance-zero { background: #e2e8f0; color: #475569; }
+        .submit-btn {
+            width: 100%;
+            padding: 16px;
+            background: #10b981;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .modal.active { display: flex; }
+        .modal-content {
+            background: white;
+            border-radius: 24px;
+            max-width: 400px;
+            width: 90%;
+            padding: 24px;
+            text-align: center;
+        }
+        @media (max-width: 768px) {
+            th, td { font-size: 12px; padding: 8px; }
+            .count-input { width: 60px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📦 Inventory Count</h1>
+            <div style="display: flex; gap: 12px;">
+                <a href="/index.html" class="back-btn">← Back</a>
+                <button class="start-btn" id="startCountBtn">+ Start New Count</button>
+            </div>
+        </div>
 
+        <div class="stats-bar">
+            <div class="stat"><div class="stat-value" id="totalProducts">0</div><div class="stat-label">Total Products</div></div>
+            <div class="stat"><div class="stat-value" id="countedProducts">0</div><div class="stat-label">Counted</div></div>
+            <div class="stat"><div class="stat-value" id="remainingProducts">0</div><div class="stat-label">Remaining</div></div>
+            <div class="stat"><div class="stat-value" id="varianceCount">0</div><div class="stat-label">Variances</div></div>
+        </div>
+
+        <div class="action-bar">
+            <input type="text" id="searchInput" class="search-box" placeholder="Search product...">
+            <select id="filterStatus" class="filter-select">
+                <option value="all">All Products</option>
+                <option value="counted">Counted</option>
+                <option value="pending">Pending Count</option>
+                <option value="variance">Has Variance</option>
+            </select>
+            <select id="filterCategory" class="filter-select">
+                <option value="all">All Categories</option>
+                <option value="Apparel">Apparel</option>
+                <option value="Footwear">Footwear</option>
+                <option value="Accessories">Accessories</option>
+                <option value="Electronics">Electronics</option>
+            </select>
+        </div>
+
+        <div class="products-table">
+            <table>
+                <thead>
+                    <tr><th>Product</th><th>SKU</th><th>System Stock</th><th>Counted</th><th>Variance</th></tr>
+                </thead>
+                <tbody id="inventoryTableBody"></tbody>
+            </table>
+        </div>
+
+        <button class="submit-btn" id="submitCountBtn">✓ Submit Final Count & Adjust Inventory</button>
+    </div>
+
+    <div id="confirmModal" class="modal">
+        <div class="modal-content">
+            <h3>Confirm Inventory Adjustment</h3>
+            <p id="modalMessage"></p>
+            <div style="display: flex; gap: 12px; margin-top: 20px;">
+                <button id="confirmYes" style="flex:1; padding:12px; background:#10b981; color:white; border:none; border-radius:8px;">Confirm</button>
+                <button id="confirmNo" style="flex:1; padding:12px; background:#e2e8f0; border:none; border-radius:8px;">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            // Product data with system stock
+            let products = [
+                { id: 1, name: 'Classic T-Shirt', sku: 'PRD-001', category: 'Apparel', systemStock: 48, countedStock: null },
+                { id: 2, name: 'Slim Fit Jeans', sku: 'PRD-002', category: 'Apparel', systemStock: 35, countedStock: null },
+                { id: 3, name: 'Running Shoes', sku: 'PRD-003', category: 'Footwear', systemStock: 12, countedStock: null },
+                { id: 4, name: 'Leather Wallet', sku: 'PRD-004', category: 'Accessories', systemStock: 45, countedStock: null },
+                { id: 5, name: 'Smart Watch', sku: 'PRD-005', category: 'Electronics', systemStock: 8, countedStock: null },
+                { id: 6, name: 'Wireless Earbuds', sku: 'PRD-006', category: 'Electronics', systemStock: 3, countedStock: null },
+                { id: 7, name: 'Sunglasses', sku: 'PRD-007', category: 'Accessories', systemStock: 28, countedStock: null },
+                { id: 8, name: 'Backpack', sku: 'PRD-008', category: 'Accessories', systemStock: 18, countedStock: null },
+                { id: 9, name: 'Hoodie', sku: 'PRD-009', category: 'Apparel', systemStock: 22, countedStock: null },
+                { id: 10, name: 'Sneakers', sku: 'PRD-010', category: 'Footwear', systemStock: 0, countedStock: null }
+            ];
+
+            let countActive = false;
+            let dirtyCounts = {};
+
+            function loadSavedCounts() {
+                const saved = localStorage.getItem('inventory_count_session');
+                if (saved) {
+                    const counts = JSON.parse(saved);
+                    products.forEach(p => {
+                        if (counts[p.id] !== undefined) {
+                            p.countedStock = counts[p.id];
+                            dirtyCounts[p.id] = true;
+                        }
+                    });
+                    countActive = true;
+                }
+            }
+
+            function saveCounts() {
+                const counts = {};
+                products.forEach(p => {
+                    if (p.countedStock !== null) counts[p.id] = p.countedStock;
+                });
+                localStorage.setItem('inventory_count_session', JSON.stringify(counts));
+            }
+
+            function getVariance(product) {
+                if (product.countedStock === null) return null;
+                return product.countedStock - product.systemStock;
+            }
+
+            function getVarianceClass(variance) {
+                if (variance === null) return '';
+                if (variance > 0) return 'variance-positive';
+                if (variance < 0) return 'variance-negative';
+                return 'variance-zero';
+            }
+
+            function getVarianceText(variance) {
+                if (variance === null) return '—';
+                if (variance > 0) return `+${variance}`;
+                return variance.toString();
+            }
+
+            function renderInventoryTable() {
+                const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+                const filterStatus = document.getElementById('filterStatus').value;
+                const filterCategory = document.getElementById('filterCategory').value;
+                
+                let filtered = [...products];
+                
+                if (searchTerm) {
+                    filtered = filtered.filter(p => 
+                        p.name.toLowerCase().includes(searchTerm) || 
+                        p.sku.toLowerCase().includes(searchTerm)
+                    );
+                }
+                
+                if (filterCategory !== 'all') {
+                    filtered = filtered.filter(p => p.category === filterCategory);
+                }
+                
+                if (filterStatus === 'counted') {
+                    filtered = filtered.filter(p => p.countedStock !== null);
+                } else if (filterStatus === 'pending') {
+                    filtered = filtered.filter(p => p.countedStock === null);
+                } else if (filterStatus === 'variance') {
+                    filtered = filtered.filter(p => p.countedStock !== null && p.countedStock !== p.systemStock);
+                }
+                
+                const tbody = document.getElementById('inventoryTableBody');
+                tbody.innerHTML = filtered.map(p => {
+                    const variance = getVariance(p);
+                    const varianceClass = getVarianceClass(variance);
+                    const varianceText = getVarianceText(variance);
+                    const isDirty = dirtyCounts[p.id];
+                    
+                    return `
+                        <tr data-id="${p.id}">
+                            <td><strong>${escapeHtml(p.name)}</strong><br><small>${p.category}</small></td>
+                            <td>${p.sku}</td>
+                            <td>${p.systemStock}</td>
+                            <td><input type="number" class="count-input ${isDirty ? 'dirty' : ''}" data-id="${p.id}" value="${p.countedStock !== null ? p.countedStock : ''}" placeholder="—"></td>
+                            <td><span class="variance-badge ${varianceClass}">${varianceText}</span></td>
+                        </tr>
+                    `;
+                }).join('');
+                
+                // Add input handlers
+                document.querySelectorAll('.count-input').forEach(input => {
+                    input.addEventListener('change', (e) => {
+                        const id = parseInt(input.dataset.id);
+                        const value = input.value === '' ? null : parseInt(input.value);
+                        const product = products.find(p => p.id === id);
+                        product.countedStock = value;
+                        if (value !== null && !isNaN(value)) {
+                            dirtyCounts[id] = true;
+                            input.classList.add('dirty');
+                        } else {
+                            delete dirtyCounts[id];
+                            input.classList.remove('dirty');
+                        }
+                        saveCounts();
+                        updateStats();
+                        renderInventoryTable(); // Refresh for variance display
+                    });
+                });
+                
+                updateStats();
+            }
+
+            function updateStats() {
+                const total = products.length;
+                const counted = products.filter(p => p.countedStock !== null).length;
+                const remaining = total - counted;
+                const variances = products.filter(p => p.countedStock !== null && p.countedStock !== p.systemStock).length;
+                
+                document.getElementById('totalProducts').textContent = total;
+                document.getElementById('countedProducts').textContent = counted;
+                document.getElementById('remainingProducts').textContent = remaining;
+                document.getElementById('varianceCount').textContent = variances;
+            }
+
+            function startNewCount() {
+                if (confirm('Start a new inventory count? This will clear any unsaved counts.')) {
+                    products.forEach(p => p.countedStock = null);
+                    dirtyCounts = {};
+                    localStorage.removeItem('inventory_count_session');
+                    countActive = true;
+                    renderInventoryTable();
+                    showToast('New count started. Enter quantities for each product.', 'success');
+                }
+            }
+
+            function submitCount() {
+                const counted = products.filter(p => p.countedStock !== null);
+                const pending = products.filter(p => p.countedStock === null);
+                
+                if (pending.length > 0) {
+                    showToast(`Please count ${pending.length} remaining products first.`, 'error');
+                    return;
+                }
+                
+                const variances = products.filter(p => p.countedStock !== p.systemStock);
+                const message = variances.length === 0 
+                    ? 'No variances found. No inventory adjustments needed.'
+                    : `${variances.length} products have variances. Adjust inventory?`;
+                
+                document.getElementById('modalMessage').innerHTML = message;
+                document.getElementById('confirmModal').classList.add('active');
+            }
+
+            function applyAdjustments() {
+                const adjustments = products.filter(p => p.countedStock !== p.systemStock);
+                
+                adjustments.forEach(p => {
+                    // Update system stock (simulate)
+                    p.systemStock = p.countedStock;
+                });
+                
+                // Clear count session
+                localStorage.removeItem('inventory_count_session');
+                dirtyCounts = {};
+                countActive = false;
+                
+                showToast(`Adjusted ${adjustments.length} products. Inventory updated.`, 'success');
+                document.getElementById('confirmModal').classList.remove('active');
+                renderInventoryTable();
+            }
+
+            function showToast(message, type) {
+                const toast = document.createElement('div');
+                toast.textContent = message;
+                toast.style.cssText = `
+                    position: fixed; bottom: 20px; right: 20px;
+                    background: ${type === 'error' ? '#ef4444' : '#10b981'};
+                    color: white; padding: 12px 20px; border-radius: 12px;
+                    z-index: 1000; animation: slideIn 0.3s ease;
+                `;
+                document.body.appendChild(toast);
+                setTimeout(() => toast.remove(), 3000);
+            }
+
+            function escapeHtml(str) {
+                const div = document.createElement('div');
+                div.textContent = str;
+                return div.innerHTML;
+            }
+
+            function init() {
+                loadSavedCounts();
+                renderInventoryTable();
+                
+                document.getElementById('startCountBtn').addEventListener('click', startNewCount);
+                document.getElementById('submitCountBtn').addEventListener('click', submitCount);
+                document.getElementById('searchInput').addEventListener('input', renderInventoryTable);
+                document.getElementById('filterStatus').addEventListener('change', renderInventoryTable);
+                document.getElementById('filterCategory').addEventListener('change', renderInventoryTable);
+                document.getElementById('confirmYes').addEventListener('click', applyAdjustments);
+                document.getElementById('confirmNo').addEventListener('click', () => {
+                    document.getElementById('confirmModal').classList.remove('active');
+                });
+            }
+            
+            init();
+        })();
+    </script>
+</body>
+</html>
