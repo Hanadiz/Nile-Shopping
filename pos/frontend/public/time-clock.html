@@ -1,1 +1,249 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nile POS - Time Clock</title>
+    <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #f1f5f9;
+            padding: 24px;
+        }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+        h1 { font-size: 24px; color: #1e293b; }
+        .back-btn {
+            background: white;
+            border: 1px solid #e2e8f0;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            text-decoration: none;
+            color: #475569;
+        }
+        .clock-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 24px;
+            padding: 32px;
+            text-align: center;
+            margin-bottom: 24px;
+        }
+        .current-time { font-size: 48px; font-weight: 700; margin: 16px 0; }
+        .clock-btn {
+            padding: 16px 32px;
+            font-size: 20px;
+            font-weight: 600;
+            border: none;
+            border-radius: 60px;
+            cursor: pointer;
+            margin-top: 16px;
+        }
+        .clock-in { background: #10b981; color: white; }
+        .clock-out { background: #ef4444; color: white; }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .stat-card {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+        }
+        .stat-value { font-size: 28px; font-weight: 700; color: #667eea; }
+        .timesheet-table {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+        }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 12px 16px; text-align: left; border-bottom: 1px solid #f1f5f9; }
+        th { background: #f8fafc; font-weight: 600; }
+        .break-btn {
+            padding: 4px 12px;
+            background: #f59e0b;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        @media (max-width: 768px) {
+            .current-time { font-size: 32px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>⏰ Time Clock</h1>
+            <a href="/index.html" class="back-btn">← Back</a>
+        </div>
+
+        <div class="clock-card">
+            <div>Current Employee: <strong id="currentEmployee">Select Employee</strong></div>
+            <div class="current-time" id="currentTime">--:--:--</div>
+            <div id="clockStatus">Not Clocked In</div>
+            <button id="clockActionBtn" class="clock-btn clock-in">Clock In</button>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card"><div class="stat-value" id="todayHours">0.0</div><div class="stat-label">Today's Hours</div></div>
+            <div class="stat-card"><div class="stat-value" id="weekHours">0.0</div><div class="stat-label">This Week</div></div>
+            <div class="stat-card"><div class="stat-value" id="currentShift">0.0</div><div class="stat-label">Current Shift</div></div>
+        </div>
+
+        <div class="timesheet-table">
+            <div style="padding: 16px; background: #f8fafc; font-weight: 600;">Today's Timesheet</div>
+            <table>
+                <thead><tr><th>Employee</th><th>Clock In</th><th>Clock Out</th><th>Break</th><th>Total Hours</th></tr></thead>
+                <tbody id="timesheetBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            let currentEmployee = { id: 1, name: 'John Cashier', clockedIn: false, clockInTime: null, onBreak: false, breakStartTime: null };
+            let timesheet = [
+                { id: 1, name: 'John Cashier', date: '2024-01-15', clockIn: '09:00:00', clockOut: '17:00:00', breakMinutes: 30, hours: 7.5 },
+                { id: 2, name: 'Jane Manager', date: '2024-01-15', clockIn: '08:30:00', clockOut: '16:30:00', breakMinutes: 45, hours: 7.25 }
+            ];
+            
+            function updateClock() {
+                const now = new Date();
+                document.getElementById('currentTime').textContent = now.toLocaleTimeString();
+            }
+            
+            function updateUI() {
+                const statusText = document.getElementById('clockStatus');
+                const actionBtn = document.getElementById('clockActionBtn');
+                
+                if (currentEmployee.clockedIn) {
+                    if (currentEmployee.onBreak) {
+                        statusText.innerHTML = '⏸️ On Break';
+                        actionBtn.textContent = 'End Break';
+                        actionBtn.className = 'clock-btn clock-in';
+                    } else {
+                        statusText.innerHTML = '✅ Clocked In';
+                        actionBtn.textContent = 'Clock Out';
+                        actionBtn.className = 'clock-btn clock-out';
+                    }
+                } else {
+                    statusText.innerHTML = '⭕ Not Clocked In';
+                    actionBtn.textContent = 'Clock In';
+                    actionBtn.className = 'clock-btn clock-in';
+                }
+                
+                // Update stats
+                if (currentEmployee.clockedIn && currentEmployee.clockInTime) {
+                    const now = new Date();
+                    const clockIn = new Date(currentEmployee.clockInTime);
+                    let diffHours = (now - clockIn) / (1000 * 60 * 60);
+                    if (currentEmployee.onBreak && currentEmployee.breakStartTime) {
+                        const breakStart = new Date(currentEmployee.breakStartTime);
+                        const breakDuration = (now - breakStart) / (1000 * 60 * 60);
+                        diffHours -= breakDuration;
+                    }
+                    document.getElementById('currentShift').textContent = diffHours.toFixed(2);
+                }
+                
+                document.getElementById('todayHours').textContent = '8.0';
+                document.getElementById('weekHours').textContent = '32.5';
+            }
+            
+            function toggleClock() {
+                if (!currentEmployee.clockedIn) {
+                    // Clock In
+                    currentEmployee.clockedIn = true;
+                    currentEmployee.clockInTime = new Date().toISOString();
+                    currentEmployee.onBreak = false;
+                    alert(`Clocked in at ${new Date().toLocaleTimeString()}`);
+                } else if (currentEmployee.onBreak) {
+                    // End Break
+                    currentEmployee.onBreak = false;
+                    currentEmployee.breakStartTime = null;
+                    alert(`Break ended at ${new Date().toLocaleTimeString()}`);
+                } else {
+                    // Clock Out
+                    currentEmployee.clockedIn = false;
+                    currentEmployee.onBreak = false;
+                    const clockOutTime = new Date();
+                    alert(`Clocked out at ${clockOutTime.toLocaleTimeString()}`);
+                    
+                    // Add to timesheet
+                    timesheet.unshift({
+                        id: timesheet.length + 1,
+                        name: currentEmployee.name,
+                        date: clockOutTime.toISOString().split('T')[0],
+                        clockIn: new Date(currentEmployee.clockInTime).toLocaleTimeString(),
+                        clockOut: clockOutTime.toLocaleTimeString(),
+                        breakMinutes: 0,
+                        hours: ((clockOutTime - new Date(currentEmployee.clockInTime)) / (1000 * 60 * 60)).toFixed(2)
+                    });
+                    renderTimesheet();
+                }
+                updateUI();
+            }
+            
+            function takeBreak() {
+                if (currentEmployee.clockedIn && !currentEmployee.onBreak) {
+                    currentEmployee.onBreak = true;
+                    currentEmployee.breakStartTime = new Date().toISOString();
+                    alert(`Break started at ${new Date().toLocaleTimeString()}`);
+                    updateUI();
+                } else if (currentEmployee.onBreak) {
+                    alert('Already on break. Click "End Break" to resume.');
+                } else {
+                    alert('Please clock in first');
+                }
+            }
+            
+            function renderTimesheet() {
+                const tbody = document.getElementById('timesheetBody');
+                tbody.innerHTML = timesheet.slice(0, 5).map(entry => `
+                    <tr>
+                        <td>${entry.name}</td>
+                        <td>${entry.clockIn}</td>
+                        <td>${entry.clockOut || '—'}</td>
+                        <td>${entry.breakMinutes || '—'}</td>
+                        <td>${entry.hours}</td>
+                    </table>
+                `).join('');
+            }
+            
+            function init() {
+                updateClock();
+                setInterval(updateClock, 1000);
+                renderTimesheet();
+                updateUI();
+                
+                document.getElementById('clockActionBtn').addEventListener('click', toggleClock);
+                
+                // Add break button next to clock button
+                const breakBtn = document.createElement('button');
+                breakBtn.textContent = 'Take Break';
+                breakBtn.className = 'clock-btn';
+                breakBtn.style.cssText = 'background:#f59e0b; color:white; margin-left:12px;';
+                breakBtn.addEventListener('click', takeBreak);
+                document.querySelector('.clock-card').appendChild(breakBtn);
+            }
+            
+            init();
+        })();
+    </script>
+</body>
+</html>
