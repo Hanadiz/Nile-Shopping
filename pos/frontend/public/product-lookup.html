@@ -1,1 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nile POS - Product Lookup</title>
+    <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #f1f5f9;
+            padding: 24px;
+        }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+        h1 { font-size: 24px; color: #1e293b; }
+        .back-btn {
+            background: white;
+            border: 1px solid #e2e8f0;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            text-decoration: none;
+            color: #475569;
+        }
+        .search-section {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .search-bar {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        .search-bar input {
+            flex: 1;
+            padding: 14px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 16px;
+        }
+        .search-bar input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        .search-bar button {
+            padding: 14px 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        .filters {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .filter-select {
+            padding: 8px 16px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            background: white;
+        }
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 16px;
+        }
+        .product-card {
+            background: white;
+            border-radius: 16px;
+            padding: 16px;
+            border: 1px solid #e2e8f0;
+            transition: all 0.2s;
+        }
+        .product-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px -5px rgba(0,0,0,0.1);
+        }
+        .product-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+        .product-name {
+            font-weight: 700;
+            font-size: 16px;
+        }
+        .product-sku {
+            font-size: 11px;
+            color: #94a3b8;
+            font-family: monospace;
+        }
+        .product-price {
+            font-size: 20px;
+            font-weight: 700;
+            color: #667eea;
+            margin: 8px 0;
+        }
+        .stock-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 100px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        .stock-high { background: #d1fae5; color: #065f46; }
+        .stock-medium { background: #fef3c7; color: #92400e; }
+        .stock-low { background: #fee2e2; color: #991b1b; }
+        .barcode-preview {
+            background: #f8fafc;
+            padding: 12px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 12px;
+            margin-top: 12px;
+            text-align: center;
+        }
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #94a3b8;
+        }
+        @media (max-width: 768px) {
+            body { padding: 16px; }
+            .product-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔍 Product Lookup</h1>
+            <a href="/index.html" class="back-btn">← Back to Register</a>
+        </div>
 
+        <div class="search-section">
+            <div class="search-bar">
+                <input type="text" id="searchInput" placeholder="Search by name, SKU, or barcode..." autofocus>
+                <button id="searchBtn">Search</button>
+            </div>
+            <div class="filters">
+                <select id="categoryFilter" class="filter-select">
+                    <option value="all">All Categories</option>
+                    <option value="Apparel">Apparel</option>
+                    <option value="Footwear">Footwear</option>
+                    <option value="Accessories">Accessories</option>
+                    <option value="Electronics">Electronics</option>
+                </select>
+                <select id="stockFilter" class="filter-select">
+                    <option value="all">All Stock</option>
+                    <option value="high">In Stock (>20)</option>
+                    <option value="medium">Low Stock (1-20)</option>
+                    <option value="out">Out of Stock</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="results-header">
+            <span id="resultCount">0 products found</span>
+            <button id="scanBarcodeBtn" style="background:none; border:none; color:#667eea; cursor:pointer;">📷 Scan Barcode</button>
+        </div>
+
+        <div id="productGrid" class="product-grid">
+            <div class="loading">Loading products...</div>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            // Demo product database
+            const products = [
+                { id: 1, sku: 'PRD-001', name: 'Classic T-Shirt', price: 29.99, category: 'Apparel', stock: 48, barcode: '8901234567890' },
+                { id: 2, sku: 'PRD-002', name: 'Slim Fit Jeans', price: 59.99, category: 'Apparel', stock: 35, barcode: '8901234567891' },
+                { id: 3, sku: 'PRD-003', name: 'Running Shoes', price: 89.99, category: 'Footwear', stock: 12, barcode: '8901234567892' },
+                { id: 4, sku: 'PRD-004', name: 'Leather Wallet', price: 39.99, category: 'Accessories', stock: 45, barcode: '8901234567893' },
+                { id: 5, sku: 'PRD-005', name: 'Smart Watch', price: 199.99, category: 'Electronics', stock: 8, barcode: '8901234567894' },
+                { id: 6, sku: 'PRD-006', name: 'Wireless Earbuds', price: 79.99, category: 'Electronics', stock: 3, barcode: '8901234567895' },
+                { id: 7, sku: 'PRD-007', name: 'Sunglasses', price: 49.99, category: 'Accessories', stock: 28, barcode: '8901234567896' },
+                { id: 8, sku: 'PRD-008', name: 'Backpack', price: 69.99, category: 'Accessories', stock: 18, barcode: '8901234567897' },
+                { id: 9, sku: 'PRD-009', name: 'Hoodie', price: 54.99, category: 'Apparel', stock: 22, barcode: '8901234567898' },
+                { id: 10, sku: 'PRD-010', name: 'Sneakers', price: 74.99, category: 'Footwear', stock: 0, barcode: '8901234567899' },
+                { id: 11, sku: 'PRD-011', name: 'Phone Case', price: 24.99, category: 'Electronics', stock: 56, barcode: '8901234567900' },
+                { id: 12, sku: 'PRD-012', name: 'Water Bottle', price: 19.99, category: 'Accessories', stock: 38, barcode: '8901234567901' }
+            ];
+
+            let scannerBuffer = '';
+            let scannerTimeout = null;
+
+            function getStockClass(stock) {
+                if (stock <= 0) return 'stock-low';
+                if (stock < 20) return 'stock-medium';
+                return 'stock-high';
+            }
+
+            function getStockText(stock) {
+                if (stock <= 0) return 'Out of Stock';
+                if (stock < 20) return `Low Stock (${stock} left)`;
+                return `In Stock (${stock})`;
+            }
+
+            function renderProducts(filteredProducts) {
+                const grid = document.getElementById('productGrid');
+                const resultCount = document.getElementById('resultCount');
+                
+                if (filteredProducts.length === 0) {
+                    grid.innerHTML = '<div class="loading" style="grid-column:1/-1;">No products found matching your criteria</div>';
+                    resultCount.textContent = '0 products found';
+                    return;
+                }
+                
+                resultCount.textContent = `${filteredProducts.length} products found`;
+                
+                grid.innerHTML = filteredProducts.map(product => `
+                    <div class="product-card" data-product='${JSON.stringify(product)}'>
+                        <div class="product-header">
+                            <span class="product-name">${escapeHtml(product.name)}</span>
+                            <span class="stock-badge ${getStockClass(product.stock)}">${getStockText(product.stock)}</span>
+                        </div>
+                        <div class="product-sku">SKU: ${product.sku}</div>
+                        <div class="product-price">$${product.price.toFixed(2)}</div>
+                        <div class="product-sku">Category: ${product.category}</div>
+                        <div class="barcode-preview">
+                            📷 ${product.barcode}
+                        </div>
+                        <button class="add-to-cart-btn" style="width:100%; margin-top:12px; padding:10px; background:#667eea; color:white; border:none; border-radius:8px; cursor:pointer;">
+                            + Add to Cart
+                        </button>
+                    </div>
+                `).join('');
+                
+                // Add click handlers
+                document.querySelectorAll('.add-to-cart-btn').forEach((btn, idx) => {
+                    btn.addEventListener('click', () => {
+                        const product = filteredProducts[idx];
+                        addToCart(product);
+                    });
+                });
+            }
+
+            function filterProducts() {
+                const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+                const category = document.getElementById('categoryFilter').value;
+                const stockFilter = document.getElementById('stockFilter').value;
+                
+                let filtered = [...products];
+                
+                if (searchTerm) {
+                    filtered = filtered.filter(p => 
+                        p.name.toLowerCase().includes(searchTerm) || 
+                        p.sku.toLowerCase().includes(searchTerm) ||
+                        p.barcode.includes(searchTerm)
+                    );
+                }
+                
+                if (category !== 'all') {
+                    filtered = filtered.filter(p => p.category === category);
+                }
+                
+                if (stockFilter === 'high') {
+                    filtered = filtered.filter(p => p.stock > 20);
+                } else if (stockFilter === 'medium') {
+                    filtered = filtered.filter(p => p.stock > 0 && p.stock <= 20);
+                } else if (stockFilter === 'out') {
+                    filtered = filtered.filter(p => p.stock === 0);
+                }
+                
+                renderProducts(filtered);
+            }
+
+            function addToCart(product) {
+                if (product.stock <= 0) {
+                    showToast('This product is out of stock!', 'error');
+                    return;
+                }
+                
+                // Get existing cart from localStorage
+                let cart = JSON.parse(localStorage.getItem('pos_cart') || '[]');
+                const existing = cart.find(item => item.id === product.id);
+                
+                if (existing) {
+                    existing.quantity += 1;
+                    existing.lineTotal = existing.quantity * existing.price;
+                } else {
+                    cart.push({
+                        id: product.id,
+                        sku: product.sku,
+                        name: product.name,
+                        price: product.price,
+                        quantity: 1,
+                        lineTotal: product.price
+                    });
+                }
+                
+                localStorage.setItem('pos_cart', JSON.stringify(cart));
+                showToast(`Added ${product.name} to cart`, 'success');
+                
+                // Dispatch event for main POS
+                window.dispatchEvent(new CustomEvent('cartUpdated'));
+            }
+
+            function showToast(message, type = 'info') {
+                const toast = document.createElement('div');
+                toast.textContent = message;
+                toast.style.cssText = `
+                    position: fixed;
+                    bottom: 20px;
+                    right: 20px;
+                    background: ${type === 'error' ? '#ef4444' : '#10b981'};
+                    color: white;
+                    padding: 12px 20px;
+                    border-radius: 12px;
+                    z-index: 1000;
+                    animation: slideIn 0.3s ease;
+                `;
+                document.body.appendChild(toast);
+                setTimeout(() => toast.remove(), 3000);
+            }
+
+            function escapeHtml(str) {
+                const div = document.createElement('div');
+                div.textContent = str;
+                return div.innerHTML;
+            }
+
+            // Barcode scanner via keyboard wedge
+            function setupBarcodeScanner() {
+                document.addEventListener('keydown', (e) => {
+                    if (e.target.tagName === 'INPUT') return;
+                    
+                    if (e.key === 'Enter') {
+                        if (scannerBuffer.length > 0) {
+                            document.getElementById('searchInput').value = scannerBuffer;
+                            filterProducts();
+                            scannerBuffer = '';
+                            clearTimeout(scannerTimeout);
+                            e.preventDefault();
+                        }
+                    } else if (e.key.length === 1) {
+                        clearTimeout(scannerTimeout);
+                        scannerBuffer += e.key;
+                        scannerTimeout = setTimeout(() => {
+                            scannerBuffer = '';
+                        }, 50);
+                    }
+                });
+            }
+
+            function init() {
+                renderProducts(products);
+                setupBarcodeScanner();
+                
+                document.getElementById('searchBtn').addEventListener('click', filterProducts);
+                document.getElementById('searchInput').addEventListener('input', filterProducts);
+                document.getElementById('categoryFilter').addEventListener('change', filterProducts);
+                document.getElementById('stockFilter').addEventListener('change', filterProducts);
+                document.getElementById('scanBarcodeBtn').addEventListener('click', () => {
+                    showToast('Scan a barcode using your scanner', 'info');
+                });
+            }
+            
+            init();
+        })();
+    </script>
+</body>
+</html>
