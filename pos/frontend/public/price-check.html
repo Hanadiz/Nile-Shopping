@@ -1,16 +1,15 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nile POS - Price Check</title>
+    <title>Nile POS - Price Check | USD / UGX</title>
     <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+            background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -18,21 +17,37 @@
             padding: 20px;
         }
         .container {
-            max-width: 500px;
+            max-width: 550px;
             width: 100%;
         }
         .header {
             text-align: center;
             margin-bottom: 24px;
         }
-        .header h1 {
-            color: white;
-            font-size: 28px;
-        }
+        .header h1 { color: white; font-size: 28px; margin-bottom: 8px; }
         .back-link {
             color: rgba(255,255,255,0.8);
             text-decoration: none;
             font-size: 14px;
+        }
+        .currency-switch {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin: 16px 0;
+        }
+        .currency-btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            padding: 6px 20px;
+            border-radius: 100px;
+            color: white;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        .currency-btn.active {
+            background: white;
+            color: #2563eb;
         }
         .scan-card {
             background: white;
@@ -41,16 +56,13 @@
             box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
             text-align: center;
         }
-        .barcode-icon {
-            font-size: 64px;
-            margin-bottom: 20px;
-        }
+        .barcode-icon { font-size: 64px; margin-bottom: 20px; }
         .scan-input {
             width: 100%;
             padding: 18px;
             font-size: 18px;
             text-align: center;
-            border: 2px solid #e2e8f0;
+            border: 2px solid #e5e7eb;
             border-radius: 16px;
             margin-bottom: 20px;
             font-family: monospace;
@@ -58,64 +70,61 @@
         }
         .scan-input:focus {
             outline: none;
-            border-color: #667eea;
-        }
-        .or-divider {
-            color: #94a3b8;
-            margin: 20px 0;
-            font-size: 14px;
-        }
-        .manual-sku {
-            display: flex;
-            gap: 12px;
-        }
-        .manual-sku input {
-            flex: 1;
-            padding: 14px;
-            border: 1px solid #e2e8f0;
-            border-radius: 12px;
-        }
-        .check-btn {
-            padding: 14px 24px;
-            background: #667eea;
-            color: white;
-            border: none;
-            border-radius: 12px;
-            cursor: pointer;
-            font-weight: 600;
+            border-color: #2563eb;
         }
         .result-card {
             margin-top: 24px;
             padding: 24px;
-            background: #f8fafc;
+            background: #f9fafb;
             border-radius: 20px;
             display: none;
         }
         .result-card.show { display: block; animation: fadeIn 0.3s; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .product-name { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
-        .product-price { font-size: 36px; font-weight: 700; color: #667eea; margin: 16px 0; }
-        .product-details { color: #64748b; font-size: 14px; margin-top: 12px; }
+        .product-price {
+            font-size: 36px;
+            font-weight: 700;
+            color: #2563eb;
+            margin: 16px 0;
+        }
+        .price-converted {
+            font-size: 14px;
+            color: #6b7280;
+            margin-top: 8px;
+        }
         .recent-list {
             margin-top: 20px;
             padding-top: 20px;
-            border-top: 1px solid #e2e8f0;
+            border-top: 1px solid #e5e7eb;
         }
         .recent-item {
             display: flex;
             justify-content: space-between;
+            align-items: center;
             padding: 12px;
-            border-bottom: 1px solid #f1f5f9;
+            border-bottom: 1px solid #f3f4f6;
             cursor: pointer;
         }
-        .recent-item:hover { background: #f1f5f9; }
+        .recent-item:hover { background: #f3f4f6; border-radius: 12px; }
         .clear-history {
             background: none;
             border: none;
-            color: #ef4444;
+            color: #dc2626;
             font-size: 12px;
             cursor: pointer;
             margin-top: 12px;
+        }
+        .add-to-cart {
+            width: 100%;
+            margin-top: 16px;
+            padding: 14px;
+            background: #10b981;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
         }
     </style>
 </head>
@@ -124,20 +133,19 @@
         <div class="header">
             <a href="/index.html" class="back-link">← Back to Register</a>
             <h1>🔍 Price Check</h1>
+            <div class="currency-switch">
+                <button class="currency-btn" data-currency="USD">USD $</button>
+                <button class="currency-btn" data-currency="UGX">UGX</button>
+            </div>
         </div>
         
         <div class="scan-card">
             <div class="barcode-icon">📷</div>
             <input type="text" id="barcodeInput" class="scan-input" placeholder="Scan barcode here" autofocus>
-            <div class="or-divider">— OR —</div>
-            <div class="manual-sku">
-                <input type="text" id="skuInput" placeholder="Enter SKU or product name">
-                <button class="check-btn" id="checkBtn">Check</button>
-            </div>
             
             <div id="resultCard" class="result-card">
                 <div id="productInfo"></div>
-                <button id="addToCartBtn" style="width:100%; margin-top:16px; padding:12px; background:#10b981; color:white; border:none; border-radius:12px; cursor:pointer;">+ Add to Cart</button>
+                <button id="addToCartBtn" class="add-to-cart">+ Add to Cart</button>
             </div>
             
             <div class="recent-list">
@@ -152,15 +160,33 @@
 
     <script>
         (function() {
+            const EXCHANGE_RATE = 3700;
+            let currentCurrency = localStorage.getItem('pos_currency') || 'UGX';
+            let recentChecks = [];
+            
             const products = [
-                { id: 1, sku: 'PRD-001', name: 'Classic T-Shirt', price: 29.99, category: 'Apparel', stock: 48, barcode: '8901234567890' },
-                { id: 2, sku: 'PRD-002', name: 'Slim Fit Jeans', price: 59.99, category: 'Apparel', stock: 35, barcode: '8901234567891' },
-                { id: 3, sku: 'PRD-003', name: 'Running Shoes', price: 89.99, category: 'Footwear', stock: 12, barcode: '8901234567892' },
-                { id: 4, sku: 'PRD-004', name: 'Leather Wallet', price: 39.99, category: 'Accessories', stock: 45, barcode: '8901234567893' },
-                { id: 5, sku: 'PRD-005', name: 'Smart Watch', price: 199.99, category: 'Electronics', stock: 8, barcode: '8901234567894' }
+                { id: 1, sku: 'NLE-APR-001', name: 'Classic T-Shirt', priceUSD: 29.99, category: 'Apparel', stock: 48, barcode: '8901234567890' },
+                { id: 2, sku: 'NLE-APR-002', name: 'Slim Fit Jeans', priceUSD: 79.99, category: 'Apparel', stock: 35, barcode: '8901234567891' },
+                { id: 3, sku: 'NLE-FTW-003', name: 'Running Shoes', priceUSD: 119.99, category: 'Footwear', stock: 12, barcode: '8901234567892' },
+                { id: 4, sku: 'NLE-ACC-004', name: 'Leather Wallet', priceUSD: 49.99, category: 'Accessories', stock: 45, barcode: '8901234567893' },
+                { id: 5, sku: 'NLE-ELC-005', name: 'Smart Watch', priceUSD: 299.99, category: 'Electronics', stock: 8, barcode: '8901234567894' }
             ];
             
-            let recentChecks = [];
+            function formatPrice(priceUSD) {
+                if (currentCurrency === 'UGX') {
+                    const ugxAmount = Math.round(priceUSD * EXCHANGE_RATE);
+                    return `UGX ${ugxAmount.toLocaleString('en-UG')}`;
+                }
+                return `$${priceUSD.toFixed(2)}`;
+            }
+            
+            function getConversionNote(priceUSD) {
+                if (currentCurrency === 'UGX') {
+                    return `≈ $${priceUSD.toFixed(2)} USD`;
+                }
+                const ugxAmount = Math.round(priceUSD * EXCHANGE_RATE);
+                return `≈ UGX ${ugxAmount.toLocaleString('en-UG')}`;
+            }
             
             function loadRecentChecks() {
                 const saved = localStorage.getItem('price_check_history');
@@ -174,7 +200,7 @@
             
             function addToRecent(product) {
                 recentChecks = recentChecks.filter(p => p.id !== product.id);
-                recentChecks.unshift(product);
+                recentChecks.unshift({ ...product, checkedAt: new Date().toISOString() });
                 saveRecentChecks();
                 renderRecentChecks();
             }
@@ -182,13 +208,16 @@
             function renderRecentChecks() {
                 const container = document.getElementById('recentHistory');
                 if (recentChecks.length === 0) {
-                    container.innerHTML = '<div style="padding: 20px; text-align: center; color: #94a3b8;">No recent checks</div>';
+                    container.innerHTML = '<div style="padding: 20px; text-align: center; color: #9ca3af;">No recent checks</div>';
                     return;
                 }
                 container.innerHTML = recentChecks.map(p => `
                     <div class="recent-item" data-id="${p.id}">
-                        <span><strong>${escapeHtml(p.name)}</strong><br><small>${p.sku}</small></span>
-                        <span style="font-weight:700; color:#667eea;">$${p.price.toFixed(2)}</span>
+                        <div>
+                            <strong>${escapeHtml(p.name)}</strong><br>
+                            <small>${p.sku}</small>
+                        </div>
+                        <div style="font-weight:700; color:#2563eb;">${formatPrice(p.priceUSD)}</div>
                     </div>
                 `).join('');
                 
@@ -213,7 +242,7 @@
             function displayProduct(product) {
                 if (!product) {
                     document.getElementById('productInfo').innerHTML = `
-                        <div style="text-align:center; color:#ef4444;">
+                        <div style="text-align:center; color:#dc2626;">
                             <div style="font-size:48px;">❌</div>
                             <div>Product not found</div>
                         </div>
@@ -224,14 +253,17 @@
                 
                 addToRecent(product);
                 
-                const stockStatus = product.stock <= 0 ? 'Out of Stock' : product.stock < 20 ? `Only ${product.stock} left!` : `In Stock (${product.stock})`;
-                const stockColor = product.stock <= 0 ? '#ef4444' : product.stock < 20 ? '#f59e0b' : '#10b981';
+                const stockStatus = product.stock <= 0 ? 'Out of Stock' : 
+                                   product.stock < 10 ? `Only ${product.stock} left!` : 
+                                   `In Stock (${product.stock})`;
+                const stockColor = product.stock <= 0 ? '#dc2626' : product.stock < 10 ? '#f59e0b' : '#10b981';
                 
                 document.getElementById('productInfo').innerHTML = `
                     <div class="product-name">${escapeHtml(product.name)}</div>
-                    <div class="product-details">SKU: ${product.sku} | Category: ${product.category}</div>
-                    <div class="product-price">$${product.price.toFixed(2)}</div>
-                    <div style="color: ${stockColor};">${stockStatus}</div>
+                    <div class="product-details" style="font-size:13px; color:#6b7280;">SKU: ${product.sku} | ${product.category}</div>
+                    <div class="product-price">${formatPrice(product.priceUSD)}</div>
+                    <div class="price-converted">${getConversionNote(product.priceUSD)}</div>
+                    <div style="color: ${stockColor}; margin-top: 8px;">${stockStatus}</div>
                 `;
                 document.getElementById('resultCard').classList.add('show');
                 
@@ -247,6 +279,7 @@
                 }
                 
                 let cart = JSON.parse(localStorage.getItem('pos_cart') || '[]');
+                const priceToUse = currentCurrency === 'UGX' ? product.priceUSD * EXCHANGE_RATE : product.priceUSD;
                 const existing = cart.find(item => item.id === product.id);
                 
                 if (existing) {
@@ -257,9 +290,11 @@
                         id: product.id,
                         sku: product.sku,
                         name: product.name,
-                        price: product.price,
+                        price: priceToUse,
+                        priceUSD: product.priceUSD,
+                        currency: currentCurrency,
                         quantity: 1,
-                        lineTotal: product.price
+                        lineTotal: priceToUse
                     });
                 }
                 
@@ -270,20 +305,13 @@
             
             function checkProduct() {
                 const barcode = document.getElementById('barcodeInput').value.trim();
-                const sku = document.getElementById('skuInput').value.trim();
-                const query = barcode || sku;
-                
-                if (!query) {
-                    showToast('Enter a barcode or SKU', 'error');
+                if (!barcode) {
+                    showToast('Scan a barcode or enter SKU', 'error');
                     return;
                 }
-                
-                const product = findProduct(query);
+                const product = findProduct(barcode);
                 displayProduct(product);
-                
-                // Clear inputs
                 document.getElementById('barcodeInput').value = '';
-                document.getElementById('skuInput').value = '';
                 document.getElementById('barcodeInput').focus();
             }
             
@@ -292,7 +320,7 @@
                 toast.textContent = message;
                 toast.style.cssText = `
                     position: fixed; bottom: 20px; right: 20px;
-                    background: ${type === 'error' ? '#ef4444' : '#10b981'};
+                    background: ${type === 'error' ? '#dc2626' : '#10b981'};
                     color: white; padding: 12px 20px; border-radius: 12px;
                     z-index: 1000; animation: slideIn 0.3s ease;
                 `;
@@ -322,24 +350,43 @@
                             clearTimeout(scannerTimeout);
                             e.preventDefault();
                         }
-                    } else if (e.key.length === 1) {
+                    } else if (e.key.length === 1 && e.key.match(/[0-9a-zA-Z]/)) {
                         clearTimeout(scannerTimeout);
                         scannerBuffer += e.key;
-                        scannerTimeout = setTimeout(() => {
-                            scannerBuffer = '';
-                        }, 50);
+                        scannerTimeout = setTimeout(() => { scannerBuffer = ''; }, 100);
                     }
+                });
+            }
+            
+            function initCurrencySelector() {
+                document.querySelectorAll('.currency-btn').forEach(btn => {
+                    btn.classList.toggle('active', btn.dataset.currency === currentCurrency);
+                    btn.addEventListener('click', () => {
+                        currentCurrency = btn.dataset.currency;
+                        localStorage.setItem('pos_currency', currentCurrency);
+                        document.querySelectorAll('.currency-btn').forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+                        renderRecentChecks();
+                        if (document.getElementById('resultCard').classList.contains('show')) {
+                            const priceText = document.querySelector('.product-price')?.innerText;
+                            if (priceText) {
+                                const productId = recentChecks[0]?.id;
+                                if (productId) {
+                                    const product = products.find(p => p.id === productId);
+                                    if (product) displayProduct(product);
+                                }
+                            }
+                        }
+                        showToast(`Currency switched to ${currentCurrency === 'UGX' ? 'Ugandan Shilling' : 'US Dollar'}`, 'success');
+                    });
                 });
             }
             
             function init() {
                 loadRecentChecks();
                 setupBarcodeScanner();
-                document.getElementById('checkBtn').addEventListener('click', checkProduct);
+                initCurrencySelector();
                 document.getElementById('barcodeInput').addEventListener('keypress', (e) => {
-                    if (e.key === 'Enter') checkProduct();
-                });
-                document.getElementById('skuInput').addEventListener('keypress', (e) => {
                     if (e.key === 'Enter') checkProduct();
                 });
                 document.getElementById('clearHistoryBtn').addEventListener('click', () => {
