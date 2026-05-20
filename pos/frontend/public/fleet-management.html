@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nile POS - Fleet Management</title>
+    <title>Nile POS - Fleet Management | Register Control</title>
     <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: #f1f5f9;
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+            background: #f3f4f6;
             padding: 24px;
         }
         .container { max-width: 1400px; margin: 0 auto; }
@@ -18,25 +18,42 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 24px;
+            flex-wrap: wrap;
+            gap: 16px;
         }
-        h1 { font-size: 24px; color: #1e293b; }
+        h1 { font-size: 24px; color: #111827; }
         .back-btn {
             background: white;
-            border: 1px solid #e2e8f0;
+            border: 1px solid #e5e7eb;
             padding: 8px 16px;
             border-radius: 8px;
             text-decoration: none;
-            color: #475569;
+            color: #374151;
         }
+        .currency-switch {
+            display: flex;
+            gap: 8px;
+            background: #e5e7eb;
+            padding: 4px 12px;
+            border-radius: 100px;
+        }
+        .currency-opt {
+            padding: 4px 12px;
+            border-radius: 100px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+        .currency-opt.active { background: #2563eb; color: white; }
         .register-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
             gap: 20px;
         }
         .register-card {
             background: white;
             border-radius: 20px;
             overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
         .register-header {
             padding: 16px 20px;
@@ -44,23 +61,26 @@
             color: white;
             display: flex;
             justify-content: space-between;
+            align-items: center;
         }
         .register-body { padding: 20px; }
         .status-online { color: #10b981; font-weight: 600; }
         .status-offline { color: #ef4444; font-weight: 600; }
         .status-maintenance { color: #f59e0b; font-weight: 600; }
-        .stats-row { display: flex; justify-content: space-between; margin: 8px 0; }
+        .stats-row { display: flex; justify-content: space-between; margin: 12px 0; padding: 8px 0; border-bottom: 1px solid #f3f4f6; }
         .action-buttons { display: flex; gap: 8px; margin-top: 16px; }
         .action-btn {
             flex: 1;
-            padding: 8px;
+            padding: 10px;
             border: none;
             border-radius: 8px;
             cursor: pointer;
+            font-weight: 500;
         }
         .restart-btn { background: #f59e0b; color: white; }
-        .sync-btn { background: #667eea; color: white; }
+        .sync-btn { background: #2563eb; color: white; }
         .view-btn { background: #10b981; color: white; }
+        .sales-value { font-weight: 700; color: #2563eb; }
         @media (max-width: 768px) {
             .register-grid { grid-template-columns: 1fr; }
         }
@@ -69,7 +89,13 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>🚗 Register Fleet Management</h1>
+            <div style="display: flex; align-items: center; gap: 16px;">
+                <h1>🚗 Register Fleet Management</h1>
+                <div class="currency-switch">
+                    <span class="currency-opt" data-currency="USD">USD</span>
+                    <span class="currency-opt" data-currency="UGX">UGX</span>
+                </div>
+            </div>
             <a href="/index.html" class="back-btn">← Back</a>
         </div>
         <div class="register-grid" id="registerGrid"></div>
@@ -77,11 +103,21 @@
 
     <script>
         (function() {
+            const EXCHANGE_RATE = localStorage.getItem('exchange_rate') ? parseFloat(localStorage.getItem('exchange_rate')) : 3700;
+            let currentCurrency = localStorage.getItem('pos_currency') || 'UGX';
+            
+            function formatMoney(amountUSD) {
+                if (currentCurrency === 'UGX') {
+                    return `UGX ${Math.round(amountUSD * EXCHANGE_RATE).toLocaleString('en-UG')}`;
+                }
+                return `$${amountUSD.toFixed(2)}`;
+            }
+            
             let registers = [
-                { id: 1, name: 'Main Counter', location: 'Front Store', status: 'online', lastSync: '2024-01-15 14:30:22', currentCashier: 'John Doe', todaySales: 1247.50, transactions: 42 },
-                { id: 2, name: 'Mobile POS 1', location: 'Sales Floor', status: 'online', lastSync: '2024-01-15 14:28:15', currentCashier: 'Jane Smith', todaySales: 892.30, transactions: 28 },
-                { id: 3, name: 'Kiosk', location: 'Entrance', status: 'offline', lastSync: '2024-01-15 12:15:00', currentCashier: null, todaySales: 345.20, transactions: 15 },
-                { id: 4, name: 'Back Office', location: 'Office', status: 'maintenance', lastSync: '2024-01-14 18:00:00', currentCashier: null, todaySales: 0, transactions: 0 }
+                { id: 1, name: 'Main Counter', location: 'Front Store', status: 'online', lastSync: '2024-01-15 14:30:22', currentCashier: 'John Davies', todaySalesUSD: 1247.50, transactions: 42 },
+                { id: 2, name: 'Mobile POS 1', location: 'Sales Floor', status: 'online', lastSync: '2024-01-15 14:28:15', currentCashier: 'Sarah O\'Brien', todaySalesUSD: 892.30, transactions: 28 },
+                { id: 3, name: 'Kiosk', location: 'Entrance', status: 'offline', lastSync: '2024-01-15 12:15:00', currentCashier: null, todaySalesUSD: 345.20, transactions: 15 },
+                { id: 4, name: 'Back Office', location: 'Office', status: 'maintenance', lastSync: '2024-01-14 18:00:00', currentCashier: null, todaySalesUSD: 0, transactions: 0 }
             ];
 
             function renderRegisters() {
@@ -89,15 +125,15 @@
                 grid.innerHTML = registers.map(reg => `
                     <div class="register-card">
                         <div class="register-header">
-                            <span>${reg.name}</span>
+                            <span style="font-weight:600;">${reg.name}</span>
                             <span class="status-${reg.status}">${reg.status.toUpperCase()}</span>
                         </div>
                         <div class="register-body">
-                            <div class="stats-row"><span>Location:</span><span>${reg.location}</span></div>
-                            <div class="stats-row"><span>Last Sync:</span><span>${reg.lastSync}</span></div>
-                            <div class="stats-row"><span>Cashier:</span><span>${reg.currentCashier || '—'}</span></div>
-                            <div class="stats-row"><span>Today's Sales:</span><span>$${reg.todaySales.toFixed(2)}</span></div>
-                            <div class="stats-row"><span>Transactions:</span><span>${reg.transactions}</span></div>
+                            <div class="stats-row"><span>📍 Location:</span><span>${reg.location}</span></div>
+                            <div class="stats-row"><span>🕐 Last Sync:</span><span>${reg.lastSync}</span></div>
+                            <div class="stats-row"><span>👤 Cashier:</span><span>${reg.currentCashier || '—'}</span></div>
+                            <div class="stats-row"><span>💰 Today's Sales:</span><span class="sales-value">${formatMoney(reg.todaySalesUSD)}</span></div>
+                            <div class="stats-row"><span>📊 Transactions:</span><span>${reg.transactions}</span></div>
                             <div class="action-buttons">
                                 <button class="action-btn restart-btn" data-id="${reg.id}">⟳ Restart</button>
                                 <button class="action-btn sync-btn" data-id="${reg.id}">🔄 Sync</button>
@@ -108,35 +144,38 @@
                 `).join('');
                 
                 document.querySelectorAll('.restart-btn').forEach(btn => {
-                    btn.addEventListener('click', () => {
-                        const id = parseInt(btn.dataset.id);
-                        alert(`Restarting register ${id}...`);
-                    });
+                    btn.addEventListener('click', () => { alert(`Restarting register ${btn.dataset.id}...`); });
                 });
                 document.querySelectorAll('.sync-btn').forEach(btn => {
-                    btn.addEventListener('click', () => {
-                        const id = parseInt(btn.dataset.id);
-                        alert(`Syncing register ${id}...`);
-                    });
+                    btn.addEventListener('click', () => { alert(`Syncing register ${btn.dataset.id}...`); });
                 });
                 document.querySelectorAll('.view-btn').forEach(btn => {
                     btn.addEventListener('click', () => {
                         const id = parseInt(btn.dataset.id);
                         const reg = registers.find(r => r.id === id);
-                        alert(`Register ${reg.name}\nStatus: ${reg.status}\nSales: $${reg.todaySales}\nTransactions: ${reg.transactions}`);
+                        alert(`Register ${reg.name}\nStatus: ${reg.status}\nSales: ${formatMoney(reg.todaySalesUSD)}\nTransactions: ${reg.transactions}`);
+                    });
+                });
+            }
+
+            function initCurrencySelector() {
+                document.querySelectorAll('.currency-opt').forEach(opt => {
+                    opt.classList.toggle('active', opt.dataset.currency === currentCurrency);
+                    opt.addEventListener('click', () => {
+                        currentCurrency = opt.dataset.currency;
+                        localStorage.setItem('pos_currency', currentCurrency);
+                        document.querySelectorAll('.currency-opt').forEach(o => o.classList.remove('active'));
+                        opt.classList.add('active');
+                        renderRegisters();
                     });
                 });
             }
             
             renderRegisters();
+            initCurrencySelector();
             
-            // Auto-refresh every 30 seconds
             setInterval(() => {
-                // Simulate status changes
-                registers = registers.map(reg => ({
-                    ...reg,
-                    lastSync: new Date().toLocaleString()
-                }));
+                registers = registers.map(reg => ({ ...reg, lastSync: new Date().toLocaleString() }));
                 renderRegisters();
             }, 30000);
         })();
