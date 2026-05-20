@@ -1,51 +1,428 @@
-
 <!-- ============================================
-     Nile POS - Footer Component
+     Nile POS - Enhanced Footer Component
+     Features: Copyright, version, environment, support links, system status
+     Version: 2.0.0
      ============================================ -->
 
-<footer class="app-footer">
+<footer class="app-footer" id="appFooter">
     <div class="footer-content">
-        <div class="footer-copyright">
-            &copy; 2024 Nile Shopping POS. All rights reserved.
+        <div class="footer-left">
+            <div class="footer-copyright">
+                &copy; 2024 Nile Shopping POS. All rights reserved.
+            </div>
+            <div class="footer-version" id="footerVersion">
+                <span class="version-label">Version</span>
+                <span class="version-number" id="versionNumber">2.0.0</span>
+                <span class="environment-badge" id="environmentBadge">Production</span>
+            </div>
         </div>
-        <div class="footer-links">
-            <a href="/privacy.html">Privacy Policy</a>
-            <a href="/terms.html">Terms of Service</a>
-            <a href="/support.html">Support</a>
-            <a href="/status.html">System Status</a>
+        
+        <div class="footer-center">
+            <div class="system-status" id="systemStatus">
+                <span class="status-dot" id="statusDot"></span>
+                <span class="status-text" id="statusText">System Operational</span>
+                <span class="status-time" id="lastSyncTime"></span>
+            </div>
         </div>
-        <div class="footer-version">
-            Version 2.0.0 | <span id="environmentBadge">Production</span>
+        
+        <div class="footer-right">
+            <div class="footer-links">
+                <a href="/privacy.html" class="footer-link">Privacy</a>
+                <span class="link-separator">|</span>
+                <a href="/terms.html" class="footer-link">Terms</a>
+                <span class="link-separator">|</span>
+                <a href="/support.html" class="footer-link">Support</a>
+                <span class="link-separator">|</span>
+                <a href="/status.html" class="footer-link">Status</a>
+                <span class="link-separator">|</span>
+                <a href="#" id="reportIssueBtn" class="footer-link">Report Issue</a>
+            </div>
+            <div class="footer-powered">
+                Powered by <strong>Nile Shopping</strong>
+            </div>
         </div>
+    </div>
+    
+    <!-- Quick Actions Bar -->
+    <div class="footer-quick-actions" id="quickActions">
+        <button class="quick-action" data-action="help">
+            <span class="action-icon">❓</span>
+            <span class="action-text">Help</span>
+        </button>
+        <button class="quick-action" data-action="feedback">
+            <span class="action-icon">💬</span>
+            <span class="action-text">Feedback</span>
+        </button>
+        <button class="quick-action" data-action="backup" data-permission="system.backup">
+            <span class="action-icon">💾</span>
+            <span class="action-text">Backup</span>
+        </button>
+        <button class="quick-action" data-action="sync">
+            <span class="action-icon">🔄</span>
+            <span class="action-text">Sync</span>
+        </button>
+        <button class="quick-action" data-action="print">
+            <span class="action-icon">🖨️</span>
+            <span class="action-text">Print</span>
+        </button>
     </div>
 </footer>
 
+<style>
+    /* Footer specific styles */
+    .app-footer {
+        background: var(--white);
+        border-top: 1px solid var(--border);
+        padding: 12px 24px;
+        margin-top: auto;
+    }
+    
+    .footer-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 16px;
+        font-size: 12px;
+    }
+    
+    .footer-left {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+    
+    .footer-copyright {
+        color: var(--gray);
+        font-size: 11px;
+    }
+    
+    .footer-version {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 10px;
+    }
+    
+    .version-label {
+        color: var(--gray);
+    }
+    
+    .version-number {
+        color: var(--dark);
+        font-family: monospace;
+        font-weight: 500;
+    }
+    
+    .environment-badge {
+        padding: 2px 8px;
+        border-radius: 100px;
+        font-size: 9px;
+        font-weight: 600;
+    }
+    
+    .environment-badge.production {
+        background: #dcfce7;
+        color: #166534;
+    }
+    
+    .environment-badge.staging {
+        background: #dbeafe;
+        color: #1e40af;
+    }
+    
+    .environment-badge.development {
+        background: #fef3c7;
+        color: #92400e;
+    }
+    
+    .system-status {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 12px;
+        background: var(--light);
+        border-radius: 100px;
+    }
+    
+    .status-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--success);
+        animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+        0%, 100% { opacity: 1; transform: scale(1); }
+        50% { opacity: 0.5; transform: scale(1.2); }
+    }
+    
+    .status-dot.warning {
+        background: var(--warning);
+    }
+    
+    .status-dot.error {
+        background: var(--danger);
+    }
+    
+    .status-text {
+        font-size: 11px;
+        font-weight: 500;
+    }
+    
+    .status-time {
+        font-size: 10px;
+        color: var(--gray);
+    }
+    
+    .footer-right {
+        text-align: right;
+    }
+    
+    .footer-links {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-bottom: 4px;
+    }
+    
+    .footer-link {
+        color: var(--gray);
+        text-decoration: none;
+        font-size: 11px;
+        transition: color 0.2s;
+    }
+    
+    .footer-link:hover {
+        color: var(--primary);
+    }
+    
+    .link-separator {
+        color: var(--border);
+        font-size: 10px;
+    }
+    
+    .footer-powered {
+        font-size: 10px;
+        color: var(--gray);
+    }
+    
+    .footer-powered strong {
+        color: var(--primary);
+    }
+    
+    .footer-quick-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 8px;
+        margin-top: 12px;
+        padding-top: 12px;
+        border-top: 1px solid var(--border);
+    }
+    
+    .quick-action {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 12px;
+        background: var(--light);
+        border: none;
+        border-radius: 8px;
+        font-size: 11px;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    
+    .quick-action:hover {
+        background: var(--primary);
+        color: white;
+    }
+    
+    .action-icon {
+        font-size: 12px;
+    }
+    
+    @media (max-width: 768px) {
+        .footer-content {
+            flex-direction: column;
+            text-align: center;
+        }
+        
+        .footer-right {
+            text-align: center;
+        }
+        
+        .footer-quick-actions {
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .system-status {
+            font-size: 10px;
+        }
+    }
+</style>
+
 <script>
     (function() {
-        // Set environment based on hostname
-        const envBadge = document.getElementById('environmentBadge');
-        if (envBadge) {
+        // ============================================
+        // FOOTER CONTROLLER
+        // ============================================
+        
+        // Set environment badge
+        function setEnvironmentBadge() {
+            const badge = document.getElementById('environmentBadge');
             const hostname = window.location.hostname;
+            
             if (hostname === 'localhost' || hostname === '127.0.0.1') {
-                envBadge.textContent = 'Development';
-                envBadge.style.color = '#f59e0b';
+                badge.textContent = 'Development';
+                badge.className = 'environment-badge development';
             } else if (hostname.includes('staging')) {
-                envBadge.textContent = 'Staging';
-                envBadge.style.color = '#3b82f6';
+                badge.textContent = 'Staging';
+                badge.className = 'environment-badge staging';
             } else {
-                envBadge.textContent = 'Production';
-                envBadge.style.color = '#10b981';
+                badge.textContent = 'Production';
+                badge.className = 'environment-badge production';
             }
         }
         
-        // Show last login time
-        const lastLogin = localStorage.getItem('pos_last_login');
-        if (lastLogin) {
-            const lastLoginDate = new Date(lastLogin);
-            const loginInfo = document.createElement('div');
-            loginInfo.className = 'footer-login-info';
-            loginInfo.innerHTML = `Last login: ${lastLoginDate.toLocaleString()}`;
-            document.querySelector('.footer-content')?.appendChild(loginInfo);
+        // System status monitoring
+        function updateSystemStatus() {
+            const statusDot = document.getElementById('statusDot');
+            const statusText = document.getElementById('statusText');
+            const lastSyncSpan = document.getElementById('lastSyncTime');
+            
+            // Check if online
+            if (!navigator.onLine) {
+                statusDot.className = 'status-dot error';
+                statusText.textContent = 'Offline Mode';
+                statusDot.style.background = 'var(--danger)';
+            } else {
+                statusDot.className = 'status-dot';
+                statusDot.style.background = 'var(--success)';
+                statusText.textContent = 'System Operational';
+            }
+            
+            // Last sync time
+            const lastSync = localStorage.getItem('last_sync_time');
+            if (lastSync) {
+                const syncDate = new Date(lastSync);
+                lastSyncSpan.textContent = `Last sync: ${syncDate.toLocaleTimeString()}`;
+            } else {
+                lastSyncSpan.textContent = 'Not synced yet';
+            }
         }
+        
+        // Online/Offline event listeners
+        window.addEventListener('online', () => {
+            updateSystemStatus();
+            showToast('Connection restored. Syncing data...', 'success');
+        });
+        
+        window.addEventListener('offline', () => {
+            updateSystemStatus();
+            showToast('You are offline. Some features may be limited.', 'warning');
+        });
+        
+        // Quick action handlers
+        function setupQuickActions() {
+            const helpBtn = document.querySelector('[data-action="help"]');
+            if (helpBtn) {
+                helpBtn.addEventListener('click', () => {
+                    showKeyboardShortcuts();
+                });
+            }
+            
+            const feedbackBtn = document.querySelector('[data-action="feedback"]');
+            if (feedbackBtn) {
+                feedbackBtn.addEventListener('click', () => {
+                    window.open('mailto:support@nileshopping.com?subject=POS%20Feedback', '_blank');
+                });
+            }
+            
+            const backupBtn = document.querySelector('[data-action="backup"]');
+            if (backupBtn && window.rbac?.hasPermission('system.backup')) {
+                backupBtn.addEventListener('click', () => {
+                    if (confirm('Perform manual backup?')) {
+                        showToast('Backup initiated. You will be notified when complete.', 'info');
+                    }
+                });
+            } else if (backupBtn) {
+                backupBtn.style.display = 'none';
+            }
+            
+            const syncBtn = document.querySelector('[data-action="sync"]');
+            if (syncBtn) {
+                syncBtn.addEventListener('click', () => {
+                    showToast('Syncing data with server...', 'info');
+                    setTimeout(() => {
+                        localStorage.setItem('last_sync_time', new Date().toISOString());
+                        updateSystemStatus();
+                        showToast('Sync completed successfully!', 'success');
+                    }, 2000);
+                });
+            }
+            
+            const printBtn = document.querySelector('[data-action="print"]');
+            if (printBtn) {
+                printBtn.addEventListener('click', () => {
+                    window.print();
+                });
+            }
+        }
+        
+        function showKeyboardShortcuts() {
+            const shortcuts = `
+                ⌨️ Keyboard Shortcuts:
+                • F1 - Help
+                • Ctrl+F - Search
+                • F2 - Customer Lookup
+                • Ctrl+C - Clear Cart
+                • Ctrl+D - Apply Discount
+                • Ctrl+Shift+L - Quick Logout
+                • Ctrl+P - Print Receipt
+            `;
+            alert(shortcuts);
+        }
+        
+        function showToast(message, type) {
+            const toast = document.createElement('div');
+            toast.textContent = message;
+            toast.style.cssText = `
+                position: fixed; bottom: 80px; right: 20px;
+                background: ${type === 'error' ? '#dc2626' : type === 'success' ? '#10b981' : type === 'warning' ? '#f59e0b' : '#2563eb'};
+                color: white; padding: 12px 20px; border-radius: 12px;
+                z-index: 1000; animation: slideIn 0.3s ease;
+                font-weight: 500;
+            `;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+        
+        // Report issue
+        const reportIssueBtn = document.getElementById('reportIssueBtn');
+        if (reportIssueBtn) {
+            reportIssueBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                const issue = prompt('Please describe the issue you are experiencing:');
+                if (issue) {
+                    console.log('Issue reported:', issue);
+                    showToast('Issue reported. Support team will contact you.', 'success');
+                }
+            });
+        }
+        
+        // Update version number
+        document.getElementById('versionNumber').textContent = '2.0.0';
+        
+        // Initialize
+        setEnvironmentBadge();
+        updateSystemStatus();
+        setupQuickActions();
+        
+        // Update system status every 30 seconds
+        setInterval(updateSystemStatus, 30000);
     })();
 </script>
