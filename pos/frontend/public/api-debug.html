@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nile POS - API Debugger</title>
+    <title>Nile POS - API Debug Console | Developer Tools</title>
     <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
             background: #0f172a;
             padding: 24px;
         }
@@ -19,16 +19,42 @@
             align-items: center;
             margin-bottom: 24px;
             color: white;
+            flex-wrap: wrap;
+            gap: 16px;
         }
-        h1 { font-size: 24px; }
+        h1 { font-size: 24px; display: flex; align-items: center; gap: 8px; }
+        .dev-badge {
+            background: #f59e0b;
+            color: #1e293b;
+            padding: 4px 12px;
+            border-radius: 100px;
+            font-size: 11px;
+            font-weight: 600;
+        }
         .back-btn {
             background: #1e293b;
             border: 1px solid #334155;
             padding: 8px 16px;
             border-radius: 8px;
+            cursor: pointer;
             text-decoration: none;
             color: #94a3b8;
         }
+        .currency-switch {
+            display: flex;
+            gap: 8px;
+            background: #1e293b;
+            padding: 4px 12px;
+            border-radius: 100px;
+        }
+        .currency-opt {
+            padding: 4px 12px;
+            border-radius: 100px;
+            cursor: pointer;
+            font-size: 13px;
+            color: #94a3b8;
+        }
+        .currency-opt.active { background: #10b981; color: white; }
         .debug-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -55,8 +81,14 @@
             border: 1px solid #334155;
             border-radius: 8px;
             color: #f1f5f9;
-            font-family: monospace;
+            font-family: 'Fira Code', monospace;
+            font-size: 13px;
         }
+        .endpoint-group {
+            display: flex;
+            gap: 12px;
+        }
+        .endpoint-group input { flex: 1; margin-bottom: 0; }
         .send-btn {
             width: 100%;
             padding: 12px;
@@ -66,12 +98,13 @@
             border-radius: 8px;
             cursor: pointer;
             font-weight: 600;
+            margin-top: 16px;
         }
         .response-area {
             background: #0f172a;
             border-radius: 8px;
             padding: 16px;
-            font-family: monospace;
+            font-family: 'Fira Code', monospace;
             font-size: 12px;
             white-space: pre-wrap;
             color: #e2e8f0;
@@ -80,14 +113,32 @@
         }
         .status-badge {
             display: inline-block;
-            padding: 4px 8px;
+            padding: 4px 10px;
             border-radius: 100px;
             font-size: 11px;
             margin-left: 12px;
         }
         .status-200 { background: #10b981; color: white; }
-        .status-400 { background: #f59e0b; color: white; }
+        .status-400 { background: #f59e0b; color: #1e293b; }
         .status-401 { background: #ef4444; color: white; }
+        .status-404 { background: #6b7280; color: white; }
+        .quick-examples {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+        .example-btn {
+            padding: 6px 12px;
+            background: #334155;
+            border: none;
+            border-radius: 6px;
+            color: #94a3b8;
+            cursor: pointer;
+            font-size: 11px;
+            font-family: monospace;
+        }
+        .example-btn:hover { background: #475569; color: white; }
         @media (max-width: 768px) {
             .debug-grid { grid-template-columns: 1fr; }
         }
@@ -96,21 +147,36 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>🔧 API Debug Console</h1>
-            <a href="/index.html" class="back-btn">← Back</a>
+            <div style="display: flex; align-items: center; gap: 16px;">
+                <h1>🔧 API Debug Console <span class="dev-badge">Developer Mode</span></h1>
+                <div class="currency-switch">
+                    <span class="currency-opt" data-currency="USD">USD</span>
+                    <span class="currency-opt" data-currency="UGX">UGX</span>
+                </div>
+            </div>
+            <a href="/index.html" class="back-btn">← Back to Register</a>
         </div>
 
         <div class="debug-grid">
             <div class="request-panel">
                 <div class="panel-header">Request Builder</div>
                 <div class="panel-body">
+                    <div class="quick-examples">
+                        <span style="color:#64748b; font-size:11px;">Quick Examples:</span>
+                        <button class="example-btn" data-method="GET" data-url="/api/v1/products/list">GET /products/list</button>
+                        <button class="example-btn" data-method="GET" data-url="/api/v1/products/search?q=shirt">GET /products/search?q=shirt</button>
+                        <button class="example-btn" data-method="POST" data-url="/api/v1/auth/login" data-body='{"email":"admin@nile.com","password":"Admin123!"}'>POST /auth/login</button>
+                        <button class="example-btn" data-method="POST" data-url="/api/v1/transactions/create" data-body='{"items":[{"product_id":1,"quantity":2}],"payments":[{"type":"cash","amount":60}]}'>POST /transactions/create</button>
+                    </div>
                     <select id="method">
                         <option value="GET">GET</option>
                         <option value="POST">POST</option>
                         <option value="PUT">PUT</option>
                         <option value="DELETE">DELETE</option>
                     </select>
-                    <input type="text" id="endpoint" placeholder="/api/v1/..." value="/api/v1/products">
+                    <div class="endpoint-group">
+                        <input type="text" id="endpoint" placeholder="/api/v1/..." value="/api/v1/products/list">
+                    </div>
                     <textarea id="requestBody" rows="8" placeholder='{"key": "value"}'></textarea>
                     <button id="sendRequest" class="send-btn">🚀 Send Request</button>
                 </div>
@@ -120,12 +186,14 @@
                 <div class="panel-header">
                     Response
                     <span id="statusBadge" class="status-badge"></span>
+                    <span id="timeBadge" style="margin-left:8px; font-size:11px; color:#64748b;"></span>
                 </div>
                 <div class="panel-body">
                     <div class="response-area" id="responseArea">Ready to send requests...</div>
                     <div style="margin-top: 16px; display: flex; gap: 12px;">
-                        <button id="copyResponse" style="flex:1; padding:8px; background:#475569; color:white; border:none; border-radius:8px;">📋 Copy</button>
-                        <button id="clearResponse" style="flex:1; padding:8px; background:#334155; color:white; border:none; border-radius:8px;">🗑️ Clear</button>
+                        <button id="copyResponse" style="flex:1; padding:8px; background:#475569; color:white; border:none; border-radius:8px; cursor:pointer;">📋 Copy</button>
+                        <button id="clearResponse" style="flex:1; padding:8px; background:#334155; color:white; border:none; border-radius:8px; cursor:pointer;">🗑️ Clear</button>
+                        <button id="formatResponse" style="flex:1; padding:8px; background:#2563eb; color:white; border:none; border-radius:8px; cursor:pointer;">🎨 Format JSON</button>
                     </div>
                 </div>
             </div>
@@ -134,76 +202,191 @@
 
     <script>
         (function() {
+            const EXCHANGE_RATE = localStorage.getItem('exchange_rate') ? parseFloat(localStorage.getItem('exchange_rate')) : 3700;
+            let currentCurrency = localStorage.getItem('pos_currency') || 'UGX';
+            
+            // Mock API responses with currency conversion
             const mockResponses = {
-                'GET:/api/v1/products': { status: 200, body: { products: [{ id: 1, name: 'Test Product', price: 29.99 }] } },
-                'POST:/api/v1/auth/login': { status: 200, body: { token: 'jwt_token_example', user: { id: 1, name: 'Admin' } } },
-                'POST:/api/v1/transactions/create': { status: 201, body: { transaction_id: 'TRX-001', status: 'completed' } }
+                'GET:/api/v1/products/list': {
+                    status: 200,
+                    body: {
+                        success: true,
+                        data: {
+                            products: [
+                                { id: 1, sku: 'NLE-APR-001', name: 'Classic T-Shirt', price_usd: 29.99, price_ugx: 110963, stock: 48 },
+                                { id: 2, sku: 'NLE-APR-002', name: 'Slim Fit Jeans', price_usd: 79.99, price_ugx: 295963, stock: 35 }
+                            ],
+                            pagination: { current_page: 1, per_page: 20, total: 2, total_pages: 1 }
+                        }
+                    }
+                },
+                'POST:/api/v1/auth/login': {
+                    status: 200,
+                    body: {
+                        success: true,
+                        data: {
+                            access_token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxLCJlbWFpbCI6ImFkbWluQG5pbGUuY29tIiwicm9sZSI6ImFkbWluIn0.demo',
+                            token_type: 'Bearer',
+                            expires_in: 3600,
+                            user: { id: 1, email: 'admin@nile.com', name: 'Admin User', role: 'admin' }
+                        }
+                    }
+                },
+                'POST:/api/v1/transactions/create': {
+                    status: 201,
+                    body: {
+                        success: true,
+                        data: {
+                            transaction_id: 12345,
+                            transaction_number: 'TRX-20240120-001',
+                            total_usd: 59.98,
+                            total_ugx: Math.round(59.98 * EXCHANGE_RATE),
+                            change: 0.02,
+                            receipt_url: '/receipts/TRX-20240120-001'
+                        }
+                    }
+                },
+                'GET:/api/v1/health': {
+                    status: 200,
+                    body: { success: true, data: { status: 'healthy', timestamp: new Date().toISOString(), version: '2.0.0' } }
+                }
             };
+            
+            function formatMoneyUGX(amountUSD) {
+                return `UGX ${Math.round(amountUSD * EXCHANGE_RATE).toLocaleString('en-UG')}`;
+            }
+            
+            function injectCurrencyDisplay(response) {
+                if (response.data && response.data.total_usd) {
+                    response.data.total_ugx_display = formatMoneyUGX(response.data.total_usd);
+                }
+                if (response.data && response.data.products) {
+                    response.data.products = response.data.products.map(p => ({
+                        ...p,
+                        price_ugx_display: formatMoneyUGX(p.price_usd)
+                    }));
+                }
+                return response;
+            }
             
             async function sendRequest() {
                 const method = document.getElementById('method').value;
-                const endpoint = document.getElementById('endpoint').value;
+                let endpoint = document.getElementById('endpoint').value;
                 const requestBody = document.getElementById('requestBody').value;
                 
                 const responseArea = document.getElementById('responseArea');
                 const statusBadge = document.getElementById('statusBadge');
+                const timeBadge = document.getElementById('timeBadge');
+                const startTime = performance.now();
                 
                 responseArea.innerHTML = 'Sending request...';
+                statusBadge.textContent = '';
+                timeBadge.textContent = '';
                 
-                // Simulate API call
+                // Parse query parameters for mock matching
+                const baseEndpoint = endpoint.split('?')[0];
+                const mockKey = `${method}:${baseEndpoint}`;
+                const mock = mockResponses[mockKey];
+                
                 setTimeout(() => {
-                    const key = `${method}:${endpoint}`;
-                    const mock = mockResponses[key];
+                    const endTime = performance.now();
+                    const duration = (endTime - startTime).toFixed(2);
+                    timeBadge.textContent = `${duration}ms`;
                     
                     if (mock) {
                         statusBadge.textContent = `HTTP ${mock.status}`;
                         statusBadge.className = `status-badge status-${mock.status}`;
-                        responseArea.innerHTML = JSON.stringify(mock.body, null, 2);
+                        let responseBody = mock.body;
+                        if (currentCurrency === 'UGX') {
+                            responseBody = injectCurrencyDisplay(JSON.parse(JSON.stringify(mock.body)));
+                        }
+                        responseArea.innerHTML = JSON.stringify(responseBody, null, 2);
                     } else {
                         statusBadge.textContent = 'HTTP 404';
-                        statusBadge.className = 'status-badge status-400';
-                        responseArea.innerHTML = JSON.stringify({ error: 'Endpoint not found', message: 'No mock response configured for this endpoint' }, null, 2);
+                        statusBadge.className = 'status-badge status-404';
+                        responseArea.innerHTML = JSON.stringify({
+                            success: false,
+                            error: 'Endpoint not found',
+                            message: `No mock response configured for ${method} ${endpoint}`,
+                            hint: 'Check the endpoint path or add a mock response'
+                        }, null, 2);
                     }
-                }, 500);
+                }, 300);
             }
             
             function copyResponse() {
                 const responseText = document.getElementById('responseArea').innerText;
                 navigator.clipboard.writeText(responseText);
-                alert('Response copied to clipboard');
+                showToast('Response copied to clipboard', 'success');
+            }
+            
+            function formatJSON() {
+                const responseText = document.getElementById('responseArea').innerText;
+                try {
+                    const parsed = JSON.parse(responseText);
+                    document.getElementById('responseArea').innerHTML = JSON.stringify(parsed, null, 2);
+                    showToast('JSON formatted', 'success');
+                } catch (e) {
+                    showToast('Not valid JSON', 'error');
+                }
+            }
+            
+            function showToast(message, type) {
+                const toast = document.createElement('div');
+                toast.textContent = message;
+                toast.style.cssText = `
+                    position: fixed; bottom: 20px; right: 20px;
+                    background: ${type === 'error' ? '#dc2626' : '#10b981'};
+                    color: white; padding: 12px 20px; border-radius: 12px;
+                    z-index: 1000; animation: slideIn 0.3s ease;
+                `;
+                document.body.appendChild(toast);
+                setTimeout(() => toast.remove(), 3000);
+            }
+            
+            function initCurrencySelector() {
+                document.querySelectorAll('.currency-opt').forEach(opt => {
+                    opt.classList.toggle('active', opt.dataset.currency === currentCurrency);
+                    opt.addEventListener('click', () => {
+                        currentCurrency = opt.dataset.currency;
+                        localStorage.setItem('pos_currency', currentCurrency);
+                        document.querySelectorAll('.currency-opt').forEach(o => o.classList.remove('active'));
+                        opt.classList.add('active');
+                        showToast(`Currency switched to ${currentCurrency === 'UGX' ? 'UGX' : 'USD'}`, 'success');
+                    });
+                });
+            }
+            
+            function initExamples() {
+                document.querySelectorAll('.example-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        document.getElementById('method').value = btn.dataset.method;
+                        document.getElementById('endpoint').value = btn.dataset.url;
+                        if (btn.dataset.body) {
+                            document.getElementById('requestBody').value = JSON.stringify(JSON.parse(btn.dataset.body), null, 2);
+                        } else {
+                            document.getElementById('requestBody').value = '';
+                        }
+                    });
+                });
             }
             
             function init() {
+                initCurrencySelector();
+                initExamples();
                 document.getElementById('sendRequest').addEventListener('click', sendRequest);
                 document.getElementById('copyResponse').addEventListener('click', copyResponse);
                 document.getElementById('clearResponse').addEventListener('click', () => {
                     document.getElementById('responseArea').innerHTML = 'Ready to send requests...';
                     document.getElementById('statusBadge').textContent = '';
+                    document.getElementById('timeBadge').textContent = '';
                 });
+                document.getElementById('formatResponse').addEventListener('click', formatJSON);
                 
-                // Example endpoints
-                const examples = [
-                    { method: 'GET', url: '/api/v1/products' },
-                    { method: 'POST', url: '/api/v1/auth/login', body: '{"email":"admin@nile.com","password":"admin123"}' },
-                    { method: 'POST', url: '/api/v1/transactions/create', body: '{"items":[{"id":1,"quantity":2}]}' }
-                ];
-                
-                // Add quick example buttons
-                const exampleContainer = document.createElement('div');
-                exampleContainer.style.marginBottom = '16px';
-                exampleContainer.innerHTML = '<div style="color:#94a3b8; margin-bottom:8px;">Quick Examples:</div>';
-                examples.forEach(ex => {
-                    const btn = document.createElement('button');
-                    btn.textContent = `${ex.method} ${ex.url}`;
-                    btn.style.cssText = 'margin-right:8px; margin-bottom:8px; padding:6px 12px; background:#334155; border:none; border-radius:6px; color:white; cursor:pointer;';
-                    btn.addEventListener('click', () => {
-                        document.getElementById('method').value = ex.method;
-                        document.getElementById('endpoint').value = ex.url;
-                        if (ex.body) document.getElementById('requestBody').value = ex.body;
-                    });
-                    exampleContainer.appendChild(btn);
+                // Enter key shortcut
+                document.getElementById('endpoint').addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') sendRequest();
                 });
-                document.querySelector('.request-panel .panel-body').insertBefore(exampleContainer, document.getElementById('method'));
             }
             
             init();
