@@ -1,0 +1,88 @@
+<!-- ============================================
+     Nile POS - Hero Section Component
+     For dashboard and landing pages
+     ============================================ -->
+
+<section class="hero-section" id="heroSection">
+    <div class="hero-content">
+        <h1 class="hero-title" id="heroTitle">Welcome Back, <span id="heroUserName">User</span>!</h1>
+        <p class="hero-subtitle" id="heroSubtitle">Here's what's happening with your business today.</p>
+        
+        <div class="hero-stats" id="heroStats">
+            <div class="hero-stat">
+                <div class="hero-stat-value" id="statTodaySales">$0</div>
+                <div class="hero-stat-label">Today's Sales</div>
+            </div>
+            <div class="hero-stat">
+                <div class="hero-stat-value" id="statTransactions">0</div>
+                <div class="hero-stat-label">Transactions</div>
+            </div>
+            <div class="hero-stat">
+                <div class="hero-stat-value" id="statCustomers">0</div>
+                <div class="hero-stat-label">Active Customers</div>
+            </div>
+            <div class="hero-stat">
+                <div class="hero-stat-value" id="statLowStock">0</div>
+                <div class="hero-stat-label">Low Stock Alerts</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+    (function() {
+        // Load user data
+        const user = JSON.parse(localStorage.getItem('pos_user') || '{}');
+        const userNameSpan = document.getElementById('heroUserName');
+        if (userNameSpan) userNameSpan.textContent = user.name?.split(' ')[0] || 'User';
+        
+        // Load stats from API or localStorage
+        function loadStats() {
+            // Demo stats - replace with actual API call
+            const todaySales = localStorage.getItem('stats_today_sales') || '1247.50';
+            const transactions = localStorage.getItem('stats_transactions') || '42';
+            const customers = localStorage.getItem('stats_customers') || '156';
+            const lowStock = localStorage.getItem('stats_low_stock') || '8';
+            
+            const currency = localStorage.getItem('pos_currency') || 'UGX';
+            const exchangeRate = 3700;
+            
+            const displaySales = currency === 'UGX' 
+                ? `UGX ${Math.round(parseFloat(todaySales) * exchangeRate).toLocaleString()}`
+                : `$${parseFloat(todaySales).toFixed(2)}`;
+            
+            const todaySalesEl = document.getElementById('statTodaySales');
+            if (todaySalesEl) todaySalesEl.textContent = displaySales;
+            
+            const transactionsEl = document.getElementById('statTransactions');
+            if (transactionsEl) transactionsEl.textContent = transactions;
+            
+            const customersEl = document.getElementById('statCustomers');
+            if (customersEl) customersEl.textContent = customers;
+            
+            const lowStockEl = document.getElementById('statLowStock');
+            if (lowStockEl) {
+                lowStockEl.textContent = lowStock;
+                if (parseInt(lowStock) > 0) {
+                    lowStockEl.style.color = '#dc2626';
+                }
+            }
+        }
+        
+        loadStats();
+        
+        // Auto-refresh stats every 30 seconds
+        setInterval(loadStats, 30000);
+        
+        // Show greeting based on time of day
+        const hour = new Date().getHours();
+        const greetingEl = document.getElementById('heroTitle');
+        if (greetingEl) {
+            let greeting = 'Good ';
+            if (hour < 12) greeting += 'Morning';
+            else if (hour < 18) greeting += 'Afternoon';
+            else greeting += 'Evening';
+            greetingEl.innerHTML = `${greeting}, <span id="heroUserName">${user.name?.split(' ')[0] || 'User'}</span>!`;
+        }
+    })();
+</script>
