@@ -1,16 +1,15 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nile POS - Time Clock</title>
+    <title>Nile POS - Time Clock | Staff Management</title>
     <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: #f1f5f9;
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+            background: #f3f4f6;
             padding: 24px;
         }
         .container { max-width: 1200px; margin: 0 auto; }
@@ -22,36 +21,51 @@
             flex-wrap: wrap;
             gap: 16px;
         }
-        h1 { font-size: 24px; color: #1e293b; }
+        h1 { font-size: 24px; color: #111827; }
         .back-btn {
             background: white;
-            border: 1px solid #e2e8f0;
+            border: 1px solid #e5e7eb;
             padding: 8px 16px;
             border-radius: 8px;
             cursor: pointer;
             text-decoration: none;
-            color: #475569;
+            color: #374151;
         }
+        .currency-switch {
+            display: flex;
+            gap: 8px;
+            background: #e5e7eb;
+            padding: 4px 12px;
+            border-radius: 100px;
+        }
+        .currency-opt {
+            padding: 4px 12px;
+            border-radius: 100px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+        .currency-opt.active { background: #2563eb; color: white; }
         .clock-card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
             color: white;
             border-radius: 24px;
             padding: 32px;
             text-align: center;
             margin-bottom: 24px;
         }
-        .current-time { font-size: 48px; font-weight: 700; margin: 16px 0; }
+        .current-time { font-size: 48px; font-weight: 700; margin: 16px 0; font-family: monospace; }
         .clock-btn {
             padding: 16px 32px;
-            font-size: 20px;
+            font-size: 18px;
             font-weight: 600;
             border: none;
             border-radius: 60px;
             cursor: pointer;
-            margin-top: 16px;
+            margin: 8px;
         }
         .clock-in { background: #10b981; color: white; }
-        .clock-out { background: #ef4444; color: white; }
+        .clock-out { background: #dc2626; color: white; }
+        .break-btn { background: #f59e0b; color: white; }
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -63,23 +77,25 @@
             border-radius: 16px;
             padding: 20px;
             text-align: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
-        .stat-value { font-size: 28px; font-weight: 700; color: #667eea; }
+        .stat-value { font-size: 28px; font-weight: 700; color: #2563eb; }
         .timesheet-table {
             background: white;
             border-radius: 20px;
-            overflow: hidden;
+            overflow-x: auto;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
-        table { width: 100%; border-collapse: collapse; }
-        th, td { padding: 12px 16px; text-align: left; border-bottom: 1px solid #f1f5f9; }
-        th { background: #f8fafc; font-weight: 600; }
-        .break-btn {
-            padding: 4px 12px;
-            background: #f59e0b;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
+        table { width: 100%; border-collapse: collapse; min-width: 700px; }
+        th, td { padding: 14px 16px; text-align: left; border-bottom: 1px solid #e5e7eb; }
+        th { background: #f9fafb; font-weight: 600; }
+        .employee-select {
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+            margin-bottom: 16px;
+            width: 100%;
+            max-width: 300px;
         }
         @media (max-width: 768px) {
             .current-time { font-size: 32px; }
@@ -89,43 +105,71 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>⏰ Time Clock</h1>
+            <div style="display: flex; align-items: center; gap: 16px;">
+                <h1>⏰ Time Clock</h1>
+                <div class="currency-switch">
+                    <span class="currency-opt" data-currency="USD">USD</span>
+                    <span class="currency-opt" data-currency="UGX">UGX</span>
+                </div>
+            </div>
             <a href="/index.html" class="back-btn">← Back</a>
         </div>
 
         <div class="clock-card">
-            <div>Current Employee: <strong id="currentEmployee">Select Employee</strong></div>
+            <select id="employeeSelect" class="employee-select">
+                <option value="1">John Davies (Cashier) - UGX 5,000/hr</option>
+                <option value="2">Sarah O'Brien (Manager) - UGX 8,000/hr</option>
+                <option value="3">David Mwangi (Stock Clerk) - UGX 4,500/hr</option>
+            </select>
             <div class="current-time" id="currentTime">--:--:--</div>
             <div id="clockStatus">Not Clocked In</div>
-            <button id="clockActionBtn" class="clock-btn clock-in">Clock In</button>
+            <div>
+                <button id="clockActionBtn" class="clock-btn clock-in">Clock In</button>
+                <button id="breakBtn" class="clock-btn break-btn">Take Break</button>
+            </div>
         </div>
 
         <div class="stats-grid">
             <div class="stat-card"><div class="stat-value" id="todayHours">0.0</div><div class="stat-label">Today's Hours</div></div>
             <div class="stat-card"><div class="stat-value" id="weekHours">0.0</div><div class="stat-label">This Week</div></div>
             <div class="stat-card"><div class="stat-value" id="currentShift">0.0</div><div class="stat-label">Current Shift</div></div>
+            <div class="stat-card"><div class="stat-value" id="todayEarnings">$0</div><div class="stat-label">Today's Earnings</div></div>
         </div>
 
         <div class="timesheet-table">
-            <div style="padding: 16px; background: #f8fafc; font-weight: 600;">Today's Timesheet</div>
-            <table>
-                <thead><tr><th>Employee</th><th>Clock In</th><th>Clock Out</th><th>Break</th><th>Total Hours</th></tr></thead>
-                <tbody id="timesheetBody"></tbody>
-            </table>
+            <div style="padding: 16px; background: #f9fafb; font-weight: 600;">Today's Timesheet</div>
+            <table><thead><tr><th>Employee</th><th>Clock In</th><th>Clock Out</th><th>Break</th><th>Hours</th><th>Earnings</th></tr></thead>
+            <tbody id="timesheetBody"></tbody></table>
         </div>
     </div>
 
     <script>
         (function() {
-            let currentEmployee = { id: 1, name: 'John Cashier', clockedIn: false, clockInTime: null, onBreak: false, breakStartTime: null };
+            const EXCHANGE_RATE = localStorage.getItem('exchange_rate') ? parseFloat(localStorage.getItem('exchange_rate')) : 3700;
+            let currentCurrency = localStorage.getItem('pos_currency') || 'UGX';
+            
+            function formatMoney(amountUSD) {
+                if (currentCurrency === 'UGX') {
+                    return `UGX ${Math.round(amountUSD * EXCHANGE_RATE).toLocaleString('en-UG')}`;
+                }
+                return `$${amountUSD.toFixed(2)}`;
+            }
+            
+            const employees = {
+                1: { name: 'John Davies', role: 'Cashier', hourlyRateUSD: 1.35 },
+                2: { name: 'Sarah O\'Brien', role: 'Manager', hourlyRateUSD: 2.16 },
+                3: { name: 'David Mwangi', role: 'Stock Clerk', hourlyRateUSD: 1.22 }
+            };
+            
+            let currentEmployee = { id: 1, name: 'John Davies', clockedIn: false, clockInTime: null, onBreak: false, breakStartTime: null, hourlyRateUSD: 1.35 };
             let timesheet = [
-                { id: 1, name: 'John Cashier', date: '2024-01-15', clockIn: '09:00:00', clockOut: '17:00:00', breakMinutes: 30, hours: 7.5 },
-                { id: 2, name: 'Jane Manager', date: '2024-01-15', clockIn: '08:30:00', clockOut: '16:30:00', breakMinutes: 45, hours: 7.25 }
+                { id: 1, name: 'John Davies', date: '2024-01-15', clockIn: '09:00:00', clockOut: '17:00:00', breakMinutes: 30, hours: 7.5, earningsUSD: 10.13 },
+                { id: 2, name: 'Sarah O\'Brien', date: '2024-01-15', clockIn: '08:30:00', clockOut: '16:30:00', breakMinutes: 45, hours: 7.25, earningsUSD: 15.66 }
             ];
             
             function updateClock() {
                 const now = new Date();
-                document.getElementById('currentTime').textContent = now.toLocaleTimeString();
+                document.getElementById('currentTime').textContent = now.toLocaleTimeString('en-GB');
             }
             
             function updateUI() {
@@ -136,7 +180,7 @@
                     if (currentEmployee.onBreak) {
                         statusText.innerHTML = '⏸️ On Break';
                         actionBtn.textContent = 'End Break';
-                        actionBtn.className = 'clock-btn clock-in';
+                        actionBtn.className = 'clock-btn break-btn';
                     } else {
                         statusText.innerHTML = '✅ Clocked In';
                         actionBtn.textContent = 'Clock Out';
@@ -148,43 +192,40 @@
                     actionBtn.className = 'clock-btn clock-in';
                 }
                 
-                // Update stats
                 if (currentEmployee.clockedIn && currentEmployee.clockInTime) {
                     const now = new Date();
                     const clockIn = new Date(currentEmployee.clockInTime);
                     let diffHours = (now - clockIn) / (1000 * 60 * 60);
                     if (currentEmployee.onBreak && currentEmployee.breakStartTime) {
                         const breakStart = new Date(currentEmployee.breakStartTime);
-                        const breakDuration = (now - breakStart) / (1000 * 60 * 60);
-                        diffHours -= breakDuration;
+                        diffHours -= (now - breakStart) / (1000 * 60 * 60);
                     }
                     document.getElementById('currentShift').textContent = diffHours.toFixed(2);
+                    const earningsUSD = diffHours * currentEmployee.hourlyRateUSD;
+                    document.getElementById('todayEarnings').textContent = formatMoney(earningsUSD);
                 }
-                
                 document.getElementById('todayHours').textContent = '8.0';
                 document.getElementById('weekHours').textContent = '32.5';
             }
             
             function toggleClock() {
                 if (!currentEmployee.clockedIn) {
-                    // Clock In
                     currentEmployee.clockedIn = true;
                     currentEmployee.clockInTime = new Date().toISOString();
                     currentEmployee.onBreak = false;
                     alert(`Clocked in at ${new Date().toLocaleTimeString()}`);
                 } else if (currentEmployee.onBreak) {
-                    // End Break
                     currentEmployee.onBreak = false;
                     currentEmployee.breakStartTime = null;
                     alert(`Break ended at ${new Date().toLocaleTimeString()}`);
                 } else {
-                    // Clock Out
                     currentEmployee.clockedIn = false;
                     currentEmployee.onBreak = false;
                     const clockOutTime = new Date();
-                    alert(`Clocked out at ${clockOutTime.toLocaleTimeString()}`);
+                    const hoursWorked = (clockOutTime - new Date(currentEmployee.clockInTime)) / (1000 * 60 * 60);
+                    const earningsUSD = hoursWorked * currentEmployee.hourlyRateUSD;
+                    alert(`Clocked out at ${clockOutTime.toLocaleTimeString()}\nHours: ${hoursWorked.toFixed(2)}\nEarnings: ${formatMoney(earningsUSD)}`);
                     
-                    // Add to timesheet
                     timesheet.unshift({
                         id: timesheet.length + 1,
                         name: currentEmployee.name,
@@ -192,7 +233,8 @@
                         clockIn: new Date(currentEmployee.clockInTime).toLocaleTimeString(),
                         clockOut: clockOutTime.toLocaleTimeString(),
                         breakMinutes: 0,
-                        hours: ((clockOutTime - new Date(currentEmployee.clockInTime)) / (1000 * 60 * 60)).toFixed(2)
+                        hours: hoursWorked.toFixed(2),
+                        earningsUSD: earningsUSD
                     });
                     renderTimesheet();
                 }
@@ -212,17 +254,52 @@
                 }
             }
             
+            function changeEmployee() {
+                const select = document.getElementById('employeeSelect');
+                const id = parseInt(select.value);
+                if (currentEmployee.clockedIn) {
+                    alert('Please clock out before switching employees');
+                    select.value = currentEmployee.id;
+                    return;
+                }
+                currentEmployee = {
+                    id: id,
+                    name: employees[id].name,
+                    clockedIn: false,
+                    clockInTime: null,
+                    onBreak: false,
+                    breakStartTime: null,
+                    hourlyRateUSD: employees[id].hourlyRateUSD
+                };
+                updateUI();
+            }
+            
             function renderTimesheet() {
                 const tbody = document.getElementById('timesheetBody');
-                tbody.innerHTML = timesheet.slice(0, 5).map(entry => `
+                tbody.innerHTML = timesheet.slice(0, 10).map(entry => `
                     <tr>
                         <td>${entry.name}</td>
                         <td>${entry.clockIn}</td>
                         <td>${entry.clockOut || '—'}</td>
-                        <td>${entry.breakMinutes || '—'}</td>
-                        <td>${entry.hours}</td>
-                    </table>
+                        <td>${entry.breakMinutes || '—'}m</td>
+                        <td>${entry.hours}hrs</td>
+                        <td>${formatMoney(entry.earningsUSD)}</td>
+                    </tr>
                 `).join('');
+            }
+            
+            function initCurrencySelector() {
+                document.querySelectorAll('.currency-opt').forEach(opt => {
+                    opt.classList.toggle('active', opt.dataset.currency === currentCurrency);
+                    opt.addEventListener('click', () => {
+                        currentCurrency = opt.dataset.currency;
+                        localStorage.setItem('pos_currency', currentCurrency);
+                        document.querySelectorAll('.currency-opt').forEach(o => o.classList.remove('active'));
+                        opt.classList.add('active');
+                        updateUI();
+                        renderTimesheet();
+                    });
+                });
             }
             
             function init() {
@@ -230,16 +307,11 @@
                 setInterval(updateClock, 1000);
                 renderTimesheet();
                 updateUI();
+                initCurrencySelector();
                 
                 document.getElementById('clockActionBtn').addEventListener('click', toggleClock);
-                
-                // Add break button next to clock button
-                const breakBtn = document.createElement('button');
-                breakBtn.textContent = 'Take Break';
-                breakBtn.className = 'clock-btn';
-                breakBtn.style.cssText = 'background:#f59e0b; color:white; margin-left:12px;';
-                breakBtn.addEventListener('click', takeBreak);
-                document.querySelector('.clock-card').appendChild(breakBtn);
+                document.getElementById('breakBtn').addEventListener('click', takeBreak);
+                document.getElementById('employeeSelect').addEventListener('change', changeEmployee);
             }
             
             init();
