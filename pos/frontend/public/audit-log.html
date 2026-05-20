@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nile POS - Audit Log</title>
+    <title>Nile POS - Security Audit Log | Compliance</title>
     <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
             background: #0f172a;
             padding: 24px;
         }
@@ -21,7 +21,14 @@
             flex-wrap: wrap;
             gap: 16px;
         }
-        h1 { font-size: 24px; color: #f1f5f9; }
+        h1 { font-size: 24px; color: #f1f5f9; display: flex; align-items: center; gap: 12px; }
+        .compliance-badge {
+            background: #059669;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 100px;
+            font-size: 11px;
+        }
         .back-btn {
             background: #1e293b;
             border: 1px solid #334155;
@@ -42,7 +49,7 @@
             align-items: center;
         }
         .filter-input {
-            padding: 10px;
+            padding: 10px 14px;
             background: #0f172a;
             border: 1px solid #334155;
             border-radius: 8px;
@@ -55,27 +62,34 @@
             border: none;
             border-radius: 8px;
             cursor: pointer;
+            font-weight: 500;
         }
         .audit-table {
             background: #1e293b;
             border-radius: 20px;
             overflow-x: auto;
         }
-        table { width: 100%; border-collapse: collapse; }
+        table { width: 100%; border-collapse: collapse; min-width: 900px; }
         th, td { padding: 14px 16px; text-align: left; border-bottom: 1px solid #334155; color: #e2e8f0; }
         th { background: #0f172a; font-weight: 600; color: #94a3b8; }
         .severity-high { color: #ef4444; font-weight: 600; }
         .severity-medium { color: #f59e0b; }
         .severity-low { color: #10b981; }
+        .currency-note {
+            font-size: 11px;
+            color: #64748b;
+            text-align: center;
+            margin-top: 16px;
+        }
         @media (max-width: 768px) {
-            th, td { font-size: 12px; padding: 8px; }
+            th, td { font-size: 12px; padding: 10px; }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>🔒 Security Audit Log</h1>
+            <h1>🔒 Security Audit Log <span class="compliance-badge">GDPR Compliant</span></h1>
             <a href="/index.html" class="back-btn">← Back to Register</a>
         </div>
 
@@ -95,25 +109,30 @@
         <div class="audit-table">
             <table>
                 <thead>
-                    <tr><th>Timestamp</th><th>User</th><th>Action</th><th>Severity</th><th>IP Address</th><th>Details</th></tr>
+                    <tr><th>Timestamp</th><th>User</th><th>Action</th><th>Severity</th><th>IP Address</th><th>Amount</th><th>Details</th></tr>
                 </thead>
                 <tbody id="auditTableBody"></tbody>
             </table>
         </div>
+        <div class="currency-note">💰 All financial amounts shown in base currency (USD). UGX conversion available on request.</div>
     </div>
 
     <script>
         (function() {
             let auditLogs = [
-                { timestamp: '2024-01-15 09:23:45', user: 'admin@nile.com', action: 'User Login', severity: 'low', ip: '192.168.1.1', details: 'Successful login from Chrome' },
-                { timestamp: '2024-01-15 10:15:22', user: 'cashier@store.com', action: 'Transaction Void', severity: 'medium', ip: '192.168.1.15', details: 'Voided transaction #TRX-001 ($142.97)' },
-                { timestamp: '2024-01-15 11:30:00', user: 'manager@nile.com', action: 'User Role Changed', severity: 'high', ip: '192.168.1.10', details: 'Promoted user john to supervisor' },
-                { timestamp: '2024-01-15 12:45:33', user: 'cashier@store.com', action: 'No-Sale Access', severity: 'medium', ip: '192.168.1.15', details: 'Opened cash drawer without transaction' },
-                { timestamp: '2024-01-15 13:20:17', user: 'admin@nile.com', action: 'Settings Changed', severity: 'medium', ip: '192.168.1.1', details: 'Updated tax rate from 8% to 10%' },
-                { timestamp: '2024-01-15 14:05:55', user: 'unknown', action: 'Failed Login Attempt', severity: 'high', ip: '203.0.113.45', details: '3 failed attempts for admin@nile.com' },
-                { timestamp: '2024-01-15 15:30:22', user: 'manager@nile.com', action: 'Refund Processed', severity: 'low', ip: '192.168.1.10', details: 'Refunded $89.99 for transaction #TRX-003' },
-                { timestamp: '2024-01-15 16:45:00', user: 'admin@nile.com', action: 'User Deleted', severity: 'high', ip: '192.168.1.1', details: 'Deleted inactive user jane_doe' }
+                { timestamp: '2024-01-15 09:23:45', user: 'admin@nileshopping.com', action: 'User Login', severity: 'low', ip: '192.168.1.1', amountUSD: null, details: 'Successful login from Chrome' },
+                { timestamp: '2024-01-15 10:15:22', user: 'cashier@nileshopping.com', action: 'Transaction Void', severity: 'medium', ip: '192.168.1.15', amountUSD: 155.97, details: 'Voided transaction #TRX-001' },
+                { timestamp: '2024-01-15 11:30:00', user: 'manager@nileshopping.com', action: 'User Role Changed', severity: 'high', ip: '192.168.1.10', amountUSD: null, details: 'Promoted user john to supervisor' },
+                { timestamp: '2024-01-15 12:45:33', user: 'cashier@nileshopping.com', action: 'No-Sale Access', severity: 'medium', ip: '192.168.1.15', amountUSD: null, details: 'Opened cash drawer without transaction' },
+                { timestamp: '2024-01-15 14:05:55', user: 'unknown', action: 'Failed Login Attempt', severity: 'high', ip: '203.0.113.45', amountUSD: null, details: '3 failed attempts for admin@nileshopping.com' },
+                { timestamp: '2024-01-15 15:30:22', user: 'manager@nileshopping.com', action: 'Refund Processed', severity: 'low', ip: '192.168.1.10', amountUSD: 89.99, details: 'Refunded for transaction #TRX-003' },
+                { timestamp: '2024-01-15 16:45:00', user: 'admin@nileshopping.com', action: 'User Deleted', severity: 'high', ip: '192.168.1.1', amountUSD: null, details: 'Deleted inactive user jane_doe' }
             ];
+
+            function formatAmount(amountUSD) {
+                if (!amountUSD && amountUSD !== 0) return '—';
+                return `$${amountUSD.toFixed(2)}`;
+            }
 
             function renderAuditLogs() {
                 const searchTerm = document.getElementById('searchInput').value.toLowerCase();
@@ -130,15 +149,9 @@
                         log.details.toLowerCase().includes(searchTerm)
                     );
                 }
-                if (severity !== 'all') {
-                    filtered = filtered.filter(log => log.severity === severity);
-                }
-                if (dateFrom) {
-                    filtered = filtered.filter(log => log.timestamp.split(' ')[0] >= dateFrom);
-                }
-                if (dateTo) {
-                    filtered = filtered.filter(log => log.timestamp.split(' ')[0] <= dateTo);
-                }
+                if (severity !== 'all') filtered = filtered.filter(log => log.severity === severity);
+                if (dateFrom) filtered = filtered.filter(log => log.timestamp.split(' ')[0] >= dateFrom);
+                if (dateTo) filtered = filtered.filter(log => log.timestamp.split(' ')[0] <= dateTo);
                 
                 const tbody = document.getElementById('auditTableBody');
                 tbody.innerHTML = filtered.map(log => `
@@ -147,16 +160,17 @@
                         <td>${log.user}</td>
                         <td>${log.action}</td>
                         <td><span class="severity-${log.severity}">${log.severity.toUpperCase()}</span></td>
-                        <td>${log.ip}</td>
-                        <td>${log.details}</td>
+                        <td><span style="font-family:monospace;">${log.ip}</span></td>
+                        <td>${formatAmount(log.amountUSD)}</td>
+                        <td>${escapeHtml(log.details)}</td>
                     </tr>
                 `).join('');
             }
 
             function exportCSV() {
-                const rows = [['Timestamp', 'User', 'Action', 'Severity', 'IP Address', 'Details']];
+                const rows = [['Timestamp', 'User', 'Action', 'Severity', 'IP Address', 'Amount (USD)', 'Details']];
                 auditLogs.forEach(log => {
-                    rows.push([log.timestamp, log.user, log.action, log.severity, log.ip, log.details]);
+                    rows.push([log.timestamp, log.user, log.action, log.severity, log.ip, log.amountUSD ? `$${log.amountUSD.toFixed(2)}` : '', log.details]);
                 });
                 const csv = rows.map(row => row.join(',')).join('\n');
                 const blob = new Blob([csv], { type: 'text/csv' });
@@ -166,6 +180,26 @@
                 a.download = `audit_log_${new Date().toISOString().split('T')[0]}.csv`;
                 a.click();
                 URL.revokeObjectURL(url);
+                showToast('Audit log exported', 'success');
+            }
+
+            function showToast(message, type) {
+                const toast = document.createElement('div');
+                toast.textContent = message;
+                toast.style.cssText = `
+                    position: fixed; bottom: 20px; right: 20px;
+                    background: ${type === 'error' ? '#dc2626' : '#10b981'};
+                    color: white; padding: 12px 20px; border-radius: 12px;
+                    z-index: 1000; animation: slideIn 0.3s ease;
+                `;
+                document.body.appendChild(toast);
+                setTimeout(() => toast.remove(), 3000);
+            }
+
+            function escapeHtml(str) {
+                const div = document.createElement('div');
+                div.textContent = str;
+                return div.innerHTML;
             }
 
             function init() {
