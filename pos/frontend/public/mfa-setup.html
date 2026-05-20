@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nile POS - MFA Setup</title>
+    <title>Nile POS - MFA Setup | Two-Factor Authentication</title>
     <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: #f1f5f9;
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+            background: #f3f4f6;
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -22,6 +22,7 @@
             max-width: 500px;
             width: 100%;
             overflow: hidden;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
         }
         .header {
             background: #1e293b;
@@ -29,16 +30,18 @@
             padding: 32px;
             text-align: center;
         }
+        .header h2 { font-size: 24px; margin-bottom: 8px; }
+        .header p { font-size: 14px; opacity: 0.8; }
         .body { padding: 32px; }
-        .qr-code {
+        .qr-container {
             background: white;
             padding: 20px;
             text-align: center;
-            border: 1px solid #e2e8f0;
-            border-radius: 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 20px;
             margin: 20px 0;
         }
-        .qr-placeholder {
+        .qr-code {
             width: 200px;
             height: 200px;
             background: repeating-linear-gradient(45deg, #1e293b, #1e293b 10px, #334155 10px, #334155 20px);
@@ -46,17 +49,19 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            color: white;
-            font-size: 12px;
+            border-radius: 16px;
         }
+        .qr-code span { color: white; font-size: 12px; text-align: center; }
         .secret-key {
-            background: #f8fafc;
-            padding: 12px;
-            border-radius: 8px;
-            font-family: monospace;
+            background: #f1f5f9;
+            padding: 12px 16px;
+            border-radius: 12px;
+            font-family: 'Fira Code', monospace;
             text-align: center;
             letter-spacing: 2px;
+            font-size: 14px;
             margin: 16px 0;
+            word-break: break-all;
         }
         .code-input {
             display: flex;
@@ -69,8 +74,15 @@
             height: 60px;
             text-align: center;
             font-size: 24px;
+            font-weight: 600;
             border: 2px solid #e2e8f0;
             border-radius: 12px;
+            background: white;
+        }
+        .code-digit:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102,126,234,0.1);
         }
         .btn {
             width: 100%;
@@ -80,68 +92,158 @@
             font-weight: 600;
             cursor: pointer;
         }
-        .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
-        .backup-codes { background: #fef3c7; padding: 16px; border-radius: 12px; margin-top: 20px; font-family: monospace; }
-        @media (max-width: 480px) {
-            .code-digit { width: 40px; height: 50px; font-size: 20px; }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
         }
+        .btn-secondary {
+            background: #f1f5f9;
+            color: #475569;
+            margin-top: 12px;
+        }
+        .backup-codes {
+            background: #fef3c7;
+            padding: 16px;
+            border-radius: 12px;
+            margin-top: 20px;
+            font-family: monospace;
+            font-size: 14px;
+        }
+        .backup-title {
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: #92400e;
+        }
+        .code-list {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+        }
+        .code-item {
+            background: white;
+            padding: 6px 12px;
+            border-radius: 6px;
+            text-align: center;
+            letter-spacing: 1px;
+        }
+        .success-message {
+            text-align: center;
+            color: #10b981;
+            margin: 16px 0;
+        }
+        .hidden { display: none; }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h2>🔐 Multi-Factor Authentication</h2>
-            <p>Secure your account with 2FA</p>
+            <h2>🔐 Two-Factor Authentication</h2>
+            <p>Secure your account with TOTP 2FA</p>
         </div>
         <div class="body">
-            <div class="qr-code">
-                <div class="qr-placeholder">[QR CODE]<br>Scan with Google Authenticator</div>
-            </div>
-            <div class="secret-key">
-                Secret Key: NILE-2FA-ABCD-EFGH-1234
+            <div id="setupSection">
+                <div class="qr-container">
+                    <div class="qr-code">
+                        <span>[QR CODE]</span>
+                    </div>
+                </div>
+                <div class="secret-key">
+                    Secret Key: NILE-2FA-ABCD-EFGH-1234-5678
+                </div>
+                <div class="code-input" id="codeInputs">
+                    <input type="text" maxlength="1" class="code-digit" data-idx="0" inputmode="numeric">
+                    <input type="text" maxlength="1" class="code-digit" data-idx="1" inputmode="numeric">
+                    <input type="text" maxlength="1" class="code-digit" data-idx="2" inputmode="numeric">
+                    <input type="text" maxlength="1" class="code-digit" data-idx="3" inputmode="numeric">
+                    <input type="text" maxlength="1" class="code-digit" data-idx="4" inputmode="numeric">
+                    <input type="text" maxlength="1" class="code-digit" data-idx="5" inputmode="numeric">
+                </div>
+                <button id="verifyBtn" class="btn btn-primary">Verify & Enable 2FA</button>
+                <button id="cancelBtn" class="btn btn-secondary">Cancel</button>
             </div>
             
-            <div class="code-input" id="codeInputs">
-                <input type="text" maxlength="1" class="code-digit" data-idx="0">
-                <input type="text" maxlength="1" class="code-digit" data-idx="1">
-                <input type="text" maxlength="1" class="code-digit" data-idx="2">
-                <input type="text" maxlength="1" class="code-digit" data-idx="3">
-                <input type="text" maxlength="1" class="code-digit" data-idx="4">
-                <input type="text" maxlength="1" class="code-digit" data-idx="5">
+            <div id="successSection" class="hidden">
+                <div class="success-message">✅ 2FA Enabled Successfully!</div>
+                <div class="backup-codes">
+                    <div class="backup-title">⚠️ Save these backup codes</div>
+                    <div class="code-list">
+                        <div class="code-item">1234-5678-9012</div>
+                        <div class="code-item">2345-6789-0123</div>
+                        <div class="code-item">3456-7890-1234</div>
+                        <div class="code-item">4567-8901-2345</div>
+                        <div class="code-item">5678-9012-3456</div>
+                        <div class="code-item">6789-0123-4567</div>
+                    </div>
+                    <p style="font-size:12px; margin-top:12px;">Store these codes securely. Each code can be used only once.</p>
+                </div>
+                <button id="doneBtn" class="btn btn-primary">Done</button>
             </div>
             
-            <button id="verifyBtn" class="btn btn-primary">Verify & Enable 2FA</button>
-            
-            <div id="backupCodes" class="backup-codes" style="display:none;">
-                <strong>⚠️ Save these backup codes</strong><br>
-                1234-5678-9012<br>
-                2345-6789-0123<br>
-                3456-7890-1234
+            <div id="alreadyEnabled" class="hidden">
+                <div class="success-message">🔒 2FA is already enabled on this account</div>
+                <button id="disableBtn" class="btn btn-secondary">Disable 2FA</button>
+                <button id="regenerateBtn" class="btn btn-primary" style="margin-top:12px;">Regenerate Backup Codes</button>
             </div>
         </div>
     </div>
 
     <script>
         (function() {
-            let codeDigits = ['', '', '', '', '', ''];
+            const setupSection = document.getElementById('setupSection');
+            const successSection = document.getElementById('successSection');
+            const alreadyEnabled = document.getElementById('alreadyEnabled');
+            const codeDigits = ['', '', '', '', '', ''];
+            
+            let isMFAEnabled = localStorage.getItem('mfa_enabled') === 'true';
+            
+            function updateUI() {
+                if (isMFAEnabled) {
+                    setupSection.classList.add('hidden');
+                    successSection.classList.add('hidden');
+                    alreadyEnabled.classList.remove('hidden');
+                } else {
+                    setupSection.classList.remove('hidden');
+                    successSection.classList.add('hidden');
+                    alreadyEnabled.classList.add('hidden');
+                }
+            }
             
             function setupCodeInputs() {
                 const inputs = document.querySelectorAll('.code-digit');
                 inputs.forEach((input, idx) => {
                     input.addEventListener('input', (e) => {
-                        if (e.target.value.length === 1 && /^\d$/.test(e.target.value)) {
-                            codeDigits[idx] = e.target.value;
+                        const value = e.target.value;
+                        if (value.length === 1 && /^\d$/.test(value)) {
+                            codeDigits[idx] = value;
                             if (idx < inputs.length - 1) {
                                 inputs[idx + 1].focus();
                             } else {
                                 verifyCode();
                             }
+                        } else if (value.length === 0) {
+                            codeDigits[idx] = '';
                         }
                     });
+                    
                     input.addEventListener('keydown', (e) => {
                         if (e.key === 'Backspace' && !input.value && idx > 0) {
                             inputs[idx - 1].focus();
                             codeDigits[idx - 1] = '';
+                            inputs[idx - 1].value = '';
+                        }
+                    });
+                    
+                    // Handle paste
+                    input.addEventListener('paste', (e) => {
+                        e.preventDefault();
+                        const paste = (e.clipboardData || window.clipboardData).getData('text');
+                        if (paste.length === 6 && /^\d+$/.test(paste)) {
+                            for (let i = 0; i < 6 && i < paste.length; i++) {
+                                codeDigits[i] = paste[i];
+                                inputs[i].value = paste[i];
+                            }
+                            if (inputs[5]) inputs[5].focus();
+                            verifyCode();
                         }
                     });
                 });
@@ -150,24 +252,64 @@
             function verifyCode() {
                 const code = codeDigits.join('');
                 if (code.length === 6) {
-                    // Simulate verification
-                    setTimeout(() => {
-                        if (code === '123456') {
-                            document.getElementById('backupCodes').style.display = 'block';
-                            alert('2FA enabled successfully!');
-                            localStorage.setItem('mfa_enabled', 'true');
-                        } else {
-                            alert('Invalid code. Please try again.');
-                            codeDigits = ['', '', '', '', '', ''];
-                            document.querySelectorAll('.code-digit').forEach(input => input.value = '');
-                            document.querySelectorAll('.code-digit')[0].focus();
-                        }
-                    }, 500);
+                    if (code === '123456') {
+                        localStorage.setItem('mfa_enabled', 'true');
+                        isMFAEnabled = true;
+                        setupSection.classList.add('hidden');
+                        successSection.classList.remove('hidden');
+                        showToast('2FA enabled successfully!', 'success');
+                    } else {
+                        showToast('Invalid code. Please try again.', 'error');
+                        codeDigits.fill('');
+                        document.querySelectorAll('.code-digit').forEach(input => input.value = '');
+                        document.querySelectorAll('.code-digit')[0].focus();
+                    }
                 }
             }
             
-            setupCodeInputs();
-            document.getElementById('verifyBtn').addEventListener('click', verifyCode);
+            function disableMFA() {
+                if (confirm('Disable two-factor authentication? Your account will be less secure.')) {
+                    localStorage.removeItem('mfa_enabled');
+                    isMFAEnabled = false;
+                    updateUI();
+                    showToast('2FA disabled', 'success');
+                }
+            }
+            
+            function regenerateCodes() {
+                alert('New backup codes have been generated. Save them now!');
+                // In production, would generate new codes server-side
+            }
+            
+            function showToast(message, type) {
+                const toast = document.createElement('div');
+                toast.textContent = message;
+                toast.style.cssText = `
+                    position: fixed; bottom: 20px; right: 20px;
+                    background: ${type === 'error' ? '#dc2626' : '#10b981'};
+                    color: white; padding: 12px 20px; border-radius: 12px;
+                    z-index: 1000; animation: slideIn 0.3s ease;
+                `;
+                document.body.appendChild(toast);
+                setTimeout(() => toast.remove(), 3000);
+            }
+            
+            function init() {
+                updateUI();
+                setupCodeInputs();
+                
+                document.getElementById('verifyBtn').addEventListener('click', verifyCode);
+                document.getElementById('cancelBtn')?.addEventListener('click', () => {
+                    window.location.href = '/index.html';
+                });
+                document.getElementById('doneBtn')?.addEventListener('click', () => {
+                    window.location.href = '/settings.html';
+                });
+                document.getElementById('disableBtn')?.addEventListener('click', disableMFA);
+                document.getElementById('regenerateBtn')?.addEventListener('click', regenerateCodes);
+            }
+            
+            init();
         })();
     </script>
 </body>
