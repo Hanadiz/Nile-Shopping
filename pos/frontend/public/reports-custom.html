@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nile POS - Custom Reports</title>
+    <title>Nile POS - Custom Reports | Analytics</title>
     <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: #f1f5f9;
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+            background: #f3f4f6;
             padding: 24px;
         }
         .container { max-width: 1400px; margin: 0 auto; }
@@ -18,46 +18,65 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 24px;
+            flex-wrap: wrap;
+            gap: 16px;
         }
-        h1 { font-size: 24px; color: #1e293b; }
+        h1 { font-size: 24px; color: #111827; }
         .back-btn {
             background: white;
-            border: 1px solid #e2e8f0;
+            border: 1px solid #e5e7eb;
             padding: 8px 16px;
             border-radius: 8px;
             text-decoration: none;
-            color: #475569;
+            color: #374151;
         }
+        .currency-switch {
+            display: flex;
+            gap: 8px;
+            background: #e5e7eb;
+            padding: 4px 12px;
+            border-radius: 100px;
+        }
+        .currency-opt {
+            padding: 4px 12px;
+            border-radius: 100px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+        .currency-opt.active { background: #2563eb; color: white; }
         .builder-grid {
             display: grid;
-            grid-template-columns: 320px 1fr;
+            grid-template-columns: 300px 1fr;
             gap: 24px;
         }
         .builder-panel {
             background: white;
             border-radius: 20px;
             padding: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
         .preview-panel {
             background: white;
             border-radius: 20px;
             padding: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
-        .field-list { margin: 16px 0; }
+        .field-list { margin: 16px 0; max-height: 300px; overflow-y: auto; }
         .field-item {
-            padding: 10px;
+            padding: 10px 12px;
             margin: 6px 0;
-            background: #f8fafc;
+            background: #f9fafb;
             border-radius: 8px;
             cursor: move;
             display: flex;
             justify-content: space-between;
+            border: 1px solid #e5e7eb;
         }
-        .selected-fields { min-height: 200px; border: 2px dashed #e2e8f0; border-radius: 12px; padding: 12px; margin: 16px 0; }
+        .selected-fields { min-height: 200px; border: 2px dashed #e5e7eb; border-radius: 12px; padding: 12px; margin: 16px 0; }
         .selected-field {
-            padding: 8px;
+            padding: 8px 12px;
             margin: 4px 0;
-            background: #e0e7ff;
+            background: #dbeafe;
             border-radius: 6px;
             display: flex;
             justify-content: space-between;
@@ -65,20 +84,26 @@
         .run-btn {
             width: 100%;
             padding: 12px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #2563eb;
             color: white;
             border: none;
             border-radius: 12px;
             cursor: pointer;
             font-weight: 600;
         }
-        table { width: 100%; border-collapse: collapse; margin-top: 16px; }
-        th, td { padding: 10px; text-align: left; border-bottom: 1px solid #e2e8f0; }
-        th { background: #f8fafc; }
+        .date-range {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        .date-range input { padding: 8px; border: 1px solid #e5e7eb; border-radius: 6px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 16px; overflow-x: auto; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #e5e7eb; }
+        th { background: #f9fafb; font-weight: 600; }
         .export-btns { display: flex; gap: 12px; margin-top: 16px; }
-        .export-csv, .export-pdf { padding: 8px 16px; border: none; border-radius: 8px; cursor: pointer; }
+        .export-csv, .export-pdf { padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: 500; }
         .export-csv { background: #10b981; color: white; }
-        .export-pdf { background: #ef4444; color: white; }
+        .export-pdf { background: #dc2626; color: white; }
         @media (max-width: 768px) {
             .builder-grid { grid-template-columns: 1fr; }
         }
@@ -87,7 +112,13 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>📊 Custom Report Builder</h1>
+            <div style="display: flex; align-items: center; gap: 16px;">
+                <h1>📊 Custom Report Builder</h1>
+                <div class="currency-switch">
+                    <span class="currency-opt" data-currency="USD">USD</span>
+                    <span class="currency-opt" data-currency="UGX">UGX</span>
+                </div>
+            </div>
             <a href="/index.html" class="back-btn">← Back</a>
         </div>
 
@@ -99,10 +130,17 @@
                     <div class="field-item" data-field="transaction_id">🆔 Transaction ID</div>
                     <div class="field-item" data-field="product_name">📦 Product Name</div>
                     <div class="field-item" data-field="quantity">🔢 Quantity</div>
-                    <div class="field-item" data-field="price">💰 Price</div>
-                    <div class="field-item" data-field="total">💵 Total</div>
+                    <div class="field-item" data-field="price_usd">💰 Price (USD)</div>
+                    <div class="field-item" data-field="price_ugx">💰 Price (UGX)</div>
+                    <div class="field-item" data-field="total_usd">💵 Total (USD)</div>
+                    <div class="field-item" data-field="total_ugx">💵 Total (UGX)</div>
                     <div class="field-item" data-field="customer">👤 Customer</div>
                     <div class="field-item" data-field="cashier">👨‍💼 Cashier</div>
+                </div>
+                
+                <div class="date-range">
+                    <input type="date" id="startDate">
+                    <input type="date" id="endDate">
                 </div>
                 
                 <h3>Selected Fields</h3>
@@ -113,8 +151,8 @@
 
             <div class="preview-panel">
                 <h3>Report Preview</h3>
-                <div id="reportPreview">
-                    <div style="text-align:center; color:#94a3b8; padding:40px;">Select fields and click Run Report</div>
+                <div id="reportPreview" style="overflow-x: auto;">
+                    <div style="text-align:center; color:#9ca3af; padding:60px;">Select fields and click Run Report</div>
                 </div>
                 <div id="exportButtons" class="export-btns" style="display:none;">
                     <button id="exportCSV" class="export-csv">📎 Export CSV</button>
@@ -126,21 +164,27 @@
 
     <script>
         (function() {
-            let selectedFields = ['date', 'transaction_id', 'product_name', 'quantity', 'total'];
+            const EXCHANGE_RATE = localStorage.getItem('exchange_rate') ? parseFloat(localStorage.getItem('exchange_rate')) : 3700;
+            let currentCurrency = localStorage.getItem('pos_currency') || 'UGX';
+            
+            function formatMoneyUGX(amountUSD) {
+                return `UGX ${Math.round(amountUSD * EXCHANGE_RATE).toLocaleString('en-UG')}`;
+            }
+            
+            let selectedFields = ['date', 'transaction_id', 'product_name', 'quantity', 'total_usd'];
             
             const demoData = [
-                { date: '2024-01-15', transaction_id: 'TRX-001', product_name: 'Classic T-Shirt', quantity: 2, price: 29.99, total: 59.98, customer: 'John Doe', cashier: 'John C' },
-                { date: '2024-01-15', transaction_id: 'TRX-001', product_name: 'Running Shoes', quantity: 1, price: 89.99, total: 89.99, customer: 'John Doe', cashier: 'John C' },
-                { date: '2024-01-15', transaction_id: 'TRX-002', product_name: 'Smart Watch', quantity: 1, price: 199.99, total: 199.99, customer: 'Jane Smith', cashier: 'Jane M' },
-                { date: '2024-01-14', transaction_id: 'TRX-003', product_name: 'Leather Wallet', quantity: 1, price: 39.99, total: 39.99, customer: 'Bob Johnson', cashier: 'John C' }
+                { date: '2024-01-15', transaction_id: 'TRX-001', product_name: 'Classic T-Shirt', quantity: 2, price_usd: 29.99, total_usd: 59.98, customer: 'John Davies', cashier: 'John C' },
+                { date: '2024-01-15', transaction_id: 'TRX-001', product_name: 'Running Shoes', quantity: 1, price_usd: 119.99, total_usd: 119.99, customer: 'John Davies', cashier: 'John C' },
+                { date: '2024-01-15', transaction_id: 'TRX-002', product_name: 'Smart Watch', quantity: 1, price_usd: 299.99, total_usd: 299.99, customer: 'Sarah O\'Brien', cashier: 'Sarah M' }
             ];
             
             function renderSelectedFields() {
                 const container = document.getElementById('selectedFields');
                 container.innerHTML = selectedFields.map(field => `
                     <div class="selected-field" data-field="${field}">
-                        ${field.replace('_', ' ').toUpperCase()}
-                        <button class="remove-field" data-field="${field}">✕</button>
+                        ${field.replace(/_/g, ' ').toUpperCase()}
+                        <button class="remove-field" data-field="${field}" style="background:none; border:none; cursor:pointer;">✕</button>
                     </div>
                 `).join('');
                 
@@ -153,16 +197,33 @@
                 });
             }
             
+            function getFieldValue(row, field) {
+                if (field === 'price_ugx') return formatMoneyUGX(row.price_usd);
+                if (field === 'total_ugx') return formatMoneyUGX(row.total_usd);
+                if (field === 'price_usd') return `$${row.price_usd.toFixed(2)}`;
+                if (field === 'total_usd') return `$${row.total_usd.toFixed(2)}`;
+                return row[field] || '—';
+            }
+            
             function runReport() {
+                const startDate = document.getElementById('startDate').value;
+                const endDate = document.getElementById('endDate').value;
+                
+                let filtered = [...demoData];
+                if (startDate) filtered = filtered.filter(row => row.date >= startDate);
+                if (endDate) filtered = filtered.filter(row => row.date <= endDate);
+                
                 const tableHtml = `
-                    <table>
-                        <thead><tr>${selectedFields.map(f => `<th>${f.replace('_', ' ').toUpperCase()}</th>`).join('')}</thead>
-                        <tbody>
-                            ${demoData.map(row => `
-                                <tr>${selectedFields.map(f => `<td>${row[f] || '—'}</td>`).join('')}</tr>
-                            `).join('')}
-                        </tbody>
-                    </table>
+                    <div style="overflow-x: auto;">
+                        <table style="min-width: 500px;">
+                            <thead><tr>${selectedFields.map(f => `<th>${f.replace(/_/g, ' ').toUpperCase()}</th>`).join('')}</thead>
+                            <tbody>
+                                ${filtered.map(row => `
+                                    <tr>${selectedFields.map(f => `<td>${getFieldValue(row, f)}</td>`).join('')}</tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
                 `;
                 document.getElementById('reportPreview').innerHTML = tableHtml;
                 document.getElementById('exportButtons').style.display = 'flex';
@@ -170,19 +231,40 @@
             
             function exportCSV() {
                 const headers = selectedFields.join(',');
-                const rows = demoData.map(row => selectedFields.map(f => row[f] || '').join(','));
+                const rows = demoData.map(row => selectedFields.map(f => {
+                    if (f === 'price_ugx') return formatMoneyUGX(row.price_usd);
+                    if (f === 'total_ugx') return formatMoneyUGX(row.total_usd);
+                    return row[f] || '';
+                }).join(','));
                 const csv = [headers, ...rows].join('\n');
                 const blob = new Blob([csv], { type: 'text/csv' });
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = `report_${new Date().toISOString().split('T')[0]}.csv`;
+                a.download = `custom_report_${new Date().toISOString().split('T')[0]}.csv`;
                 a.click();
                 URL.revokeObjectURL(url);
+                alert('Report exported to CSV');
+            }
+            
+            function initCurrencySelector() {
+                document.querySelectorAll('.currency-opt').forEach(opt => {
+                    opt.classList.toggle('active', opt.dataset.currency === currentCurrency);
+                    opt.addEventListener('click', () => {
+                        currentCurrency = opt.dataset.currency;
+                        localStorage.setItem('pos_currency', currentCurrency);
+                        document.querySelectorAll('.currency-opt').forEach(o => o.classList.remove('active'));
+                        opt.classList.add('active');
+                        runReport();
+                    });
+                });
             }
             
             function init() {
                 renderSelectedFields();
+                initCurrencySelector();
+                document.getElementById('startDate').value = new Date(Date.now() - 30*24*60*60*1000).toISOString().split('T')[0];
+                document.getElementById('endDate').value = new Date().toISOString().split('T')[0];
                 
                 document.querySelectorAll('.field-item').forEach(field => {
                     field.addEventListener('click', () => {
@@ -196,10 +278,7 @@
                 
                 document.getElementById('runReportBtn').addEventListener('click', runReport);
                 document.getElementById('exportCSV').addEventListener('click', exportCSV);
-                document.getElementById('exportPDF').addEventListener('click', () => {
-                    alert('PDF export would generate a PDF document');
-                    window.print();
-                });
+                document.getElementById('exportPDF').addEventListener('click', () => window.print());
             }
             
             init();
