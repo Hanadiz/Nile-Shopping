@@ -1,16 +1,27 @@
 <!-- ============================================
-     Nile POS - Sidebar Component
-     Dynamically renders based on RBAC permissions
+     Nile POS - Enhanced Sidebar Component
+     Features: Dynamic menu, RBAC filtering, collapsible, user profile
+     Version: 2.0.0
      ============================================ -->
 
 <aside class="sidebar" id="appSidebar">
+    <!-- Sidebar Toggle Button -->
+    <div class="sidebar-toggle" id="sidebarToggle">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="15 18 9 12 15 6"></polyline>
+        </svg>
+    </div>
+    
+    <!-- Logo Section -->
     <div class="sidebar-logo">
         <div class="logo-icon">🛍️</div>
         <div class="logo-text">Nile<span>POS</span></div>
+        <div class="logo-version" id="logoVersion">v2.0</div>
     </div>
     
+    <!-- Main Navigation -->
     <nav class="sidebar-nav" id="sidebarNav">
-        <!-- Menu items will be dynamically populated by RBAC -->
+        <!-- Menu will be dynamically populated -->
         <div class="nav-section">
             <div class="nav-section-title">Main</div>
             <a href="/dashboard.html" class="nav-item" data-permission="dashboard.view">
@@ -20,7 +31,7 @@
             <a href="/index.html" class="nav-item" data-permission="pos.access">
                 <span class="nav-icon">🛒</span>
                 <span class="nav-text">Point of Sale</span>
-                <span class="nav-badge" data-tier="professional">Pro</span>
+                <span class="nav-badge" id="posBadge" style="display:none;">!</span>
             </a>
         </div>
         
@@ -33,6 +44,7 @@
             <a href="/inventory-count.html" class="nav-item" data-permission="inventory.view">
                 <span class="nav-icon">📋</span>
                 <span class="nav-text">Inventory</span>
+                <span class="nav-badge" id="lowStockBadge" style="display:none; background:#f59e0b;">!</span>
             </a>
             <a href="/returns-refunds.html" class="nav-item" data-permission="transaction.refund">
                 <span class="nav-icon">🔄</span>
@@ -46,18 +58,20 @@
                 <span class="nav-icon">👥</span>
                 <span class="nav-text">Customers</span>
             </a>
-            <a href="/loyalty.html" class="nav-item" data-permission="customer.loyalty" data-tier="professional">
+            <a href="/loyalty.html" class="nav-item" data-permission="loyalty.view" data-tier="professional">
                 <span class="nav-icon">⭐</span>
                 <span class="nav-text">Loyalty</span>
+                <span class="nav-badge pro-badge">Pro</span>
             </a>
             <a href="/gift-cards.html" class="nav-item" data-permission="giftcard.view" data-tier="basic">
                 <span class="nav-icon">🎁</span>
                 <span class="nav-text">Gift Cards</span>
+                <span class="nav-badge basic-badge">Basic+</span>
             </a>
         </div>
         
         <div class="nav-section">
-            <div class="nav-section-title">Reports</div>
+            <div class="nav-section-title">Reports & Analytics</div>
             <a href="/reports-custom.html" class="nav-item" data-permission="report.sales">
                 <span class="nav-icon">📊</span>
                 <span class="nav-text">Reports</span>
@@ -69,10 +83,10 @@
         </div>
         
         <div class="nav-section">
-            <div class="nav-section-title">Management</div>
+            <div class="nav-section-title">Operations</div>
             <a href="/time-clock.html" class="nav-item" data-permission="employee.view" data-tier="professional">
-                <span class="nav-icon">👔</span>
-                <span class="nav-text">Staff</span>
+                <span class="nav-icon">⏰</span>
+                <span class="nav-text">Time Clock</span>
             </a>
             <a href="/fleet-management.html" class="nav-item" data-permission="store.view" data-tier="professional">
                 <span class="nav-icon">🏢</span>
@@ -96,12 +110,21 @@
             </a>
             <a href="/offline.html" class="nav-item" data-permission="offline.access" data-tier="basic">
                 <span class="nav-icon">📡</span>
-                <span class="nav-text">Offline</span>
-                <span class="nav-badge" id="offlineBadgeNav" style="display:none; background:#f59e0b;">!</span>
+                <span class="nav-text">Offline Mode</span>
+                <span class="nav-badge" id="offlineBadge" style="display:none; background:#f59e0b;">!</span>
             </a>
+            <a href="/api-debug.html" class="nav-item" data-permission="api.access" data-tier="professional">
+                <span class="nav-icon">🔧</span>
+                <span class="nav-text">API Console</span>
+            </a>
+        </div>
+        
+        <div class="nav-section enterprise-section" data-tier="enterprise">
+            <div class="nav-section-title">Enterprise</div>
             <a href="/tenants.html" class="nav-item" data-permission="tenant.view" data-tier="enterprise">
                 <span class="nav-icon">🏪</span>
-                <span class="nav-text">Tenants</span>
+                <span class="nav-text">Multi-Tenant</span>
+                <span class="nav-badge enterprise-badge">Enterprise</span>
             </a>
             <a href="/compliance.html" class="nav-item" data-permission="compliance.view" data-tier="enterprise">
                 <span class="nav-icon">⚖️</span>
@@ -110,75 +133,295 @@
         </div>
     </nav>
     
+    <!-- Sidebar Footer / User Info -->
     <div class="sidebar-user">
-        <div class="user-avatar" id="sidebarUserAvatar">U</div>
-        <div class="user-info">
-            <div class="user-name" id="sidebarUserName">Loading...</div>
-            <div class="user-role" id="sidebarUserRole">cashier</div>
+        <div class="user-status-indicator" id="userStatus"></div>
+        <div class="user-avatar-sidebar" id="sidebarUserAvatar">U</div>
+        <div class="user-info-sidebar">
+            <div class="user-name-sidebar" id="sidebarUserName">Loading...</div>
+            <div class="user-role-sidebar" id="sidebarUserRole">cashier</div>
+            <div class="user-tier-sidebar" id="sidebarUserTier">Freemium</div>
+        </div>
+        <div class="sidebar-actions">
+            <button class="sidebar-action-btn" id="sidebarSettingsBtn" title="Settings">⚙️</button>
+            <button class="sidebar-action-btn" id="sidebarLogoutBtn" title="Logout">🚪</button>
         </div>
     </div>
 </aside>
 
+<style>
+    /* Sidebar specific styles */
+    .logo-version {
+        font-size: 9px;
+        color: var(--gray-light);
+        margin-top: 4px;
+    }
+    
+    .nav-badge {
+        margin-left: auto;
+        background: var(--danger);
+        padding: 2px 8px;
+        border-radius: 100px;
+        font-size: 9px;
+        font-weight: 600;
+    }
+    
+    .pro-badge {
+        background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+    }
+    
+    .basic-badge {
+        background: var(--warning);
+    }
+    
+    .enterprise-badge {
+        background: linear-gradient(135deg, #ec4899, #be185d);
+    }
+    
+    .sidebar-user {
+        position: relative;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 16px;
+        border-top: 1px solid rgba(255,255,255,0.1);
+        margin-top: auto;
+    }
+    
+    .user-status-indicator {
+        position: absolute;
+        bottom: 20px;
+        left: 20px;
+        width: 10px;
+        height: 10px;
+        background: var(--success);
+        border-radius: 50%;
+        border: 2px solid var(--dark);
+    }
+    
+    .user-avatar-sidebar {
+        width: 40px;
+        height: 40px;
+        background: var(--primary);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        font-size: 14px;
+    }
+    
+    .user-info-sidebar {
+        flex: 1;
+    }
+    
+    .user-name-sidebar {
+        font-size: 13px;
+        font-weight: 600;
+    }
+    
+    .user-role-sidebar {
+        font-size: 10px;
+        color: var(--gray-light);
+    }
+    
+    .user-tier-sidebar {
+        font-size: 9px;
+        color: var(--primary-light);
+        margin-top: 2px;
+    }
+    
+    .sidebar-actions {
+        display: flex;
+        gap: 8px;
+    }
+    
+    .sidebar-action-btn {
+        background: rgba(255,255,255,0.1);
+        border: none;
+        color: var(--gray-light);
+        width: 28px;
+        height: 28px;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    
+    .sidebar-action-btn:hover {
+        background: rgba(255,255,255,0.2);
+        color: white;
+    }
+    
+    .sidebar.collapsed .sidebar-user {
+        justify-content: center;
+        padding: 16px 8px;
+    }
+    
+    .sidebar.collapsed .user-info-sidebar,
+    .sidebar.collapsed .sidebar-actions {
+        display: none;
+    }
+    
+    .sidebar.collapsed .user-status-indicator {
+        left: 8px;
+    }
+    
+    .enterprise-section {
+        border-top: 1px solid rgba(255,255,255,0.05);
+        margin-top: 8px;
+        padding-top: 8px;
+    }
+    
+    /* Sidebar toggle button */
+    .sidebar-toggle {
+        position: absolute;
+        top: 20px;
+        right: -12px;
+        width: 24px;
+        height: 24px;
+        background: var(--primary);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        z-index: 101;
+        transition: transform 0.2s;
+        color: white;
+        font-size: 12px;
+    }
+    
+    .sidebar.collapsed .sidebar-toggle {
+        transform: rotate(180deg);
+    }
+</style>
+
 <script>
-    // Sidebar initialization with RBAC
     (function() {
-        // Update user info
-        const user = JSON.parse(localStorage.getItem('pos_user') || '{}');
-        const userNameSpan = document.getElementById('sidebarUserName');
-        const userRoleSpan = document.getElementById('sidebarUserRole');
-        const userAvatar = document.getElementById('sidebarUserAvatar');
+        // ============================================
+        // SIDEBAR CONTROLLER
+        // ============================================
         
-        if (userNameSpan) userNameSpan.textContent = user.name || user.email?.split('@')[0] || 'User';
-        if (userRoleSpan) userRoleSpan.textContent = user.role?.toUpperCase() || 'Cashier';
-        if (userAvatar) userAvatar.textContent = (user.name?.charAt(0) || 'U').toUpperCase();
+        const user = JSON.parse(localStorage.getItem('pos_user') || '{"name":"Demo User","role":"cashier","tier":"freemium"}');
+        
+        // Update user display
+        function updateUserDisplay() {
+            const initials = (user.name || 'U').split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+            document.getElementById('sidebarUserAvatar').textContent = initials;
+            document.getElementById('sidebarUserName').textContent = user.name || 'Demo User';
+            document.getElementById('sidebarUserRole').textContent = (user.role || 'cashier').charAt(0).toUpperCase() + (user.role || 'cashier').slice(1);
+            document.getElementById('sidebarUserTier').textContent = (user.tier || 'freemium').charAt(0).toUpperCase() + (user.tier || 'freemium').slice(1);
+        }
         
         // Apply RBAC filtering
-        if (window.rbac) {
-            // Hide menu items without permission
+        function applyRBACFilters() {
+            if (!window.rbac) return;
+            
+            // Filter by permission
             document.querySelectorAll('.nav-item[data-permission]').forEach(item => {
-                const requiredPerm = item.dataset.permission;
-                if (!window.rbac.hasPermission(requiredPerm)) {
+                const perm = item.dataset.permission;
+                if (!window.rbac.hasPermission(perm)) {
                     item.style.display = 'none';
                 }
             });
             
-            // Hide tier-locked items
+            // Filter by tier
             document.querySelectorAll('.nav-item[data-tier]').forEach(item => {
                 const requiredTier = item.dataset.tier;
-                const userTier = user.tier || 'freemium';
-                const tierLevels = { freemium: 0, basic: 1, professional: 2, premium: 3, enterprise: 4 };
-                if (tierLevels[userTier] < tierLevels[requiredTier]) {
+                if (!window.rbac.hasTierAccess(requiredTier)) {
                     item.style.display = 'none';
                 }
             });
             
-            // Hide role-locked items
-            document.querySelectorAll('.nav-item[data-role]').forEach(item => {
-                const requiredRole = item.dataset.role;
-                if (!window.rbac.isAtLeast(requiredRole)) {
-                    item.style.display = 'none';
+            // Filter enterprise section
+            const enterpriseSection = document.querySelector('.enterprise-section');
+            if (enterpriseSection && !window.rbac.hasTierAccess('enterprise')) {
+                enterpriseSection.style.display = 'none';
+            }
+        }
+        
+        // Sidebar collapse toggle
+        const sidebar = document.getElementById('appSidebar');
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        const mainContent = document.querySelector('.main-content');
+        
+        const isCollapsed = localStorage.getItem('sidebar_collapsed') === 'true';
+        if (isCollapsed) {
+            sidebar?.classList.add('collapsed');
+            mainContent?.classList.add('expanded');
+        }
+        
+        if (sidebarToggle) {
+            sidebarToggle.addEventListener('click', () => {
+                sidebar.classList.toggle('collapsed');
+                const newState = sidebar.classList.contains('collapsed');
+                localStorage.setItem('sidebar_collapsed', newState);
+                mainContent?.classList.toggle('expanded', newState);
+            });
+        }
+        
+        // Active nav item highlighting
+        function setActiveNavItem() {
+            const currentPath = window.location.pathname;
+            document.querySelectorAll('.nav-item').forEach(item => {
+                const href = item.getAttribute('href');
+                if (href && currentPath.includes(href)) {
+                    item.classList.add('active');
+                } else {
+                    item.classList.remove('active');
                 }
             });
         }
         
-        // Set active nav item based on current URL
-        const currentPath = window.location.pathname;
-        document.querySelectorAll('.nav-item').forEach(item => {
-            const href = item.getAttribute('href');
-            if (href && currentPath.includes(href)) {
-                item.classList.add('active');
-            }
-        });
-        
         // Offline status badge
-        window.addEventListener('offline', () => {
-            const offlineBadge = document.getElementById('offlineBadgeNav');
-            if (offlineBadge) offlineBadge.style.display = 'inline-flex';
-        });
+        function updateOfflineStatus() {
+            const offlineBadge = document.getElementById('offlineBadge');
+            if (offlineBadge) {
+                offlineBadge.style.display = navigator.onLine ? 'none' : 'inline-flex';
+            }
+        }
         
-        window.addEventListener('online', () => {
-            const offlineBadge = document.getElementById('offlineBadgeNav');
-            if (offlineBadge) offlineBadge.style.display = 'none';
+        window.addEventListener('online', updateOfflineStatus);
+        window.addEventListener('offline', updateOfflineStatus);
+        updateOfflineStatus();
+        
+        // Low stock badge (demo)
+        function updateLowStockBadge() {
+            const lowStockBadge = document.getElementById('lowStockBadge');
+            if (lowStockBadge) {
+                const hasLowStock = true; // Would check from API
+                lowStockBadge.style.display = hasLowStock ? 'inline-flex' : 'none';
+            }
+        }
+        
+        // Settings button
+        const settingsBtn = document.getElementById('sidebarSettingsBtn');
+        if (settingsBtn) {
+            settingsBtn.addEventListener('click', () => {
+                window.location.href = '/settings.html';
+            });
+        }
+        
+        // Logout button
+        const logoutBtn = document.getElementById('sidebarLogoutBtn');
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', () => {
+                if (confirm('Are you sure you want to logout?')) {
+                    window.location.href = '/logout.html';
+                }
+            });
+        }
+        
+        // Initialize
+        updateUserDisplay();
+        applyRBACFilters();
+        setActiveNavItem();
+        updateLowStockBadge();
+        
+        // Re-apply RBAC when window loads (for dynamic content)
+        window.addEventListener('load', () => {
+            applyRBACFilters();
+            setActiveNavItem();
         });
     })();
 </script>
