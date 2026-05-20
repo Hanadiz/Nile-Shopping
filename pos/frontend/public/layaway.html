@@ -1,16 +1,15 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nile POS - Layaway Management</title>
+    <title>Nile POS - Layaway Management | Payment Plans</title>
     <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: #f1f5f9;
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+            background: #f3f4f6;
             padding: 24px;
         }
         .container { max-width: 1200px; margin: 0 auto; }
@@ -22,25 +21,29 @@
             flex-wrap: wrap;
             gap: 16px;
         }
-        h1 { font-size: 24px; color: #1e293b; }
-        .back-btn {
-            background: white;
-            border: 1px solid #e2e8f0;
+        h1 { font-size: 24px; color: #111827; }
+        .back-btn, .new-btn {
             padding: 8px 16px;
             border-radius: 8px;
             cursor: pointer;
             text-decoration: none;
-            color: #475569;
         }
-        .new-btn {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 10px;
+        .back-btn { background: white; border: 1px solid #e5e7eb; color: #374151; }
+        .new-btn { background: #2563eb; color: white; border: none; font-weight: 600; }
+        .currency-switch {
+            display: flex;
+            gap: 8px;
+            background: #e5e7eb;
+            padding: 4px 12px;
+            border-radius: 100px;
+        }
+        .currency-opt {
+            padding: 4px 12px;
+            border-radius: 100px;
             cursor: pointer;
-            font-weight: 600;
+            font-size: 13px;
         }
+        .currency-opt.active { background: #2563eb; color: white; }
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -52,22 +55,24 @@
             border-radius: 16px;
             padding: 20px;
             text-align: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
-        .stat-value { font-size: 28px; font-weight: 700; color: #667eea; }
+        .stat-value { font-size: 28px; font-weight: 700; color: #2563eb; }
         .layaway-table {
             background: white;
             border-radius: 20px;
-            overflow: hidden;
+            overflow-x: auto;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
-        table { width: 100%; border-collapse: collapse; }
-        th, td { padding: 12px 16px; text-align: left; border-bottom: 1px solid #f1f5f9; }
-        th { background: #f8fafc; font-weight: 600; }
-        .status-active { background: #d1fae5; color: #065f46; padding: 4px 8px; border-radius: 100px; font-size: 11px; display: inline-block; }
-        .status-overdue { background: #fee2e2; color: #991b1b; padding: 4px 8px; border-radius: 100px; font-size: 11px; display: inline-block; }
-        .status-completed { background: #e2e8f0; color: #475569; padding: 4px 8px; border-radius: 100px; font-size: 11px; display: inline-block; }
+        table { width: 100%; border-collapse: collapse; min-width: 800px; }
+        th, td { padding: 14px 16px; text-align: left; border-bottom: 1px solid #e5e7eb; }
+        th { background: #f9fafb; font-weight: 600; }
+        .status-active { background: #dcfce7; color: #166534; padding: 4px 10px; border-radius: 100px; display: inline-block; font-size: 11px; }
+        .status-overdue { background: #fee2e2; color: #991b1b; padding: 4px 10px; border-radius: 100px; display: inline-block; font-size: 11px; }
+        .status-completed { background: #e5e7eb; color: #374151; padding: 4px 10px; border-radius: 100px; display: inline-block; font-size: 11px; }
         .view-btn {
             padding: 4px 12px;
-            background: #667eea;
+            background: #2563eb;
             color: white;
             border: none;
             border-radius: 6px;
@@ -94,30 +99,34 @@
             max-height: 80vh;
             overflow-y: auto;
         }
-        .modal-header { padding: 20px; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; }
+        .modal-header { padding: 20px; border-bottom: 1px solid #e5e7eb; display: flex; justify-content: space-between; }
         .modal-body { padding: 20px; }
         .form-group { margin-bottom: 16px; }
         .form-group label { display: block; margin-bottom: 6px; font-weight: 500; }
-        .form-group input, .form-group select { width: 100%; padding: 10px; border: 1px solid #e2e8f0; border-radius: 8px; }
-        .payment-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #e2e8f0; }
+        .form-group input, .form-group select { width: 100%; padding: 10px; border: 1px solid #e5e7eb; border-radius: 8px; }
         .make-payment {
             background: #10b981;
             color: white;
             border: none;
-            padding: 10px;
+            padding: 12px;
             border-radius: 8px;
             cursor: pointer;
             margin-top: 12px;
-        }
-        @media (max-width: 768px) {
-            th, td { font-size: 12px; padding: 8px; }
+            width: 100%;
+            font-weight: 600;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>📦 Layaway Management</h1>
+            <div style="display: flex; align-items: center; gap: 16px;">
+                <h1>📦 Layaway Management</h1>
+                <div class="currency-switch">
+                    <span class="currency-opt" data-currency="USD">USD</span>
+                    <span class="currency-opt" data-currency="UGX">UGX</span>
+                </div>
+            </div>
             <div style="display: flex; gap: 12px;">
                 <a href="/index.html" class="back-btn">← Back</a>
                 <button class="new-btn" id="newLayawayBtn">+ New Layaway</button>
@@ -133,9 +142,7 @@
 
         <div class="layaway-table">
             <table>
-                <thead>
-                    <tr><th>ID</th><th>Customer</th><th>Total</th><th>Paid</th><th>Balance</th><th>Due Date</th><th>Status</th><th>Action</th></tr>
-                </thead>
+                <thead><tr><th>ID</th><th>Customer</th><th>Total</th><th>Paid</th><th>Balance</th><th>Due Date</th><th>Status</th><th>Action</th></tr></thead>
                 <tbody id="layawayTableBody"></tbody>
             </table>
         </div>
@@ -144,12 +151,12 @@
     <!-- Layaway Modal -->
     <div id="layawayModal" class="modal">
         <div class="modal-content">
-            <div class="modal-header"><h3 id="modalTitle">New Layaway</h3><button class="close-modal">✕</button></div>
+            <div class="modal-header"><h3>New Layaway</h3><button class="close-modal">✕</button></div>
             <div class="modal-body">
                 <form id="layawayForm">
                     <div class="form-group"><label>Customer Name</label><input type="text" id="customerName" required></div>
-                    <div class="form-group"><label>Customer Phone</label><input type="text" id="customerPhone"></div>
-                    <div class="form-group"><label>Total Amount</label><input type="number" id="totalAmount" step="0.01" required></div>
+                    <div class="form-group"><label>Customer Phone</label><input type="text" id="customerPhone" placeholder="+256 XXX XXX XXX"></div>
+                    <div class="form-group"><label>Total Amount (USD)</label><input type="number" id="totalAmountUSD" step="0.01" required></div>
                     <div class="form-group"><label>Deposit (%)</label><input type="number" id="depositPercent" value="20" step="5"></div>
                     <div class="form-group"><label>Due Date</label><input type="date" id="dueDate" required></div>
                     <div class="form-group"><label>Notes</label><textarea id="notes" rows="2"></textarea></div>
@@ -165,9 +172,9 @@
             <div class="modal-header"><h3>Make Payment</h3><button class="close-modal">✕</button></div>
             <div class="modal-body">
                 <div id="paymentInfo"></div>
-                <div class="form-group"><label>Payment Amount</label><input type="number" id="paymentAmount" step="0.01" placeholder="0.00"></div>
+                <div class="form-group"><label>Payment Amount (USD)</label><input type="number" id="paymentAmountUSD" step="0.01" placeholder="0.00"></div>
                 <div class="form-group"><label>Payment Method</label>
-                    <select id="paymentMethod"><option value="cash">Cash</option><option value="card">Card</option></select>
+                    <select id="paymentMethod"><option value="cash">Cash</option><option value="card">Card</option><option value="mobile">Mobile Money</option></select>
                 </div>
                 <button id="submitPaymentBtn" class="make-payment">Process Payment</button>
             </div>
@@ -176,22 +183,32 @@
 
     <script>
         (function() {
+            const EXCHANGE_RATE = localStorage.getItem('exchange_rate') ? parseFloat(localStorage.getItem('exchange_rate')) : 3700;
+            let currentCurrency = localStorage.getItem('pos_currency') || 'UGX';
+            
+            function formatMoney(amountUSD) {
+                if (currentCurrency === 'UGX') {
+                    return `UGX ${Math.round(amountUSD * EXCHANGE_RATE).toLocaleString('en-UG')}`;
+                }
+                return `$${amountUSD.toFixed(2)}`;
+            }
+            
             let layaways = [
-                { id: 'LAY-001', customerName: 'John Doe', customerPhone: '555-0101', total: 299.99, paid: 100.00, balance: 199.99, dueDate: '2024-02-15', status: 'active', notes: '', payments: [{ date: '2024-01-15', amount: 100.00 }] },
-                { id: 'LAY-002', customerName: 'Jane Smith', customerPhone: '555-0102', total: 89.99, paid: 50.00, balance: 39.99, dueDate: '2024-01-20', status: 'overdue', notes: '', payments: [{ date: '2024-01-10', amount: 50.00 }] }
+                { id: 'LAY-001', customerName: 'John Davies', customerPhone: '+256 712 345678', totalUSD: 299.99, paidUSD: 100.00, balanceUSD: 199.99, dueDate: '2024-02-15', status: 'active', notes: '', payments: [{ date: '2024-01-15', amountUSD: 100.00 }] },
+                { id: 'LAY-002', customerName: 'Sarah O\'Brien', customerPhone: '+256 712 345679', totalUSD: 89.99, paidUSD: 50.00, balanceUSD: 39.99, dueDate: '2024-01-20', status: 'overdue', notes: '', payments: [{ date: '2024-01-10', amountUSD: 50.00 }] }
             ];
             let nextId = 3;
             let currentLayaway = null;
 
             function updateStats() {
                 const active = layaways.filter(l => l.status === 'active').length;
-                const totalValue = layaways.reduce((s, l) => s + l.total, 0);
-                const remainingBalance = layaways.reduce((s, l) => s + l.balance, 0);
+                const totalValueUSD = layaways.reduce((s, l) => s + l.totalUSD, 0);
+                const remainingBalanceUSD = layaways.reduce((s, l) => s + l.balanceUSD, 0);
                 const overdue = layaways.filter(l => l.status === 'overdue').length;
                 
                 document.getElementById('activeCount').textContent = active;
-                document.getElementById('totalValue').textContent = `$${totalValue.toFixed(2)}`;
-                document.getElementById('remainingBalance').textContent = `$${remainingBalance.toFixed(2)}`;
+                document.getElementById('totalValue').textContent = formatMoney(totalValueUSD);
+                document.getElementById('remainingBalance').textContent = formatMoney(remainingBalanceUSD);
                 document.getElementById('overdueCount').textContent = overdue;
             }
 
@@ -201,9 +218,9 @@
                     <tr>
                         <td>${l.id}</td>
                         <td>${l.customerName}</td>
-                        <td>$${l.total.toFixed(2)}</td>
-                        <td>$${l.paid.toFixed(2)}</td>
-                        <td>$${l.balance.toFixed(2)}</td>
+                        <td>${formatMoney(l.totalUSD)}</td>
+                        <td>${formatMoney(l.paidUSD)}</td>
+                        <td>${formatMoney(l.balanceUSD)}</td>
                         <td>${l.dueDate}</td>
                         <td><span class="status-${l.status}">${l.status}</span></td>
                         <td><button class="view-btn" data-id="${l.id}">View/Pay</button></td>
@@ -219,45 +236,42 @@
                 currentLayaway = layaways.find(l => l.id === id);
                 if (!currentLayaway) return;
                 
-                const paymentHistory = currentLayaway.payments.map(p => `<div class="payment-row"><span>${p.date}</span><span>$${p.amount.toFixed(2)}</span></div>`).join('');
+                const paymentHistory = currentLayaway.payments.map(p => `<div class="payment-row"><span>${p.date}</span><span>${formatMoney(p.amountUSD)}</span></div>`).join('');
                 
                 document.getElementById('paymentInfo').innerHTML = `
                     <div><strong>${currentLayaway.customerName}</strong> (${currentLayaway.customerPhone})</div>
-                    <div>Total: $${currentLayaway.total.toFixed(2)} | Paid: $${currentLayaway.paid.toFixed(2)} | Balance: $${currentLayaway.balance.toFixed(2)}</div>
+                    <div>Total: ${formatMoney(currentLayaway.totalUSD)} | Paid: ${formatMoney(currentLayaway.paidUSD)} | Balance: ${formatMoney(currentLayaway.balanceUSD)}</div>
                     <div>Due: ${currentLayaway.dueDate}</div>
                     <div style="margin-top:16px;"><strong>Payment History:</strong></div>
                     ${paymentHistory || '<div>No payments yet</div>'}
                 `;
-                document.getElementById('paymentAmount').value = '';
+                document.getElementById('paymentAmountUSD').value = '';
                 document.getElementById('paymentModal').classList.add('active');
             }
 
             function makePayment() {
                 if (!currentLayaway) return;
                 
-                const amount = parseFloat(document.getElementById('paymentAmount').value);
-                if (isNaN(amount) || amount <= 0) {
+                const amountUSD = parseFloat(document.getElementById('paymentAmountUSD').value);
+                if (isNaN(amountUSD) || amountUSD <= 0) {
                     alert('Enter a valid payment amount');
                     return;
                 }
-                if (amount > currentLayaway.balance) {
-                    alert(`Payment cannot exceed balance of $${currentLayaway.balance.toFixed(2)}`);
+                if (amountUSD > currentLayaway.balanceUSD) {
+                    alert(`Payment cannot exceed balance of ${formatMoney(currentLayaway.balanceUSD)}`);
                     return;
                 }
                 
-                currentLayaway.paid += amount;
-                currentLayaway.balance -= amount;
-                currentLayaway.payments.push({ date: new Date().toISOString().split('T')[0], amount: amount });
+                currentLayaway.paidUSD += amountUSD;
+                currentLayaway.balanceUSD -= amountUSD;
+                currentLayaway.payments.push({ date: new Date().toISOString().split('T')[0], amountUSD: amountUSD });
                 
-                if (currentLayaway.balance <= 0) {
+                if (currentLayaway.balanceUSD <= 0) {
                     currentLayaway.status = 'completed';
                     alert('Layaway fully paid! Customer can pick up items.');
                 } else {
-                    // Check if overdue
                     const today = new Date().toISOString().split('T')[0];
-                    if (currentLayaway.dueDate < today && currentLayaway.balance > 0) {
-                        currentLayaway.status = 'overdue';
-                    }
+                    if (currentLayaway.dueDate < today && currentLayaway.balanceUSD > 0) currentLayaway.status = 'overdue';
                 }
                 
                 const index = layaways.findIndex(l => l.id === currentLayaway.id);
@@ -266,27 +280,27 @@
                 updateStats();
                 renderLayaways();
                 document.getElementById('paymentModal').classList.remove('active');
-                alert(`Payment of $${amount.toFixed(2)} received. Remaining balance: $${currentLayaway.balance.toFixed(2)}`);
+                alert(`Payment of ${formatMoney(amountUSD)} received. Remaining balance: ${formatMoney(currentLayaway.balanceUSD)}`);
             }
 
             function createLayaway(event) {
                 event.preventDefault();
                 
-                const total = parseFloat(document.getElementById('totalAmount').value);
+                const totalUSD = parseFloat(document.getElementById('totalAmountUSD').value);
                 const depositPercent = parseFloat(document.getElementById('depositPercent').value);
-                const deposit = total * (depositPercent / 100);
+                const depositUSD = totalUSD * (depositPercent / 100);
                 
                 const newLayaway = {
                     id: `LAY-${String(nextId++).padStart(3, '0')}`,
                     customerName: document.getElementById('customerName').value,
                     customerPhone: document.getElementById('customerPhone').value,
-                    total: total,
-                    paid: deposit,
-                    balance: total - deposit,
+                    totalUSD: totalUSD,
+                    paidUSD: depositUSD,
+                    balanceUSD: totalUSD - depositUSD,
                     dueDate: document.getElementById('dueDate').value,
                     status: 'active',
                     notes: document.getElementById('notes').value,
-                    payments: [{ date: new Date().toISOString().split('T')[0], amount: deposit }]
+                    payments: [{ date: new Date().toISOString().split('T')[0], amountUSD: depositUSD }]
                 };
                 
                 layaways.push(newLayaway);
@@ -294,12 +308,27 @@
                 renderLayaways();
                 document.getElementById('layawayModal').classList.remove('active');
                 document.getElementById('layawayForm').reset();
-                alert(`Layaway created! Deposit: $${deposit.toFixed(2)}. Balance due: $${newLayaway.balance.toFixed(2)}`);
+                alert(`Layaway created! Deposit: ${formatMoney(depositUSD)}. Balance due: ${formatMoney(newLayaway.balanceUSD)}`);
+            }
+
+            function initCurrencySelector() {
+                document.querySelectorAll('.currency-opt').forEach(opt => {
+                    opt.classList.toggle('active', opt.dataset.currency === currentCurrency);
+                    opt.addEventListener('click', () => {
+                        currentCurrency = opt.dataset.currency;
+                        localStorage.setItem('pos_currency', currentCurrency);
+                        document.querySelectorAll('.currency-opt').forEach(o => o.classList.remove('active'));
+                        opt.classList.add('active');
+                        updateStats();
+                        renderLayaways();
+                    });
+                });
             }
 
             function init() {
                 updateStats();
                 renderLayaways();
+                initCurrencySelector();
                 
                 document.getElementById('newLayawayBtn').addEventListener('click', () => {
                     document.getElementById('layawayForm').reset();
@@ -308,11 +337,8 @@
                 });
                 document.getElementById('layawayForm').addEventListener('submit', createLayaway);
                 document.getElementById('submitPaymentBtn').addEventListener('click', makePayment);
-                
                 document.querySelectorAll('.close-modal').forEach(btn => {
-                    btn.addEventListener('click', () => {
-                        document.querySelectorAll('.modal').forEach(m => m.classList.remove('active'));
-                    });
+                    btn.addEventListener('click', () => document.querySelectorAll('.modal').forEach(m => m.classList.remove('active')));
                 });
             }
             
