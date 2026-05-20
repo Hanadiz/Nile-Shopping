@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nile POS - Inventory Count</title>
+    <title>Nile POS - Inventory Count | Stock Management</title>
     <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: #f1f5f9;
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+            background: #f3f4f6;
             padding: 24px;
         }
         .container { max-width: 1400px; margin: 0 auto; }
@@ -21,18 +21,36 @@
             flex-wrap: wrap;
             gap: 16px;
         }
-        h1 { font-size: 24px; color: #1e293b; }
+        h1 { font-size: 24px; color: #111827; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+        .currency-selector {
+            background: #f3f4f6;
+            padding: 6px 12px;
+            border-radius: 100px;
+            font-size: 13px;
+            display: flex;
+            gap: 8px;
+        }
+        .currency-option {
+            cursor: pointer;
+            padding: 4px 12px;
+            border-radius: 100px;
+            transition: all 0.2s;
+        }
+        .currency-option.active {
+            background: #2563eb;
+            color: white;
+        }
         .back-btn {
             background: white;
-            border: 1px solid #e2e8f0;
+            border: 1px solid #e5e7eb;
             padding: 8px 16px;
             border-radius: 8px;
             cursor: pointer;
             text-decoration: none;
-            color: #475569;
+            color: #374151;
         }
         .start-btn {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #2563eb;
             color: white;
             border: none;
             padding: 10px 20px;
@@ -42,18 +60,19 @@
         }
         .stats-bar {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
             gap: 16px;
             margin-bottom: 24px;
         }
         .stat {
             background: white;
             border-radius: 16px;
-            padding: 16px;
+            padding: 20px;
             text-align: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
-        .stat-value { font-size: 28px; font-weight: 700; color: #667eea; }
-        .stat-label { font-size: 12px; color: #64748b; margin-top: 4px; }
+        .stat-value { font-size: 28px; font-weight: 700; color: #2563eb; }
+        .stat-label { font-size: 13px; color: #6b7280; margin-top: 4px; }
         .action-bar {
             background: white;
             border-radius: 16px;
@@ -66,41 +85,45 @@
         }
         .search-box {
             flex: 1;
-            padding: 10px;
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
+            padding: 12px;
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            font-size: 14px;
         }
         .filter-select {
-            padding: 10px;
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
+            padding: 12px;
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            background: white;
         }
         .products-table {
             background: white;
             border-radius: 20px;
-            overflow: hidden;
+            overflow-x: auto;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
-        table { width: 100%; border-collapse: collapse; }
-        th, td { padding: 12px 16px; text-align: left; border-bottom: 1px solid #f1f5f9; }
-        th { background: #f8fafc; font-weight: 600; }
+        table { width: 100%; border-collapse: collapse; min-width: 700px; }
+        th, td { padding: 14px 16px; text-align: left; border-bottom: 1px solid #e5e7eb; }
+        th { background: #f9fafb; font-weight: 600; color: #374151; }
         .count-input {
-            width: 80px;
+            width: 100px;
             padding: 8px;
-            border: 1px solid #e2e8f0;
+            border: 2px solid #e5e7eb;
             border-radius: 8px;
             text-align: center;
+            font-weight: 500;
         }
         .count-input.dirty { background: #fef3c7; border-color: #f59e0b; }
         .variance-badge {
             display: inline-block;
-            padding: 4px 8px;
+            padding: 4px 10px;
             border-radius: 100px;
-            font-size: 11px;
+            font-size: 12px;
             font-weight: 600;
         }
-        .variance-positive { background: #d1fae5; color: #065f46; }
+        .variance-positive { background: #dcfce7; color: #166534; }
         .variance-negative { background: #fee2e2; color: #991b1b; }
-        .variance-zero { background: #e2e8f0; color: #475569; }
+        .variance-zero { background: #f3f4f6; color: #374151; }
         .submit-btn {
             width: 100%;
             padding: 16px;
@@ -129,21 +152,31 @@
         .modal-content {
             background: white;
             border-radius: 24px;
-            max-width: 400px;
+            max-width: 450px;
             width: 90%;
             padding: 24px;
             text-align: center;
         }
+        .inventory-value {
+            font-weight: 700;
+            color: #2563eb;
+        }
         @media (max-width: 768px) {
-            th, td { font-size: 12px; padding: 8px; }
-            .count-input { width: 60px; }
+            th, td { font-size: 12px; padding: 10px; }
+            .count-input { width: 70px; }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>📦 Inventory Count</h1>
+            <h1>
+                📦 Inventory Count
+                <div class="currency-selector">
+                    <span class="currency-option" data-currency="USD">USD $</span>
+                    <span class="currency-option" data-currency="UGX">UGX</span>
+                </div>
+            </h1>
             <div style="display: flex; gap: 12px;">
                 <a href="/index.html" class="back-btn">← Back</a>
                 <button class="start-btn" id="startCountBtn">+ Start New Count</button>
@@ -154,11 +187,11 @@
             <div class="stat"><div class="stat-value" id="totalProducts">0</div><div class="stat-label">Total Products</div></div>
             <div class="stat"><div class="stat-value" id="countedProducts">0</div><div class="stat-label">Counted</div></div>
             <div class="stat"><div class="stat-value" id="remainingProducts">0</div><div class="stat-label">Remaining</div></div>
-            <div class="stat"><div class="stat-value" id="varianceCount">0</div><div class="stat-label">Variances</div></div>
+            <div class="stat"><div class="stat-value" id="inventoryValue">0</div><div class="stat-label">Inventory Value</div></div>
         </div>
 
         <div class="action-bar">
-            <input type="text" id="searchInput" class="search-box" placeholder="Search product...">
+            <input type="text" id="searchInput" class="search-box" placeholder="Search product by name or SKU...">
             <select id="filterStatus" class="filter-select">
                 <option value="all">All Products</option>
                 <option value="counted">Counted</option>
@@ -177,7 +210,7 @@
         <div class="products-table">
             <table>
                 <thead>
-                    <tr><th>Product</th><th>SKU</th><th>System Stock</th><th>Counted</th><th>Variance</th></tr>
+                    <tr><th>Product</th><th>SKU</th><th>System Stock</th><th>Counted</th><th>Variance</th><th>Value (Current)</th></tr>
                 </thead>
                 <tbody id="inventoryTableBody"></tbody>
             </table>
@@ -192,25 +225,34 @@
             <p id="modalMessage"></p>
             <div style="display: flex; gap: 12px; margin-top: 20px;">
                 <button id="confirmYes" style="flex:1; padding:12px; background:#10b981; color:white; border:none; border-radius:8px;">Confirm</button>
-                <button id="confirmNo" style="flex:1; padding:12px; background:#e2e8f0; border:none; border-radius:8px;">Cancel</button>
+                <button id="confirmNo" style="flex:1; padding:12px; background:#e5e7eb; border:none; border-radius:8px;">Cancel</button>
             </div>
         </div>
     </div>
 
     <script>
         (function() {
-            // Product data with system stock
+            // Currency configuration
+            const EXCHANGE_RATE = 3700; // 1 USD = 3700 UGX
+            let currentCurrency = localStorage.getItem('pos_currency') || 'UGX';
+            
+            function formatMoney(amount) {
+                if (currentCurrency === 'UGX') {
+                    return `UGX ${Math.round(amount * EXCHANGE_RATE).toLocaleString('en-UG')}`;
+                }
+                return `$${amount.toFixed(2).toLocaleString('en-US')}`;
+            }
+            
+            // Product data with USD base prices
             let products = [
-                { id: 1, name: 'Classic T-Shirt', sku: 'PRD-001', category: 'Apparel', systemStock: 48, countedStock: null },
-                { id: 2, name: 'Slim Fit Jeans', sku: 'PRD-002', category: 'Apparel', systemStock: 35, countedStock: null },
-                { id: 3, name: 'Running Shoes', sku: 'PRD-003', category: 'Footwear', systemStock: 12, countedStock: null },
-                { id: 4, name: 'Leather Wallet', sku: 'PRD-004', category: 'Accessories', systemStock: 45, countedStock: null },
-                { id: 5, name: 'Smart Watch', sku: 'PRD-005', category: 'Electronics', systemStock: 8, countedStock: null },
-                { id: 6, name: 'Wireless Earbuds', sku: 'PRD-006', category: 'Electronics', systemStock: 3, countedStock: null },
-                { id: 7, name: 'Sunglasses', sku: 'PRD-007', category: 'Accessories', systemStock: 28, countedStock: null },
-                { id: 8, name: 'Backpack', sku: 'PRD-008', category: 'Accessories', systemStock: 18, countedStock: null },
-                { id: 9, name: 'Hoodie', sku: 'PRD-009', category: 'Apparel', systemStock: 22, countedStock: null },
-                { id: 10, name: 'Sneakers', sku: 'PRD-010', category: 'Footwear', systemStock: 0, countedStock: null }
+                { id: 1, name: 'Classic T-Shirt', sku: 'NLE-APR-001', category: 'Apparel', systemStock: 48, countedStock: null, costUSD: 12.50, retailUSD: 29.99 },
+                { id: 2, name: 'Slim Fit Jeans', sku: 'NLE-APR-002', category: 'Apparel', systemStock: 35, countedStock: null, costUSD: 35.00, retailUSD: 79.99 },
+                { id: 3, name: 'Running Shoes', sku: 'NLE-FTW-003', category: 'Footwear', systemStock: 12, countedStock: null, costUSD: 55.00, retailUSD: 119.99 },
+                { id: 4, name: 'Leather Wallet', sku: 'NLE-ACC-004', category: 'Accessories', systemStock: 45, countedStock: null, costUSD: 18.00, retailUSD: 49.99 },
+                { id: 5, name: 'Smart Watch', sku: 'NLE-ELC-005', category: 'Electronics', systemStock: 8, countedStock: null, costUSD: 150.00, retailUSD: 299.99 },
+                { id: 6, name: 'Wireless Earbuds', sku: 'NLE-ELC-006', category: 'Electronics', systemStock: 3, countedStock: null, costUSD: 40.00, retailUSD: 89.99 },
+                { id: 7, name: 'Sunglasses', sku: 'NLE-ACC-007', category: 'Accessories', systemStock: 28, countedStock: null, costUSD: 28.00, retailUSD: 69.99 },
+                { id: 8, name: 'Backpack', sku: 'NLE-ACC-008', category: 'Accessories', systemStock: 18, countedStock: null, costUSD: 38.00, retailUSD: 89.99 }
             ];
 
             let countActive = false;
@@ -256,6 +298,15 @@
                 return variance.toString();
             }
 
+            function calculateInventoryValue() {
+                let totalValueUSD = 0;
+                products.forEach(p => {
+                    const stock = p.countedStock !== null ? p.countedStock : p.systemStock;
+                    totalValueUSD += stock * p.costUSD;
+                });
+                return totalValueUSD;
+            }
+
             function renderInventoryTable() {
                 const searchTerm = document.getElementById('searchInput').value.toLowerCase();
                 const filterStatus = document.getElementById('filterStatus').value;
@@ -269,25 +320,24 @@
                         p.sku.toLowerCase().includes(searchTerm)
                     );
                 }
-                
-                if (filterCategory !== 'all') {
-                    filtered = filtered.filter(p => p.category === filterCategory);
-                }
-                
-                if (filterStatus === 'counted') {
-                    filtered = filtered.filter(p => p.countedStock !== null);
-                } else if (filterStatus === 'pending') {
-                    filtered = filtered.filter(p => p.countedStock === null);
-                } else if (filterStatus === 'variance') {
-                    filtered = filtered.filter(p => p.countedStock !== null && p.countedStock !== p.systemStock);
-                }
+                if (filterCategory !== 'all') filtered = filtered.filter(p => p.category === filterCategory);
+                if (filterStatus === 'counted') filtered = filtered.filter(p => p.countedStock !== null);
+                else if (filterStatus === 'pending') filtered = filtered.filter(p => p.countedStock === null);
+                else if (filterStatus === 'variance') filtered = filtered.filter(p => p.countedStock !== null && p.countedStock !== p.systemStock);
                 
                 const tbody = document.getElementById('inventoryTableBody');
+                const inventoryValueUSD = calculateInventoryValue();
+                const displayValue = currentCurrency === 'UGX' ? `UGX ${Math.round(inventoryValueUSD * EXCHANGE_RATE).toLocaleString()}` : `$${inventoryValueUSD.toFixed(2)}`;
+                document.getElementById('inventoryValue').textContent = displayValue;
+                
                 tbody.innerHTML = filtered.map(p => {
                     const variance = getVariance(p);
                     const varianceClass = getVarianceClass(variance);
                     const varianceText = getVarianceText(variance);
                     const isDirty = dirtyCounts[p.id];
+                    const stockToShow = p.countedStock !== null ? p.countedStock : p.systemStock;
+                    const valueUSD = stockToShow * p.costUSD;
+                    const valueDisplay = currentCurrency === 'UGX' ? `UGX ${Math.round(valueUSD * EXCHANGE_RATE).toLocaleString()}` : `$${valueUSD.toFixed(2)}`;
                     
                     return `
                         <tr data-id="${p.id}">
@@ -296,11 +346,11 @@
                             <td>${p.systemStock}</td>
                             <td><input type="number" class="count-input ${isDirty ? 'dirty' : ''}" data-id="${p.id}" value="${p.countedStock !== null ? p.countedStock : ''}" placeholder="—"></td>
                             <td><span class="variance-badge ${varianceClass}">${varianceText}</span></td>
+                            <td><span class="inventory-value">${valueDisplay}</span></td>
                         </tr>
                     `;
                 }).join('');
                 
-                // Add input handlers
                 document.querySelectorAll('.count-input').forEach(input => {
                     input.addEventListener('change', (e) => {
                         const id = parseInt(input.dataset.id);
@@ -316,7 +366,7 @@
                         }
                         saveCounts();
                         updateStats();
-                        renderInventoryTable(); // Refresh for variance display
+                        renderInventoryTable();
                     });
                 });
                 
@@ -332,7 +382,6 @@
                 document.getElementById('totalProducts').textContent = total;
                 document.getElementById('countedProducts').textContent = counted;
                 document.getElementById('remainingProducts').textContent = remaining;
-                document.getElementById('varianceCount').textContent = variances;
             }
 
             function startNewCount() {
@@ -356,9 +405,11 @@
                 }
                 
                 const variances = products.filter(p => p.countedStock !== p.systemStock);
+                const inventoryValueUSD = calculateInventoryValue();
+                const displayValue = currentCurrency === 'UGX' ? `UGX ${Math.round(inventoryValueUSD * EXCHANGE_RATE).toLocaleString()}` : `$${inventoryValueUSD.toFixed(2)}`;
                 const message = variances.length === 0 
-                    ? 'No variances found. No inventory adjustments needed.'
-                    : `${variances.length} products have variances. Adjust inventory?`;
+                    ? `No variances found. Inventory value: ${displayValue}`
+                    : `${variances.length} products have variances. New inventory value: ${displayValue}`;
                 
                 document.getElementById('modalMessage').innerHTML = message;
                 document.getElementById('confirmModal').classList.add('active');
@@ -366,17 +417,10 @@
 
             function applyAdjustments() {
                 const adjustments = products.filter(p => p.countedStock !== p.systemStock);
-                
-                adjustments.forEach(p => {
-                    // Update system stock (simulate)
-                    p.systemStock = p.countedStock;
-                });
-                
-                // Clear count session
+                adjustments.forEach(p => { p.systemStock = p.countedStock; });
                 localStorage.removeItem('inventory_count_session');
                 dirtyCounts = {};
                 countActive = false;
-                
                 showToast(`Adjusted ${adjustments.length} products. Inventory updated.`, 'success');
                 document.getElementById('confirmModal').classList.remove('active');
                 renderInventoryTable();
@@ -387,7 +431,7 @@
                 toast.textContent = message;
                 toast.style.cssText = `
                     position: fixed; bottom: 20px; right: 20px;
-                    background: ${type === 'error' ? '#ef4444' : '#10b981'};
+                    background: ${type === 'error' ? '#dc2626' : '#10b981'};
                     color: white; padding: 12px 20px; border-radius: 12px;
                     z-index: 1000; animation: slideIn 0.3s ease;
                 `;
@@ -401,9 +445,24 @@
                 return div.innerHTML;
             }
 
+            function initCurrencySelector() {
+                document.querySelectorAll('.currency-option').forEach(opt => {
+                    opt.classList.toggle('active', opt.dataset.currency === currentCurrency);
+                    opt.addEventListener('click', () => {
+                        currentCurrency = opt.dataset.currency;
+                        localStorage.setItem('pos_currency', currentCurrency);
+                        document.querySelectorAll('.currency-option').forEach(o => o.classList.remove('active'));
+                        opt.classList.add('active');
+                        renderInventoryTable();
+                        showToast(`Currency switched to ${currentCurrency === 'UGX' ? 'Ugandan Shilling (UGX)' : 'US Dollar (USD)'}`, 'success');
+                    });
+                });
+            }
+
             function init() {
                 loadSavedCounts();
                 renderInventoryTable();
+                initCurrencySelector();
                 
                 document.getElementById('startCountBtn').addEventListener('click', startNewCount);
                 document.getElementById('submitCountBtn').addEventListener('click', submitCount);
