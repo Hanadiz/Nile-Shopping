@@ -1,16 +1,15 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nile POS - Purchase Orders</title>
+    <title>Nile POS - Purchase Orders | Vendor Management</title>
     <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: #f1f5f9;
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+            background: #f3f4f6;
             padding: 24px;
         }
         .container { max-width: 1400px; margin: 0 auto; }
@@ -22,35 +21,50 @@
             flex-wrap: wrap;
             gap: 16px;
         }
-        h1 { font-size: 24px; color: #1e293b; }
+        h1 { font-size: 24px; color: #111827; }
         .back-btn, .new-btn {
             padding: 8px 16px;
             border-radius: 8px;
             cursor: pointer;
             text-decoration: none;
         }
-        .back-btn { background: white; border: 1px solid #e2e8f0; color: #475569; }
-        .new-btn { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; font-weight: 600; }
-        .tabs { display: flex; gap: 8px; margin-bottom: 24px; border-bottom: 1px solid #e2e8f0; }
-        .tab { padding: 12px 24px; cursor: pointer; border: none; background: none; }
-        .tab.active { border-bottom: 2px solid #667eea; color: #667eea; font-weight: 600; }
+        .back-btn { background: white; border: 1px solid #e5e7eb; color: #374151; }
+        .new-btn { background: #2563eb; color: white; border: none; font-weight: 600; }
+        .currency-switch {
+            display: flex;
+            gap: 8px;
+            background: #e5e7eb;
+            padding: 4px 12px;
+            border-radius: 100px;
+        }
+        .currency-opt {
+            padding: 4px 12px;
+            border-radius: 100px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+        .currency-opt.active { background: #2563eb; color: white; }
+        .tabs { display: flex; gap: 8px; margin-bottom: 24px; border-bottom: 1px solid #e5e7eb; }
+        .tab { padding: 12px 24px; cursor: pointer; border: none; background: none; font-weight: 500; }
+        .tab.active { border-bottom: 2px solid #2563eb; color: #2563eb; }
         .po-table {
             background: white;
             border-radius: 20px;
-            overflow: hidden;
+            overflow-x: auto;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
-        table { width: 100%; border-collapse: collapse; }
-        th, td { padding: 12px 16px; text-align: left; border-bottom: 1px solid #f1f5f9; }
-        th { background: #f8fafc; font-weight: 600; }
-        .status-draft { background: #e2e8f0; color: #475569; padding: 4px 8px; border-radius: 100px; font-size: 11px; display: inline-block; }
-        .status-sent { background: #fef3c7; color: #92400e; padding: 4px 8px; border-radius: 100px; font-size: 11px; display: inline-block; }
-        .status-received { background: #d1fae5; color: #065f46; padding: 4px 8px; border-radius: 100px; font-size: 11px; display: inline-block; }
+        table { width: 100%; border-collapse: collapse; min-width: 800px; }
+        th, td { padding: 14px 16px; text-align: left; border-bottom: 1px solid #e5e7eb; }
+        th { background: #f9fafb; font-weight: 600; }
+        .status-draft { background: #e5e7eb; color: #374151; padding: 4px 10px; border-radius: 100px; display: inline-block; font-size: 11px; }
+        .status-sent { background: #fef3c7; color: #92400e; padding: 4px 10px; border-radius: 100px; display: inline-block; font-size: 11px; }
+        .status-received { background: #dcfce7; color: #166534; padding: 4px 10px; border-radius: 100px; display: inline-block; font-size: 11px; }
         .action-btn {
-            padding: 4px 8px;
-            background: #667eea;
+            padding: 4px 12px;
+            background: #2563eb;
             color: white;
             border: none;
-            border-radius: 4px;
+            border-radius: 6px;
             cursor: pointer;
             margin: 0 2px;
         }
@@ -75,22 +89,28 @@
             max-height: 80vh;
             overflow-y: auto;
         }
-        .modal-header { padding: 20px; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; }
+        .modal-header { padding: 20px; border-bottom: 1px solid #e5e7eb; display: flex; justify-content: space-between; }
         .modal-body { padding: 20px; }
         .form-group { margin-bottom: 16px; }
         .form-group label { display: block; margin-bottom: 6px; font-weight: 500; }
-        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px; border: 1px solid #e2e8f0; border-radius: 8px; }
-        .item-row { display: flex; gap: 8px; margin-bottom: 8px; }
-        .add-item { background: #e2e8f0; border: none; padding: 8px; border-radius: 8px; cursor: pointer; width: 100%; margin-top: 12px; }
+        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px; border: 1px solid #e5e7eb; border-radius: 8px; }
+        .item-row { display: flex; gap: 8px; margin-bottom: 8px; flex-wrap: wrap; }
+        .add-item { background: #e5e7eb; border: none; padding: 10px; border-radius: 8px; cursor: pointer; width: 100%; margin-top: 12px; }
         @media (max-width: 768px) {
-            th, td { font-size: 12px; padding: 8px; }
+            th, td { font-size: 12px; padding: 10px; }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>📋 Purchase Orders</h1>
+            <div style="display: flex; align-items: center; gap: 16px;">
+                <h1>📋 Purchase Orders</h1>
+                <div class="currency-switch">
+                    <span class="currency-opt" data-currency="USD">USD</span>
+                    <span class="currency-opt" data-currency="UGX">UGX</span>
+                </div>
+            </div>
             <div style="display: flex; gap: 12px;">
                 <a href="/index.html" class="back-btn">← Back</a>
                 <button class="new-btn" id="newPOBtn">+ New PO</button>
@@ -115,13 +135,13 @@
     <!-- PO Modal -->
     <div id="poModal" class="modal">
         <div class="modal-content">
-            <div class="modal-header"><h3 id="modalTitle">Create Purchase Order</h3><button class="close-modal">✕</button></div>
+            <div class="modal-header"><h3>Create Purchase Order</h3><button class="close-modal">✕</button></div>
             <div class="modal-body">
                 <form id="poForm">
                     <div class="form-group"><label>Vendor</label><input type="text" id="vendor" required placeholder="Supplier name"></div>
                     <div class="form-group"><label>Expected Date</label><input type="date" id="expectedDate"></div>
                     <div id="itemsContainer">
-                        <div class="item-row"><input type="text" placeholder="Product" style="flex:2"><input type="number" placeholder="Qty" style="flex:1"><input type="text" placeholder="Price" style="flex:1"></div>
+                        <div class="item-row"><input type="text" placeholder="Product" style="flex:2"><input type="number" placeholder="Qty" style="flex:1"><input type="number" placeholder="Unit Cost (USD)" step="0.01" style="flex:1"></div>
                     </div>
                     <button type="button" class="add-item" id="addItemBtn">+ Add Item</button>
                     <div class="form-group"><label>Notes</label><textarea id="poNotes" rows="2"></textarea></div>
@@ -144,9 +164,19 @@
 
     <script>
         (function() {
+            const EXCHANGE_RATE = localStorage.getItem('exchange_rate') ? parseFloat(localStorage.getItem('exchange_rate')) : 3700;
+            let currentCurrency = localStorage.getItem('pos_currency') || 'UGX';
+            
+            function formatMoney(amountUSD) {
+                if (currentCurrency === 'UGX') {
+                    return `UGX ${Math.round(amountUSD * EXCHANGE_RATE).toLocaleString('en-UG')}`;
+                }
+                return `$${amountUSD.toFixed(2)}`;
+            }
+            
             let purchaseOrders = [
-                { id: 'PO-001', vendor: 'Apple Inc.', date: '2024-01-10', expectedDate: '2024-01-20', total: 2499.99, status: 'received', items: [{ product: 'Smart Watch', qty: 5, price: 199.99 }], notes: '' },
-                { id: 'PO-002', vendor: 'Nike', date: '2024-01-12', expectedDate: '2024-01-25', total: 899.95, status: 'sent', items: [{ product: 'Running Shoes', qty: 10, price: 89.99 }], notes: '' }
+                { id: 'PO-001', vendor: 'Nile Basics Co.', date: '2024-01-10', expectedDate: '2024-01-20', totalUSD: 2499.99, status: 'received', items: [{ product: 'Classic T-Shirt', qty: 100, unitCostUSD: 12.50 }], notes: '' },
+                { id: 'PO-002', vendor: 'Nile Technologies', date: '2024-01-12', expectedDate: '2024-01-25', totalUSD: 4500.00, status: 'sent', items: [{ product: 'Smart Watch Pro', qty: 30, unitCostUSD: 150.00 }], notes: '' }
             ];
             let nextId = 3;
             let currentStatusFilter = 'all';
@@ -154,31 +184,22 @@
 
             function renderPOs() {
                 let filtered = purchaseOrders;
-                if (currentStatusFilter !== 'all') {
-                    filtered = purchaseOrders.filter(po => po.status === currentStatusFilter);
-                }
+                if (currentStatusFilter !== 'all') filtered = purchaseOrders.filter(po => po.status === currentStatusFilter);
                 
                 const tbody = document.getElementById('poTableBody');
                 tbody.innerHTML = filtered.map(po => `
                     <tr>
-                        <td>${po.id}</td>
-                        <td>${po.vendor}</td>
-                        <td>${po.date}</td>
-                        <td>$${po.total.toFixed(2)}</td>
+                        <td>${po.id}</td><td>${po.vendor}</td><td>${po.date}</td>
+                        <td>${formatMoney(po.totalUSD)}</td>
                         <td><span class="status-${po.status}">${po.status}</span></td>
-                        <td>
-                            ${po.status === 'sent' ? `<button class="action-btn receive-btn" data-id="${po.id}">Receive</button>` : ''}
+                        <td>${po.status === 'sent' ? `<button class="action-btn receive-btn" data-id="${po.id}">Receive</button>` : ''}
                             <button class="action-btn view-btn" data-id="${po.id}">View</button>
-                        </td>
+                         </td>
                     </tr>
                 `).join('');
                 
-                document.querySelectorAll('.receive-btn').forEach(btn => {
-                    btn.addEventListener('click', () => receiveOrder(btn.dataset.id));
-                });
-                document.querySelectorAll('.view-btn').forEach(btn => {
-                    btn.addEventListener('click', () => viewOrder(btn.dataset.id));
-                });
+                document.querySelectorAll('.receive-btn').forEach(btn => btn.addEventListener('click', () => receiveOrder(btn.dataset.id)));
+                document.querySelectorAll('.view-btn').forEach(btn => btn.addEventListener('click', () => viewOrder(btn.dataset.id)));
             }
 
             function receiveOrder(id) {
@@ -188,7 +209,7 @@
                         <div><strong>PO #:</strong> ${currentReceivePO.id}</div>
                         <div><strong>Vendor:</strong> ${currentReceivePO.vendor}</div>
                         <div><strong>Items:</strong></div>
-                        ${currentReceivePO.items.map(item => `<div>• ${item.product} x${item.qty}</div>`).join('')}
+                        ${currentReceivePO.items.map(item => `<div>• ${item.product} x${item.qty} @ ${formatMoney(item.unitCostUSD)} each</div>`).join('')}
                     `;
                     document.getElementById('receiveModal').classList.add('active');
                 }
@@ -207,9 +228,7 @@
 
             function viewOrder(id) {
                 const po = purchaseOrders.find(po => po.id === id);
-                if (po) {
-                    alert(`PO ${po.id}\nVendor: ${po.vendor}\nDate: ${po.date}\nTotal: $${po.total}\nStatus: ${po.status}\nItems: ${po.items.map(i => `${i.product} x${i.qty}`).join(', ')}`);
-                }
+                if (po) alert(`PO ${po.id}\nVendor: ${po.vendor}\nDate: ${po.date}\nTotal: ${formatMoney(po.totalUSD)}\nStatus: ${po.status}\nItems: ${po.items.map(i => `${i.product} x${i.qty}`).join(', ')}`);
             }
 
             function createPO(event) {
@@ -218,31 +237,27 @@
                 const vendor = document.getElementById('vendor').value;
                 const expectedDate = document.getElementById('expectedDate').value;
                 const items = [];
-                const rows = document.querySelectorAll('.item-row');
-                let total = 0;
+                let totalUSD = 0;
                 
-                rows.forEach(row => {
+                document.querySelectorAll('.item-row').forEach(row => {
                     const inputs = row.querySelectorAll('input');
                     const product = inputs[0].value;
                     const qty = parseInt(inputs[1].value);
-                    const price = parseFloat(inputs[2].value);
-                    if (product && qty && price) {
-                        items.push({ product, qty, price });
-                        total += qty * price;
+                    const unitCostUSD = parseFloat(inputs[2].value);
+                    if (product && qty && unitCostUSD) {
+                        items.push({ product, qty, unitCostUSD });
+                        totalUSD += qty * unitCostUSD;
                     }
                 });
                 
-                if (items.length === 0) {
-                    alert('Please add at least one item');
-                    return;
-                }
+                if (items.length === 0) { alert('Please add at least one item'); return; }
                 
                 const newPO = {
                     id: `PO-${String(nextId++).padStart(3, '0')}`,
                     vendor: vendor,
                     date: new Date().toISOString().split('T')[0],
                     expectedDate: expectedDate,
-                    total: total,
+                    totalUSD: totalUSD,
                     status: 'draft',
                     items: items,
                     notes: document.getElementById('poNotes').value
@@ -252,26 +267,37 @@
                 renderPOs();
                 document.getElementById('poModal').classList.remove('active');
                 document.getElementById('poForm').reset();
-                alert(`PO ${newPO.id} created! Total: $${total.toFixed(2)}`);
+                alert(`PO ${newPO.id} created! Total: ${formatMoney(totalUSD)}`);
             }
 
             function addItemRow() {
                 const container = document.getElementById('itemsContainer');
                 const newRow = document.createElement('div');
                 newRow.className = 'item-row';
-                newRow.innerHTML = `<input type="text" placeholder="Product" style="flex:2"><input type="number" placeholder="Qty" style="flex:1"><input type="text" placeholder="Price" style="flex:1"><button type="button" class="remove-item" style="background:#ef4444; color:white; border:none; border-radius:4px; width:30px;">✕</button>`;
+                newRow.innerHTML = `<input type="text" placeholder="Product" style="flex:2"><input type="number" placeholder="Qty" style="flex:1"><input type="number" placeholder="Unit Cost (USD)" step="0.01" style="flex:1"><button type="button" class="remove-item" style="background:#dc2626; color:white; border:none; border-radius:4px; width:30px;">✕</button>`;
                 container.appendChild(newRow);
-                
-                newRow.querySelector('.remove-item').addEventListener('click', () => {
-                    newRow.remove();
+                newRow.querySelector('.remove-item').addEventListener('click', () => newRow.remove());
+            }
+
+            function initCurrencySelector() {
+                document.querySelectorAll('.currency-opt').forEach(opt => {
+                    opt.classList.toggle('active', opt.dataset.currency === currentCurrency);
+                    opt.addEventListener('click', () => {
+                        currentCurrency = opt.dataset.currency;
+                        localStorage.setItem('pos_currency', currentCurrency);
+                        document.querySelectorAll('.currency-opt').forEach(o => o.classList.remove('active'));
+                        opt.classList.add('active');
+                        renderPOs();
+                    });
                 });
             }
 
             function init() {
                 renderPOs();
+                initCurrencySelector();
                 
                 document.getElementById('newPOBtn').addEventListener('click', () => {
-                    document.getElementById('itemsContainer').innerHTML = '<div class="item-row"><input type="text" placeholder="Product" style="flex:2"><input type="number" placeholder="Qty" style="flex:1"><input type="text" placeholder="Price" style="flex:1"></div>';
+                    document.getElementById('itemsContainer').innerHTML = '<div class="item-row"><input type="text" placeholder="Product" style="flex:2"><input type="number" placeholder="Qty" style="flex:1"><input type="number" placeholder="Unit Cost (USD)" step="0.01" style="flex:1"></div>';
                     document.getElementById('poModal').classList.add('active');
                 });
                 document.getElementById('addItemBtn').addEventListener('click', addItemRow);
@@ -286,11 +312,8 @@
                         renderPOs();
                     });
                 });
-                
                 document.querySelectorAll('.close-modal').forEach(btn => {
-                    btn.addEventListener('click', () => {
-                        document.querySelectorAll('.modal').forEach(m => m.classList.remove('active'));
-                    });
+                    btn.addEventListener('click', () => document.querySelectorAll('.modal').forEach(m => m.classList.remove('active')));
                 });
             }
             
