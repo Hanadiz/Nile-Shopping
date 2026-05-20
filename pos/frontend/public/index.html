@@ -1,492 +1,89 @@
-<!-- ============================================
-     Nile POS - Header Component with Full Auth Control
-     Features: User display, logout, session management
-     ============================================ -->
-
-<header class="app-header">
-    <div class="header-left">
-        <button class="mobile-menu-toggle" id="mobileMenuToggle">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <line x1="3" y1="12" x2="21" y2="12"></line>
-                <line x1="3" y1="6" x2="21" y2="6"></line>
-                <line x1="3" y1="18" x2="21" y2="18"></line>
-            </svg>
-        </button>
-        <h1 class="page-title" id="pageTitle">Point of Sale</h1>
-    </div>
-    
-    <div class="header-right">
-        <!-- Currency Switcher -->
-        <div class="currency-switcher" id="currencySwitcher">
-            <button class="currency-btn" data-currency="USD" id="currencyUSD">$ USD</button>
-            <button class="currency-btn" data-currency="UGX" id="currencyUGX">UGX</button>
-        </div>
-        
-        <!-- User Dropdown -->
-        <div class="user-dropdown" id="userDropdown">
-            <div class="user-dropdown-trigger" id="userDropdownTrigger">
-                <div class="user-avatar" id="userAvatar">
-                    <span id="avatarInitials">DU</span>
-                </div>
-                <div class="user-info-header">
-                    <span class="user-name" id="userName">Demo User</span>
-                    <span class="user-role-badge" id="userRoleBadge">Cashier</span>
-                </div>
-                <span class="dropdown-arrow">▼</span>
-            </div>
-            <div class="user-dropdown-menu" id="userDropdownMenu">
-                <div class="dropdown-user-info">
-                    <div class="dropdown-avatar" id="dropdownAvatar">DU</div>
-                    <div class="dropdown-user-details">
-                        <div class="dropdown-user-name" id="dropdownUserName">Demo User</div>
-                        <div class="dropdown-user-email" id="dropdownUserEmail">demo@nile.com</div>
-                        <div class="dropdown-user-tier" id="dropdownUserTier">Freemium Plan</div>
-                    </div>
-                </div>
-                <div class="dropdown-divider"></div>
-                <a href="/dashboard.html" class="dropdown-item">
-                    <span class="dropdown-icon">📊</span> Dashboard
-                </a>
-                <a href="/profile.html" class="dropdown-item" id="profileLink">
-                    <span class="dropdown-icon">👤</span> My Profile
-                </a>
-                <a href="/settings.html" class="dropdown-item">
-                    <span class="dropdown-icon">⚙️</span> Settings
-                </a>
-                <div class="dropdown-divider"></div>
-                <div class="dropdown-info">
-                    <div class="dropdown-info-item">
-                        <span>Store:</span>
-                        <strong id="userStore">Nile Downtown</strong>
-                    </div>
-                    <div class="dropdown-info-item">
-                        <span>Register:</span>
-                        <strong id="userRegister">01</strong>
-                    </div>
-                </div>
-                <div class="dropdown-divider"></div>
-                <a href="#" id="logoutBtn" class="dropdown-item logout-item">
-                    <span class="dropdown-icon">🚪</span> Logout
-                    <span class="dropdown-shortcut">Ctrl+Shift+L</span>
-                </a>
-            </div>
-        </div>
-    </div>
-</header>
-
-<style>
-    .currency-switcher {
-        display: flex;
-        gap: 4px;
-        background: var(--light);
-        padding: 4px;
-        border-radius: 40px;
-    }
-    
-    .currency-btn {
-        padding: 6px 14px;
-        border: none;
-        background: transparent;
-        border-radius: 32px;
-        cursor: pointer;
-        font-size: 12px;
-        font-weight: 500;
-        transition: all 0.2s;
-    }
-    
-    .currency-btn.active {
-        background: var(--primary);
-        color: white;
-    }
-    
-    .user-dropdown {
-        position: relative;
-    }
-    
-    .user-dropdown-trigger {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        padding: 6px 12px 6px 8px;
-        border-radius: 40px;
-        background: var(--light);
-        cursor: pointer;
-        transition: background 0.2s;
-    }
-    
-    .user-dropdown-trigger:hover {
-        background: #e2e8f0;
-    }
-    
-    .user-avatar {
-        width: 36px;
-        height: 36px;
-        background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        font-weight: 600;
-    }
-    
-    .user-info-header {
-        display: flex;
-        flex-direction: column;
-    }
-    
-    .user-name {
-        font-size: 13px;
-        font-weight: 600;
-    }
-    
-    .user-role-badge {
-        font-size: 10px;
-        color: var(--gray);
-    }
-    
-    .dropdown-arrow {
-        font-size: 10px;
-        color: var(--gray);
-    }
-    
-    .user-dropdown-menu {
-        position: absolute;
-        top: 100%;
-        right: 0;
-        width: 280px;
-        background: white;
-        border-radius: 16px;
-        box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
-        opacity: 0;
-        visibility: hidden;
-        transition: all 0.2s;
-        z-index: 100;
-        margin-top: 8px;
-    }
-    
-    .user-dropdown.active .user-dropdown-menu {
-        opacity: 1;
-        visibility: visible;
-    }
-    
-    .dropdown-user-info {
-        display: flex;
-        gap: 12px;
-        padding: 16px;
-        border-bottom: 1px solid var(--border);
-    }
-    
-    .dropdown-avatar {
-        width: 48px;
-        height: 48px;
-        background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        font-weight: 700;
-        font-size: 18px;
-    }
-    
-    .dropdown-user-details { flex: 1; }
-    .dropdown-user-name { font-size: 14px; font-weight: 700; }
-    .dropdown-user-email { font-size: 11px; color: var(--gray); margin-top: 2px; }
-    .dropdown-user-tier { font-size: 10px; color: var(--primary); margin-top: 4px; font-weight: 500; }
-    
-    .dropdown-item {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        padding: 10px 16px;
-        color: var(--dark);
-        text-decoration: none;
-        transition: background 0.2s;
-    }
-    
-    .dropdown-item:hover {
-        background: var(--light);
-    }
-    
-    .dropdown-icon { font-size: 16px; width: 20px; }
-    .dropdown-shortcut { margin-left: auto; font-size: 10px; color: var(--gray); font-family: monospace; }
-    .dropdown-info { padding: 12px 16px; }
-    .dropdown-info-item { display: flex; justify-content: space-between; font-size: 12px; padding: 6px 0; }
-    .dropdown-info-item span { color: var(--gray); }
-    .logout-item { color: var(--danger); }
-    .logout-item:hover { background: #fee2e2; }
-    .dropdown-divider { height: 1px; background: var(--border); margin: 8px 0; }
-    
-    @media (max-width: 768px) {
-        .currency-switcher { display: none; }
-        .user-info-header { display: none; }
-        .user-dropdown-trigger { padding: 6px; }
-    }
-</style>
-
-<script>
-    (function() {
-        // ============================================
-        // LOAD USER DATA FROM STORAGE
-        // ============================================
-        function loadUserData() {
-            // Try to get from profile storage first
-            let user = localStorage.getItem('pos_user_profile');
-            if (user) {
-                user = JSON.parse(user);
-            } else {
-                // Fallback to main POS user
-                user = localStorage.getItem('pos_user');
-                if (user) {
-                    user = JSON.parse(user);
-                } else {
-                    // Default demo user
-                    user = {
-                        id: 1,
-                        firstName: "Demo",
-                        lastName: "User",
-                        name: "Demo User",
-                        email: "demo@nile.com",
-                        role: "cashier",
-                        tier: "freemium",
-                        storeName: "Nile Downtown",
-                        registerId: 1
-                    };
-                }
-            }
-            
-            return user;
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nile POS - Loading</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
         
-        // Update all user display elements
-        function updateUserDisplay() {
-            const user = loadUserData();
-            const displayName = user.name || `${user.firstName} ${user.lastName}`;
-            const initials = (displayName || 'DU').split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
-            
-            // Update avatar and name in header
-            const avatarInitials = document.getElementById('avatarInitials');
-            const userName = document.getElementById('userName');
-            const userRoleBadge = document.getElementById('userRoleBadge');
-            
-            if (avatarInitials) avatarInitials.textContent = initials;
-            if (userName) userName.textContent = displayName;
-            if (userRoleBadge) userRoleBadge.textContent = (user.role || 'cashier').charAt(0).toUpperCase() + (user.role || 'cashier').slice(1);
-            
-            // Update dropdown
-            const dropdownAvatar = document.getElementById('dropdownAvatar');
-            const dropdownUserName = document.getElementById('dropdownUserName');
-            const dropdownUserEmail = document.getElementById('dropdownUserEmail');
-            const dropdownUserTier = document.getElementById('dropdownUserTier');
-            const userStore = document.getElementById('userStore');
-            const userRegister = document.getElementById('userRegister');
-            
-            if (dropdownAvatar) dropdownAvatar.textContent = initials;
-            if (dropdownUserName) dropdownUserName.textContent = displayName;
-            if (dropdownUserEmail) dropdownUserEmail.textContent = user.email || 'demo@nile.com';
-            if (dropdownUserTier) dropdownUserTier.textContent = (user.tier || 'freemium').charAt(0).toUpperCase() + (user.tier || 'freemium').slice(1) + ' Plan';
-            if (userStore) userStore.textContent = user.storeName || 'Nile Downtown';
-            if (userRegister) userRegister.textContent = (user.registerId || 1).toString().padStart(2, '0');
+        body {
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+            background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         
-        // ============================================
-        // LOGOUT FUNCTION - COMPLETE SESSION CLEANUP
-        // ============================================
-        function performLogout() {
-            // Clear all authentication data
+        .loading-container {
+            text-align: center;
+            color: white;
+        }
+        
+        .logo {
+            font-size: 48px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        .logo span {
+            color: #60a5fa;
+        }
+        
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        
+        .loading-text {
+            font-size: 14px;
+            opacity: 0.8;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="loading-container">
+        <div class="logo">Nile<span>POS</span></div>
+        <div class="spinner"></div>
+        <div class="loading-text">Redirecting to secure login...</div>
+    </div>
+    
+    <script>
+        // Main entry point - redirect to login page
+        // Check if user is already logged in
+        const token = localStorage.getItem('pos_jwt');
+        const sessionExpiry = localStorage.getItem('pos_session_expiry');
+        
+        if (token && sessionExpiry && new Date(sessionExpiry) > new Date()) {
+            // User is already logged in, redirect to dashboard
+            window.location.href = '/dashboard.html';
+        } else {
+            // Clear any stale data and redirect to login
             localStorage.removeItem('pos_jwt');
-            localStorage.removeItem('pos_refresh_token');
             localStorage.removeItem('pos_user');
-            localStorage.removeItem('pos_permissions');
             localStorage.removeItem('pos_session_expiry');
-            localStorage.removeItem('pos_tier');
-            
-            // Optional: Keep cart and settings for next session? Clear them for security
-            // localStorage.removeItem('pos_cart'); // Uncomment if you want to clear cart on logout
-            
-            // Clear session storage
-            sessionStorage.clear();
-            
-            // Clear cookies
-            document.cookie.split(";").forEach(cookie => {
-                const eqPos = cookie.indexOf("=");
-                const name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
-                document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/";
-            });
-            
-            // Redirect to login page
             window.location.href = '/login.html';
         }
-        
-        // ============================================
-        // SESSION VALIDATION
-        // ============================================
-        function validateSession() {
-            const token = localStorage.getItem('pos_jwt');
-            const sessionExpiry = localStorage.getItem('pos_session_expiry');
-            
-            if (!token) {
-                // No token, redirect to login
-                if (window.location.pathname !== '/login.html' && 
-                    window.location.pathname !== '/register.html' &&
-                    window.location.pathname !== '/forgot-password.html') {
-                    window.location.href = '/login.html';
-                }
-                return false;
-            }
-            
-            if (sessionExpiry && new Date(sessionExpiry) < new Date()) {
-                // Session expired
-                performLogout();
-                return false;
-            }
-            
-            // Extend session (8 hours)
-            const expires = new Date();
-            expires.setHours(expires.getHours() + 8);
-            localStorage.setItem('pos_session_expiry', expires.toISOString());
-            
-            return true;
-        }
-        
-        // ============================================
-        // CURRENCY SWITCHER
-        // ============================================
-        function initCurrencySwitcher() {
-            const currentCurrency = localStorage.getItem('pos_currency') || 'UGX';
-            const usdBtn = document.getElementById('currencyUSD');
-            const ugxBtn = document.getElementById('currencyUGX');
-            
-            if (usdBtn && ugxBtn) {
-                usdBtn.classList.toggle('active', currentCurrency === 'USD');
-                ugxBtn.classList.toggle('active', currentCurrency === 'UGX');
-                
-                usdBtn.addEventListener('click', () => {
-                    localStorage.setItem('pos_currency', 'USD');
-                    usdBtn.classList.add('active');
-                    ugxBtn.classList.remove('active');
-                    window.dispatchEvent(new CustomEvent('currencyChanged', { detail: { currency: 'USD' } }));
-                    showToast('Currency switched to USD', 'success');
-                });
-                
-                ugxBtn.addEventListener('click', () => {
-                    localStorage.setItem('pos_currency', 'UGX');
-                    ugxBtn.classList.add('active');
-                    usdBtn.classList.remove('active');
-                    window.dispatchEvent(new CustomEvent('currencyChanged', { detail: { currency: 'UGX' } }));
-                    showToast('Currency switched to Ugandan Shilling', 'success');
-                });
-            }
-        }
-        
-        // ============================================
-        // USER DROPDOWN TOGGLE
-        // ============================================
-        function initUserDropdown() {
-            const userDropdown = document.getElementById('userDropdown');
-            const trigger = document.getElementById('userDropdownTrigger');
-            
-            if (trigger && userDropdown) {
-                trigger.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    userDropdown.classList.toggle('active');
-                });
-                
-                document.addEventListener('click', () => {
-                    userDropdown.classList.remove('active');
-                });
-            }
-        }
-        
-        // ============================================
-        // LOGOUT BUTTON HANDLER
-        // ============================================
-        function initLogoutButton() {
-            const logoutBtn = document.getElementById('logoutBtn');
-            if (logoutBtn) {
-                logoutBtn.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    if (confirm('Are you sure you want to logout?')) {
-                        performLogout();
-                    }
-                });
-            }
-        }
-        
-        // ============================================
-        // PROFILE LINK HANDLER
-        // ============================================
-        function initProfileLink() {
-            const profileLink = document.getElementById('profileLink');
-            if (profileLink) {
-                profileLink.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    window.location.href = '/profile.html';
-                });
-            }
-        }
-        
-        // ============================================
-        // TOAST NOTIFICATION
-        // ============================================
-        function showToast(message, type) {
-            const toast = document.createElement('div');
-            toast.textContent = message;
-            toast.style.cssText = `
-                position: fixed; bottom: 20px; right: 20px;
-                background: ${type === 'error' ? '#dc2626' : type === 'success' ? '#10b981' : '#2563eb'};
-                color: white; padding: 12px 20px; border-radius: 12px;
-                z-index: 1000; animation: slideIn 0.3s ease;
-                font-weight: 500;
-            `;
-            document.body.appendChild(toast);
-            setTimeout(() => toast.remove(), 3000);
-        }
-        
-        // ============================================
-        // KEYBOARD SHORTCUT: Ctrl+Shift+L for logout
-        // ============================================
-        function initKeyboardShortcuts() {
-            document.addEventListener('keydown', (e) => {
-                if (e.ctrlKey && e.shiftKey && e.key === 'L') {
-                    e.preventDefault();
-                    if (confirm('Quick logout?')) {
-                        performLogout();
-                    }
-                }
-            });
-        }
-        
-        // ============================================
-        // SESSION CHECK ON PAGE LOAD
-        // ============================================
-        function checkAndRedirect() {
-            const protectedPages = ['/index.html', '/dashboard.html', '/products.html', '/customers.html', '/reports.html'];
-            const currentPath = window.location.pathname;
-            
-            if (protectedPages.some(page => currentPath.includes(page))) {
-                validateSession();
-            }
-        }
-        
-        // ============================================
-        // INITIALIZE ALL
-        // ============================================
-        function init() {
-            updateUserDisplay();
-            initCurrencySwitcher();
-            initUserDropdown();
-            initLogoutButton();
-            initProfileLink();
-            initKeyboardShortcuts();
-            checkAndRedirect();
-        }
-        
-        // Run initialization
-        init();
-        
-        // Make performLogout available globally for other components
-        window.performLogout = performLogout;
-    })();
-</script>
+    </script>
+</body>
+</html>
