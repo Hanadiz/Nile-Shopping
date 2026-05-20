@@ -1,15 +1,15 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en-GB">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nile POS - Returns & Refunds</title>
+    <title>Nile POS - Returns & Refunds | UK Consumer Rights</title>
     <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: #f1f5f9;
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+            background: #f3f4f6;
             padding: 24px;
         }
         .container { max-width: 1200px; margin: 0 auto; }
@@ -18,68 +18,95 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 24px;
+            flex-wrap: wrap;
+            gap: 16px;
         }
-        h1 { font-size: 24px; color: #1e293b; }
+        h1 { font-size: 24px; color: #111827; display: flex; align-items: center; gap: 8px; }
+        .consumer-rights {
+            background: #1e3a8a;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 100px;
+            font-size: 11px;
+        }
         .back-btn {
             background: white;
-            border: 1px solid #e2e8f0;
+            border: 1px solid #e5e7eb;
             padding: 8px 16px;
             border-radius: 8px;
             cursor: pointer;
             text-decoration: none;
-            color: #475569;
+            color: #374151;
         }
         .search-section {
             background: white;
             border-radius: 20px;
-            padding: 20px;
+            padding: 24px;
             margin-bottom: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
         .search-box {
             display: flex;
             gap: 12px;
             margin-bottom: 16px;
+            flex-wrap: wrap;
         }
         .search-box input {
             flex: 1;
             padding: 14px;
-            border: 2px solid #e2e8f0;
+            border: 2px solid #e5e7eb;
             border-radius: 12px;
             font-size: 16px;
+            font-family: monospace;
+        }
+        .search-box input:focus {
+            outline: none;
+            border-color: #2563eb;
         }
         .search-box button {
             padding: 14px 24px;
-            background: #667eea;
+            background: #2563eb;
             color: white;
             border: none;
             border-radius: 12px;
             cursor: pointer;
+            font-weight: 600;
+        }
+        .rights-info {
+            background: #eff6ff;
+            border-left: 4px solid #2563eb;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            font-size: 13px;
         }
         .transaction-info {
-            background: #f8fafc;
+            background: #f9fafb;
             border-radius: 16px;
             padding: 20px;
             margin-top: 20px;
             display: none;
         }
-        .transaction-info.show { display: block; }
-        .items-list {
-            margin: 20px 0;
-        }
+        .transaction-info.show { display: block; animation: fadeIn 0.3s; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .items-list { margin: 20px 0; }
         .return-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding: 12px;
-            border-bottom: 1px solid #e2e8f0;
+            border-bottom: 1px solid #e5e7eb;
+            flex-wrap: wrap;
+            gap: 12px;
         }
-        .return-item select {
-            padding: 6px 12px;
+        .return-reason {
+            padding: 8px;
+            border: 1px solid #e5e7eb;
             border-radius: 8px;
-            border: 1px solid #e2e8f0;
+            background: white;
         }
         .refund-summary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
             color: white;
             border-radius: 16px;
             padding: 20px;
@@ -97,22 +124,20 @@
             cursor: pointer;
             margin-top: 20px;
         }
-        .warning {
-            background: #fef3c7;
-            border-left: 4px solid #f59e0b;
-            padding: 12px;
-            margin-bottom: 16px;
-            border-radius: 8px;
+        .restocking-fee {
+            font-size: 12px;
+            color: #6b7280;
+            margin-top: 8px;
         }
         @media (max-width: 768px) {
-            .return-item { flex-direction: column; gap: 8px; }
+            .return-item { flex-direction: column; align-items: stretch; }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>🔄 Returns & Refunds</h1>
+            <h1>🔄 Returns & Refunds <span class="consumer-rights">Consumer Rights Act 2015</span></h1>
             <a href="/index.html" class="back-btn">← Back to Register</a>
         </div>
 
@@ -121,59 +146,62 @@
                 <input type="text" id="receiptNumber" placeholder="Enter receipt/transaction number" autofocus>
                 <button id="searchTransactionBtn">Search Transaction</button>
             </div>
-            <div class="warning">
-                ⚠️ Returns are subject to store policy. Items must be in original condition within 30 days.
+            <div class="rights-info">
+                📜 Under UK Consumer Rights Act 2015, customers have 30 days to return faulty goods for a full refund.
+                For non-faulty returns, a 14-day cooling-off period applies for online/phone purchases.
             </div>
         </div>
 
         <div id="transactionInfo" class="transaction-info">
-            <h3>Transaction Details</h3>
+            <h3 style="margin-bottom: 16px;">Transaction Details</h3>
             <div id="transactionDetails"></div>
             <div class="items-list" id="itemsList"></div>
             <div class="refund-summary">
-                <div style="display: flex; justify-content: space-between;">
-                    <span>Refund Amount:</span>
-                    <span id="refundAmount" style="font-size: 24px; font-weight: 700;">$0.00</span>
-                </div>
-                <div style="display: flex; justify-content: space-between; margin-top: 12px;">
-                    <span>Refund Method:</span>
-                    <select id="refundMethod" style="padding: 8px; border-radius: 8px;">
-                        <option value="original">Original Payment Method</option>
-                        <option value="store_credit">Store Credit</option>
-                        <option value="gift_card">Gift Card</option>
-                    </select>
+                <div style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 16px;">
+                    <div>
+                        <div style="font-size: 12px; opacity: 0.8;">Refund Amount</div>
+                        <div id="refundAmount" style="font-size: 28px; font-weight: 700;">£0.00</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 12px; opacity: 0.8;">Refund Method</div>
+                        <select id="refundMethod" style="padding: 8px 12px; border-radius: 8px; border: none;">
+                            <option value="original">Original Payment Method</option>
+                            <option value="store_credit">Store Credit</option>
+                            <option value="gift_card">Gift Card</option>
+                        </select>
+                    </div>
+                    <div>
+                        <div style="font-size: 12px; opacity: 0.8;">Return Reason</div>
+                        <select id="returnReason" style="padding: 8px 12px; border-radius: 8px; border: none;">
+                            <option value="faulty">Faulty / Damaged</option>
+                            <option value="not_as_described">Not as described</option>
+                            <option value="changed_mind">Changed mind (14 days)</option>
+                            <option value="wrong_item">Wrong item sent</option>
+                        </select>
+                    </div>
                 </div>
                 <button class="process-btn" id="processRefundBtn">Process Refund</button>
+                <div class="restocking-fee" id="restockingNotice" style="margin-top: 12px; color: #fcd34d;"></div>
             </div>
         </div>
     </div>
 
     <script>
         (function() {
-            // Demo transaction data
             const demoTransactions = {
                 'TRX-001': {
-                    number: 'TRX-001',
-                    date: '2024-01-15 14:30:00',
-                    customer: 'John Doe',
-                    subtotal: 129.97,
-                    tax: 13.00,
-                    total: 142.97,
+                    number: 'TRX-001', date: '2024-01-15 14:30:00', customer: 'John Davies',
+                    subtotal: 129.97, tax: 26.00, total: 155.97, days_ago: 5,
                     items: [
-                        { id: 1, name: 'Classic T-Shirt', sku: 'PRD-001', price: 29.99, quantity: 1, returnable: true },
-                        { id: 3, name: 'Running Shoes', sku: 'PRD-003', price: 89.99, quantity: 1, returnable: true },
-                        { id: 5, name: 'Phone Case', sku: 'PRD-011', price: 9.99, quantity: 1, returnable: false }
+                        { id: 1, name: 'Classic T-Shirt', sku: 'NLE-APR-001', price: 29.99, quantity: 1, returnable: true },
+                        { id: 3, name: 'Running Shoes', sku: 'NLE-FTW-003', price: 89.99, quantity: 1, returnable: true }
                     ]
                 },
                 'TRX-002': {
-                    number: 'TRX-002',
-                    date: '2024-01-14 10:15:00',
-                    customer: 'Jane Smith',
-                    subtotal: 199.99,
-                    tax: 20.00,
-                    total: 219.99,
+                    number: 'TRX-002', date: '2024-01-10 10:15:00', customer: 'Sarah O\'Brien',
+                    subtotal: 199.99, tax: 40.00, total: 239.99, days_ago: 12,
                     items: [
-                        { id: 5, name: 'Smart Watch', sku: 'PRD-005', price: 199.99, quantity: 1, returnable: true }
+                        { id: 5, name: 'Smart Watch Pro', sku: 'NLE-ELC-005', price: 199.99, quantity: 1, returnable: true }
                     ]
                 }
             };
@@ -184,13 +212,16 @@
             function displayTransaction() {
                 if (!currentTransaction) return;
                 
-                const details = document.getElementById('transactionDetails');
-                details.innerHTML = `
-                    <div style="display: grid; grid-template-columns: repeat(2,1fr); gap:12px; margin-bottom:20px;">
+                const isWithin14Days = currentTransaction.days_ago <= 14;
+                const isFaultyReturn = true; // Would be determined by reason
+                
+                document.getElementById('transactionDetails').innerHTML = `
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px,1fr)); gap:12px; margin-bottom:20px;">
                         <div><strong>Receipt #:</strong> ${currentTransaction.number}</div>
                         <div><strong>Date:</strong> ${currentTransaction.date}</div>
                         <div><strong>Customer:</strong> ${currentTransaction.customer}</div>
-                        <div><strong>Original Total:</strong> $${currentTransaction.total.toFixed(2)}</div>
+                        <div><strong>Original Total:</strong> £${currentTransaction.total.toFixed(2)}</div>
+                        <div><strong>Days since purchase:</strong> ${currentTransaction.days_ago} days</div>
                     </div>
                 `;
                 
@@ -198,34 +229,54 @@
                     <div class="return-item">
                         <div>
                             <strong>${escapeHtml(item.name)}</strong><br>
-                            <small>${item.sku} | $${item.price.toFixed(2)}</small>
+                            <small>${item.sku} | £${item.price.toFixed(2)}</small>
                         </div>
-                        <div>
+                        <div style="display: flex; gap: 12px; align-items: center;">
                             ${item.returnable ? `
-                                <select data-item-id="${item.id}" class="return-qty">
+                                <select class="return-qty" data-item-id="${item.id}">
                                     <option value="0">Not Returning</option>
                                     <option value="1">Return 1</option>
                                     ${item.quantity > 1 ? `<option value="${item.quantity}">Return All (${item.quantity})</option>` : ''}
                                 </select>
-                            ` : '<span style="color:#ef4444;">Not returnable</span>'}
+                                <select class="return-reason-select" data-item-id="${item.id}" style="padding:6px; border-radius:6px;">
+                                    <option value="faulty">Faulty</option>
+                                    <option value="not_described">Not as described</option>
+                                    <option value="changed_mind">Changed mind</option>
+                                </select>
+                            ` : '<span style="color:#dc2626;">Not returnable (worn/used)</span>'}
                         </div>
                     </div>
                 `).join('');
                 
                 document.getElementById('itemsList').innerHTML = itemsHtml;
                 
-                // Add event listeners to quantity selects
                 document.querySelectorAll('.return-qty').forEach(select => {
                     select.addEventListener('change', (e) => {
                         const itemId = parseInt(select.dataset.itemId);
                         const qty = parseInt(select.value);
                         const item = currentTransaction.items.find(i => i.id === itemId);
+                        const reasonSelect = document.querySelector(`.return-reason-select[data-item-id="${itemId}"]`);
+                        
                         if (qty > 0) {
-                            selectedReturns[itemId] = { ...item, returnQty: qty };
+                            selectedReturns[itemId] = { 
+                                ...item, 
+                                returnQty: qty,
+                                reason: reasonSelect?.value || 'changed_mind'
+                            };
                         } else {
                             delete selectedReturns[itemId];
                         }
                         updateRefundAmount();
+                    });
+                });
+                
+                document.querySelectorAll('.return-reason-select').forEach(select => {
+                    select.addEventListener('change', (e) => {
+                        const itemId = parseInt(select.dataset.itemId);
+                        if (selectedReturns[itemId]) {
+                            selectedReturns[itemId].reason = select.value;
+                            updateRefundAmount();
+                        }
                     });
                 });
                 
@@ -235,10 +286,27 @@
 
             function updateRefundAmount() {
                 let totalRefund = 0;
+                let restockingFee = 0;
+                
                 for (const item of Object.values(selectedReturns)) {
-                    totalRefund += item.price * item.returnQty;
+                    let refundAmount = item.price * item.returnQty;
+                    
+                    // Apply restocking fee for changed mind returns (15%)
+                    if (item.reason === 'changed_mind') {
+                        restockingFee += refundAmount * 0.15;
+                        refundAmount = refundAmount * 0.85;
+                    }
+                    
+                    totalRefund += refundAmount;
                 }
-                document.getElementById('refundAmount').textContent = `$${totalRefund.toFixed(2)}`;
+                
+                document.getElementById('refundAmount').textContent = `£${totalRefund.toFixed(2)}`;
+                
+                if (restockingFee > 0) {
+                    document.getElementById('restockingNotice').innerHTML = `⚠️ 15% restocking fee applied (${restockingFee > 0 ? '£' + restockingFee.toFixed(2) : 'N/A'}) for changed mind returns.`;
+                } else {
+                    document.getElementById('restockingNotice').innerHTML = '';
+                }
             }
 
             function searchTransaction() {
@@ -261,34 +329,77 @@
                     return;
                 }
                 
-                const refundAmount = Object.values(selectedReturns).reduce((sum, item) => sum + (item.price * item.returnQty), 0);
-                const refundMethod = document.getElementById('refundMethod').value;
-                
-                showToast(`Refund of $${refundAmount.toFixed(2)} processed via ${refundMethod}.`, 'success');
-                
-                // Update cart in localStorage for exchange (optional)
-                const cart = Object.values(selectedReturns).map(item => ({
-                    id: item.id,
-                    name: item.name,
-                    sku: item.sku,
-                    price: item.price,
-                    quantity: item.returnQty,
-                    lineTotal: item.price * item.returnQty,
-                    isReturn: true
-                }));
-                
-                if (cart.length > 0) {
-                    localStorage.setItem('pos_return_cart', JSON.stringify(cart));
-                    if (confirm('Would you like to process an exchange (new sale) instead?')) {
-                        window.location.href = '/index.html?mode=exchange';
-                    }
+                let refundAmount = 0;
+                for (const item of Object.values(selectedReturns)) {
+                    let amount = item.price * item.returnQty;
+                    if (item.reason === 'changed_mind') amount *= 0.85;
+                    refundAmount += amount;
                 }
                 
-                // Reset form
+                const refundMethod = document.getElementById('refundMethod').value;
+                const refundReason = document.getElementById('returnReason').value;
+                
+                // Create refund record
+                const refundRecord = {
+                    transaction_number: currentTransaction.number,
+                    customer: currentTransaction.customer,
+                    items: selectedReturns,
+                    total_refund: refundAmount,
+                    method: refundMethod,
+                    reason: refundReason,
+                    date: new Date().toISOString(),
+                    staff: 'Cashier'
+                };
+                
+                // Store refund record
+                let refunds = JSON.parse(localStorage.getItem('pos_refunds') || '[]');
+                refunds.push(refundRecord);
+                localStorage.setItem('pos_refunds', JSON.stringify(refunds));
+                
+                showToast(`Refund of £${refundAmount.toFixed(2)} processed. Receipt printed.`, 'success');
+                
+                // Print refund receipt
+                printRefundReceipt(refundRecord);
+                
+                // Reset
                 document.getElementById('receiptNumber').value = '';
                 document.getElementById('transactionInfo').classList.remove('show');
                 currentTransaction = null;
                 selectedReturns = {};
+            }
+
+            function printRefundReceipt(refund) {
+                const printWindow = window.open('', '_blank');
+                printWindow.document.write(`
+                    <!DOCTYPE html>
+                    <html>
+                    <head><title>Refund Receipt</title>
+                    <style>
+                        body { font-family: monospace; padding: 20px; max-width: 300px; margin: 0 auto; }
+                        .header { text-align: center; border-bottom: 1px dashed #000; padding-bottom: 10px; }
+                        .items { margin: 20px 0; }
+                        .total { border-top: 1px solid #000; padding-top: 10px; }
+                        .footer { text-align: center; margin-top: 20px; font-size: 11px; }
+                    </style>
+                    </head>
+                    <body>
+                        <div class="header">
+                            <h3>REFUND RECEIPT</h3>
+                            <p>${new Date().toLocaleString()}</p>
+                        </div>
+                        <div>Transaction: ${refund.transaction_number}</div>
+                        <div>Customer: ${refund.customer}</div>
+                        <div class="items">
+                            ${Object.values(refund.items).map(i => `<div>${i.name} x${i.returnQty} - £${(i.price * i.returnQty).toFixed(2)}</div>`).join('')}
+                        </div>
+                        <div class="total"><strong>Total Refund: £${refund.total_refund.toFixed(2)}</strong></div>
+                        <div>Method: ${refund.method}</div>
+                        <div>Reason: ${refund.reason}</div>
+                        <div class="footer">Thank you for shopping at Nile Shopping</div>
+                        <script>window.print(); window.close();<\/script>
+                    </body>
+                    </html>
+                `);
             }
 
             function showToast(message, type) {
@@ -296,7 +407,7 @@
                 toast.textContent = message;
                 toast.style.cssText = `
                     position: fixed; bottom: 20px; right: 20px;
-                    background: ${type === 'error' ? '#ef4444' : '#10b981'};
+                    background: ${type === 'error' ? '#dc2626' : '#10b981'};
                     color: white; padding: 12px 20px; border-radius: 12px;
                     z-index: 1000; animation: slideIn 0.3s ease;
                 `;
