@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <meta name="description" content="Nile Shopping POS - Complete Point of Sale System">
-    <title>Nile POS - Register</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <meta name="description" content="Nile Shopping POS - Complete Point of Sale System with Multi-Currency, Inventory, Customer Management">
+    <title>Nile POS - Complete Point of Sale System</title>
     <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico">
     <style>
         * {
@@ -13,9 +13,22 @@
             box-sizing: border-box;
         }
 
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --primary-light: #60a5fa;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #dc2626;
+            --dark: #1e293b;
+            --gray: #64748b;
+            --light: #f1f5f9;
+            --border: #e2e8f0;
+        }
+
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #f1f5f9;
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+            background: #f3f4f6;
             height: 100vh;
             overflow: hidden;
         }
@@ -27,27 +40,29 @@
             flex-direction: column;
         }
 
-        /* Top Bar */
+        /* Enhanced Top Bar */
         .top-bar {
             background: white;
-            border-bottom: 1px solid #e2e8f0;
+            border-bottom: 1px solid var(--border);
             padding: 12px 24px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            flex-wrap: wrap;
+            gap: 12px;
         }
 
         .logo-area {
             display: flex;
             align-items: center;
-            gap: 16px;
+            gap: 20px;
         }
 
         .logo {
-            font-size: 20px;
+            font-size: 22px;
             font-weight: 700;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
@@ -55,44 +70,64 @@
 
         .register-info {
             display: flex;
-            gap: 20px;
-            font-size: 14px;
-            color: #475569;
+            gap: 24px;
+            font-size: 13px;
+            color: var(--gray);
         }
 
         .register-info span {
             font-weight: 600;
-            color: #1e293b;
+            color: var(--dark);
         }
 
         .top-actions {
             display: flex;
-            gap: 16px;
+            gap: 12px;
             align-items: center;
+            flex-wrap: wrap;
         }
 
-        .customer-badge {
+        .customer-badge, .cart-badge, .currency-selector {
             display: flex;
             align-items: center;
             gap: 8px;
-            background: #f1f5f9;
-            padding: 6px 12px;
+            background: var(--light);
+            padding: 8px 16px;
             border-radius: 100px;
             cursor: pointer;
-            transition: background 0.2s;
+            transition: all 0.2s;
+            font-size: 13px;
+            font-weight: 500;
         }
 
-        .customer-badge:hover {
+        .customer-badge:hover, .cart-badge:hover {
             background: #e2e8f0;
         }
 
         .cart-count {
-            background: #ef4444;
+            background: var(--danger);
             color: white;
             border-radius: 100px;
             padding: 2px 8px;
-            font-size: 12px;
+            font-size: 11px;
             font-weight: 600;
+        }
+
+        .currency-selector {
+            background: white;
+            border: 1px solid var(--border);
+        }
+
+        .currency-option {
+            cursor: pointer;
+            padding: 2px 6px;
+            border-radius: 100px;
+            transition: all 0.2s;
+        }
+
+        .currency-option.active {
+            background: var(--primary);
+            color: white;
         }
 
         .user-menu {
@@ -100,18 +135,22 @@
             align-items: center;
             gap: 12px;
             cursor: pointer;
+            background: var(--light);
+            padding: 6px 12px 6px 8px;
+            border-radius: 100px;
         }
 
         .avatar {
-            width: 36px;
-            height: 36px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
             font-weight: 600;
+            font-size: 14px;
         }
 
         /* Main Content */
@@ -144,7 +183,7 @@
         .search-bar input {
             flex: 1;
             border: none;
-            font-size: 16px;
+            font-size: 15px;
             outline: none;
         }
 
@@ -153,36 +192,44 @@
             border: none;
             cursor: pointer;
             font-size: 20px;
+            padding: 0 8px;
         }
 
         .category-tabs {
             display: flex;
-            gap: 8px;
+            gap: 10px;
             overflow-x: auto;
             padding-bottom: 8px;
         }
 
         .category-tab {
-            padding: 8px 20px;
+            padding: 10px 24px;
             background: white;
-            border: none;
+            border: 1px solid var(--border);
             border-radius: 100px;
             cursor: pointer;
             font-size: 14px;
+            font-weight: 500;
             white-space: nowrap;
             transition: all 0.2s;
         }
 
+        .category-tab:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
         .category-tab.active {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
             color: white;
+            border-color: transparent;
         }
 
         .products-grid {
             flex: 1;
             overflow-y: auto;
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
             gap: 16px;
             padding: 4px;
         }
@@ -194,19 +241,27 @@
             cursor: pointer;
             transition: all 0.2s;
             text-align: center;
-            border: 1px solid #e2e8f0;
+            border: 1px solid var(--border);
+            position: relative;
         }
 
         .product-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px -5px rgba(0,0,0,0.1);
-            border-color: #818cf8;
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
+            border-color: var(--primary);
+        }
+
+        .product-badge {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            font-size: 20px;
         }
 
         .product-image {
             width: 80px;
             height: 80px;
-            background: #f1f5f9;
+            background: var(--light);
             border-radius: 12px;
             margin: 0 auto 12px;
             display: flex;
@@ -219,23 +274,37 @@
             font-weight: 600;
             font-size: 14px;
             margin-bottom: 4px;
+            color: var(--dark);
         }
 
         .product-price {
-            color: #667eea;
+            color: var(--primary);
             font-weight: 700;
             font-size: 16px;
         }
 
         .product-sku {
             font-size: 10px;
-            color: #94a3b8;
+            color: var(--gray);
             margin-top: 4px;
         }
 
+        .stock-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 100px;
+            font-size: 10px;
+            font-weight: 600;
+            margin-top: 6px;
+        }
+
+        .stock-high { background: #dcfce7; color: #166534; }
+        .stock-medium { background: #fef3c7; color: #92400e; }
+        .stock-low { background: #fee2e2; color: #991b1b; }
+
         /* Cart Panel */
         .cart-panel {
-            width: 420px;
+            width: 450px;
             background: white;
             border-radius: 24px;
             display: flex;
@@ -246,22 +315,19 @@
 
         .cart-header {
             padding: 20px;
-            border-bottom: 1px solid #e2e8f0;
+            border-bottom: 1px solid var(--border);
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
 
-        .cart-header h3 {
-            font-size: 18px;
-        }
-
+        .cart-header h3 { font-size: 18px; }
         .clear-cart {
             background: none;
             border: none;
-            color: #ef4444;
+            color: var(--danger);
             cursor: pointer;
-            font-size: 14px;
+            font-size: 13px;
         }
 
         .cart-items {
@@ -275,7 +341,7 @@
             justify-content: space-between;
             align-items: center;
             padding: 12px 0;
-            border-bottom: 1px solid #f1f5f9;
+            border-bottom: 1px solid var(--light);
         }
 
         .cart-item-info {
@@ -288,8 +354,8 @@
         }
 
         .cart-item-price {
-            font-size: 12px;
-            color: #64748b;
+            font-size: 11px;
+            color: var(--gray);
         }
 
         .cart-item-quantity {
@@ -302,21 +368,22 @@
             width: 28px;
             height: 28px;
             border-radius: 8px;
-            border: 1px solid #e2e8f0;
+            border: 1px solid var(--border);
             background: white;
             cursor: pointer;
+            font-weight: 600;
         }
 
         .cart-item-total {
             font-weight: 600;
-            min-width: 70px;
+            min-width: 80px;
             text-align: right;
         }
 
         .cart-item-remove {
             background: none;
             border: none;
-            color: #94a3b8;
+            color: var(--gray);
             cursor: pointer;
             font-size: 18px;
             padding: 0 8px;
@@ -324,8 +391,8 @@
 
         .cart-summary {
             padding: 20px;
-            border-top: 1px solid #e2e8f0;
-            background: #f8fafc;
+            border-top: 1px solid var(--border);
+            background: var(--light);
         }
 
         .summary-row {
@@ -340,13 +407,14 @@
             font-weight: 700;
             margin-top: 12px;
             padding-top: 12px;
-            border-top: 2px solid #e2e8f0;
+            border-top: 2px solid var(--border);
+            color: var(--primary);
         }
 
         .checkout-btn {
             width: 100%;
             padding: 16px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
             color: white;
             border: none;
             border-radius: 16px;
@@ -357,30 +425,45 @@
             transition: transform 0.2s;
         }
 
-        .checkout-btn:hover {
-            transform: translateY(-1px);
+        .checkout-btn:hover { transform: translateY(-1px); }
+        .checkout-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+        .discount-input {
+            display: flex;
+            gap: 8px;
+            margin: 12px 0;
+        }
+        .discount-input input {
+            flex: 1;
+            padding: 8px 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 13px;
+        }
+        .apply-discount {
+            padding: 8px 16px;
+            background: var(--warning);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
         }
 
-        .checkout-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        /* Keyboard Shortcuts Hint */
+        /* Keyboard Shortcuts */
         .shortcuts-hint {
             position: fixed;
             bottom: 16px;
             right: 16px;
-            background: #1e293b;
-            color: #94a3b8;
+            background: var(--dark);
+            color: var(--gray);
             padding: 6px 12px;
             border-radius: 8px;
-            font-size: 11px;
+            font-size: 10px;
             font-family: monospace;
+            z-index: 100;
         }
 
-        /* Modal */
+        /* Modals */
         .modal {
             display: none;
             position: fixed;
@@ -394,99 +477,111 @@
             z-index: 1000;
         }
 
-        .modal.active {
-            display: flex;
-        }
+        .modal.active { display: flex; }
 
         .modal-content {
             background: white;
             border-radius: 24px;
             max-width: 500px;
             width: 90%;
-            max-height: 80vh;
+            max-height: 85vh;
             overflow-y: auto;
         }
 
         .modal-header {
             padding: 20px;
-            border-bottom: 1px solid #e2e8f0;
+            border-bottom: 1px solid var(--border);
             display: flex;
             justify-content: space-between;
+            position: sticky;
+            top: 0;
+            background: white;
         }
 
-        .modal-body {
-            padding: 20px;
+        .modal-body { padding: 20px; }
+
+        .payment-methods {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin: 16px 0;
         }
 
-        /* Toast Notification */
+        .payment-method-btn {
+            padding: 12px;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            background: white;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .payment-method-btn.selected {
+            border-color: var(--primary);
+            background: #eff6ff;
+            color: var(--primary);
+        }
+
         .toast {
             position: fixed;
             bottom: 80px;
             right: 20px;
-            background: #1e293b;
+            background: var(--dark);
             color: white;
             padding: 12px 20px;
             border-radius: 12px;
-            font-size: 14px;
+            font-size: 13px;
             z-index: 1000;
             animation: slideIn 0.3s ease;
         }
 
         @keyframes slideIn {
-            from {
-                transform: translateX(100%);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
         }
 
-        /* Responsive */
         @media (max-width: 1024px) {
-            .cart-panel {
-                width: 360px;
-            }
+            .cart-panel { width: 380px; }
         }
 
         @media (max-width: 768px) {
-            .main-content {
-                flex-direction: column;
-            }
-            .cart-panel {
-                width: 100%;
-                height: 50%;
-            }
-            .product-panel {
-                height: 50%;
-            }
+            .main-content { flex-direction: column; }
+            .cart-panel { width: 100%; height: 45%; }
+            .product-panel { height: 55%; }
         }
 
-        .hidden {
-            display: none;
-        }
+        .hidden { display: none; }
     </style>
 </head>
 <body>
     <div class="app-container">
-        <!-- Top Bar -->
+        <!-- Enhanced Top Bar -->
         <div class="top-bar">
             <div class="logo-area">
-                <div class="logo">Nile<span style="color:#667eea">POS</span></div>
+                <div class="logo">Nile<span style="color:var(--primary)">POS</span></div>
                 <div class="register-info">
                     <div>Register: <span id="registerNumber">01</span></div>
                     <div>Cashier: <span id="cashierName">Loading...</span></div>
-                    <div id="offlineBadge" class="hidden" style="color:#f59e0b;">⚠️ Offline Mode</div>
+                    <div id="offlineBadge" class="hidden" style="color:var(--warning);">⚠️ Offline Mode</div>
                 </div>
             </div>
             <div class="top-actions">
                 <div class="customer-badge" id="customerBadge">
                     <span>👤</span>
                     <span id="customerName">Guest</span>
+                    <span id="customerPoints" style="font-size:11px;"></span>
+                </div>
+                <div class="cart-badge" id="cartBadge">
+                    <span>🛒</span>
+                    <span id="cartItemCount">0</span>
+                </div>
+                <div class="currency-selector" id="currencySelector">
+                    <span class="currency-option" data-currency="USD">USD</span>
+                    <span class="currency-option" data-currency="UGX">UGX</span>
                 </div>
                 <div class="user-menu" id="userMenu">
                     <div class="avatar" id="userAvatar">JD</div>
+                    <span id="userName"></span>
                 </div>
             </div>
         </div>
@@ -498,9 +593,17 @@
                 <div class="search-bar">
                     <input type="text" id="productSearch" placeholder="Search by name, SKU, or scan barcode...">
                     <button id="scanBtn">📷</button>
+                    <button id="filterBtn" style="background:#f1f5f9; border-radius:8px;">🔍 Filter</button>
                 </div>
                 <div class="category-tabs" id="categoryTabs">
                     <button class="category-tab active" data-category="all">All Products</button>
+                    <button class="category-tab" data-category="Electronics">📱 Electronics</button>
+                    <button class="category-tab" data-category="Apparel">👕 Apparel</button>
+                    <button class="category-tab" data-category="Footwear">👟 Footwear</button>
+                    <button class="category-tab" data-category="Accessories">💼 Accessories</button>
+                    <button class="category-tab" data-category="Groceries">🥑 Groceries</button>
+                    <button class="category-tab" data-category="Pharmacy">💊 Pharmacy</button>
+                    <button class="category-tab" data-category="Furniture">🛋️ Furniture</button>
                 </div>
                 <div class="products-grid" id="productsGrid">
                     <!-- Products loaded dynamically -->
@@ -514,7 +617,7 @@
                     <button class="clear-cart" id="clearCartBtn">Clear Cart</button>
                 </div>
                 <div class="cart-items" id="cartItems">
-                    <div style="text-align: center; color: #94a3b8; padding: 40px;">
+                    <div style="text-align: center; color: var(--gray); padding: 40px;">
                         No items in cart
                     </div>
                 </div>
@@ -524,12 +627,20 @@
                         <span id="subtotal">$0.00</span>
                     </div>
                     <div class="summary-row">
-                        <span>Tax (10%)</span>
+                        <span>Discount</span>
+                        <span id="discountAmount">-$0.00</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>Tax (18% VAT)</span>
                         <span id="tax">$0.00</span>
                     </div>
                     <div class="summary-row total">
                         <span>Total</span>
                         <span id="total">$0.00</span>
+                    </div>
+                    <div class="discount-input">
+                        <input type="text" id="couponCode" placeholder="Coupon code">
+                        <button class="apply-discount" id="applyCouponBtn">Apply</button>
                     </div>
                     <button class="checkout-btn" id="checkoutBtn" disabled>Checkout</button>
                 </div>
@@ -537,11 +648,11 @@
         </div>
 
         <div class="shortcuts-hint">
-            ⌨️ F1: Help | Ctrl+F: Search | F2: Customer | Ctrl+C: Clear
+            ⌨️ F1: Help | Ctrl+F: Search | F2: Customer | Ctrl+C: Clear | Ctrl+D: Discount
         </div>
     </div>
 
-    <!-- Payment Modal -->
+    <!-- Enhanced Payment Modal -->
     <div id="paymentModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -551,17 +662,15 @@
             <div class="modal-body">
                 <div class="summary-row" style="margin-bottom: 20px;">
                     <span>Total Amount:</span>
-                    <span id="modalTotal" style="font-size: 24px; font-weight: 700;">$0.00</span>
+                    <span id="modalTotal" style="font-size: 28px; font-weight: 700;">$0.00</span>
                 </div>
-                <div class="form-group">
-                    <label>Payment Method</label>
-                    <select id="paymentMethod" style="width:100%; padding:12px; border-radius:12px; border:1px solid #e2e8f0;">
-                        <option value="cash">Cash</option>
-                        <option value="card">Credit/Debit Card</option>
-                        <option value="gift_card">Gift Card</option>
-                    </select>
+                <div class="payment-methods" id="paymentMethods">
+                    <button class="payment-method-btn" data-method="cash">💵 Cash</button>
+                    <button class="payment-method-btn" data-method="card">💳 Card</button>
+                    <button class="payment-method-btn" data-method="mobile">📱 Mobile Money</button>
+                    <button class="payment-method-btn" data-method="gift_card">🎁 Gift Card</button>
                 </div>
-                <div id="cashSection">
+                <div id="cashSection" style="display: none;">
                     <div class="form-group">
                         <label>Cash Tendered</label>
                         <input type="number" id="cashTendered" step="0.01" placeholder="0.00">
@@ -571,12 +680,32 @@
                         <span id="changeDue">$0.00</span>
                     </div>
                 </div>
+                <div id="mobileSection" style="display: none;">
+                    <div class="form-group">
+                        <label>Mobile Number</label>
+                        <input type="tel" id="mobileNumber" placeholder="+256 XXX XXX XXX">
+                    </div>
+                    <div class="form-group">
+                        <label>Provider</label>
+                        <select id="mobileProvider">
+                            <option value="mtn">MTN Mobile Money</option>
+                            <option value="airtel">Airtel Money</option>
+                            <option value="vodafone">Vodafone Cash</option>
+                        </select>
+                    </div>
+                </div>
+                <div id="giftCardSection" style="display: none;">
+                    <div class="form-group">
+                        <label>Gift Card Number</label>
+                        <input type="text" id="giftCardNumber" placeholder="GIFT-XXXX-XXXX">
+                    </div>
+                </div>
                 <button id="processPaymentBtn" class="checkout-btn" style="margin-top: 20px;">Process Payment</button>
             </div>
         </div>
     </div>
 
-    <!-- Customer Modal -->
+    <!-- Enhanced Customer Modal -->
     <div id="customerModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -585,10 +714,11 @@
             </div>
             <div class="modal-body">
                 <div class="form-group">
-                    <input type="text" id="customerSearch" placeholder="Search by email or phone" style="width:100%; padding:12px;">
+                    <input type="text" id="customerSearch" placeholder="Search by email or phone" style="width:100%; padding:12px; border-radius:12px;">
                 </div>
                 <div id="customerResults"></div>
-                <button id="guestCustomerBtn" style="margin-top: 16px; width:100%; padding:12px; background:#f1f5f9; border:none; border-radius:12px;">Continue as Guest</button>
+                <button id="newCustomerBtn" style="margin-top: 16px; width:100%; padding:12px; background:var(--primary); color:white; border:none; border-radius:12px;">+ New Customer</button>
+                <button id="guestCustomerBtn" style="margin-top: 8px; width:100%; padding:12px; background:var(--light); border:none; border-radius:12px;">Continue as Guest</button>
             </div>
         </div>
     </div>
@@ -598,27 +728,123 @@
 
     <script>
         // ============================================
-        // NILE POS - MAIN POS CONTROLLER
-        // Self-contained, production-ready POS system
+        // NILE POS - ENHANCED MAIN CONTROLLER
+        // With 50+ Products, Multi-Currency, Coupons, Loyalty
         // ============================================
 
         (function() {
+            // ============================================
+            // CURRENCY CONFIGURATION
+            // ============================================
+            const EXCHANGE_RATE = 3700;
+            let currentCurrency = localStorage.getItem('pos_currency') || 'UGX';
+            
+            function formatMoney(amountUSD) {
+                if (currentCurrency === 'UGX') {
+                    return `UGX ${Math.round(amountUSD * EXCHANGE_RATE).toLocaleString('en-UG')}`;
+                }
+                return `$${amountUSD.toFixed(2)}`;
+            }
+
+            // ============================================
+            // EXPANDED PRODUCT DATABASE (50+ Products)
+            // ============================================
+            const products = [
+                // Electronics
+                { id: 1, sku: 'NLE-ELC-001', name: 'Smartphone X Pro', price: 699.99, stock: 25, category: 'Electronics', image: '📱', barcode: '8901234567801', brand: 'Nile Tech', rating: 4.8 },
+                { id: 2, sku: 'NLE-ELC-002', name: 'Wireless Earbuds', price: 89.99, stock: 48, category: 'Electronics', image: '🎧', barcode: '8901234567802', brand: 'Nile Audio', rating: 4.5 },
+                { id: 3, sku: 'NLE-ELC-003', name: 'Smart Watch Ultra', price: 299.99, stock: 18, category: 'Electronics', image: '⌚', barcode: '8901234567803', brand: 'Nile Wearables', rating: 4.7 },
+                { id: 4, sku: 'NLE-ELC-004', name: 'Laptop Pro 15', price: 1299.99, stock: 12, category: 'Electronics', image: '💻', barcode: '8901234567804', brand: 'Nile Computing', rating: 4.9 },
+                { id: 5, sku: 'NLE-ELC-005', name: 'Tablet Mini', price: 399.99, stock: 22, category: 'Electronics', image: '📟', barcode: '8901234567805', brand: 'Nile Tech', rating: 4.6 },
+                { id: 6, sku: 'NLE-ELC-006', name: 'Gaming Headset', price: 79.99, stock: 35, category: 'Electronics', image: '🎮', barcode: '8901234567806', brand: 'Nile Gaming', rating: 4.4 },
+                { id: 7, sku: 'NLE-ELC-007', name: 'Power Bank 20000mAh', price: 49.99, stock: 65, category: 'Electronics', image: '🔋', barcode: '8901234567807', brand: 'Nile Accessories', rating: 4.3 },
+                { id: 8, sku: 'NLE-ELC-008', name: 'USB-C Hub', price: 39.99, stock: 42, category: 'Electronics', image: '🔌', barcode: '8901234567808', brand: 'Nile Accessories', rating: 4.2 },
+                
+                // Apparel
+                { id: 9, sku: 'NLE-APR-001', name: 'Classic Cotton T-Shirt', price: 29.99, stock: 120, category: 'Apparel', image: '👕', barcode: '8901234567809', brand: 'Nile Basics', rating: 4.5 },
+                { id: 10, sku: 'NLE-APR-002', name: 'Slim Fit Jeans', price: 79.99, stock: 85, category: 'Apparel', image: '👖', barcode: '8901234567810', brand: 'Nile Denim', rating: 4.6 },
+                { id: 11, sku: 'NLE-APR-003', name: 'Hoodie Premium', price: 59.99, stock: 45, category: 'Apparel', image: '🧥', barcode: '8901234567811', brand: 'Nile Basics', rating: 4.7 },
+                { id: 12, sku: 'NLE-APR-004', name: 'Polo Shirt', price: 39.99, stock: 68, category: 'Apparel', image: '👔', barcode: '8901234567812', brand: 'Nile Sport', rating: 4.4 },
+                { id: 13, sku: 'NLE-APR-005', name: 'Winter Jacket', price: 149.99, stock: 22, category: 'Apparel', image: '🧥', barcode: '8901234567813', brand: 'Nile Outerwear', rating: 4.8 },
+                { id: 14, sku: 'NLE-APR-006', name: 'Jogger Pants', price: 49.99, stock: 56, category: 'Apparel', image: '👖', barcode: '8901234567814', brand: 'Nile Active', rating: 4.5 },
+                
+                // Footwear
+                { id: 15, sku: 'NLE-FTW-001', name: 'Running Shoes', price: 119.99, stock: 32, category: 'Footwear', image: '👟', barcode: '8901234567815', brand: 'Nile Sport', rating: 4.7 },
+                { id: 16, sku: 'NLE-FTW-002', name: 'Casual Sneakers', price: 89.99, stock: 48, category: 'Footwear', image: '👞', barcode: '8901234567816', brand: 'Nile Casual', rating: 4.5 },
+                { id: 17, sku: 'NLE-FTW-003', name: 'Formal Shoes', price: 129.99, stock: 28, category: 'Footwear', image: '👞', barcode: '8901234567817', brand: 'Nile Formal', rating: 4.6 },
+                { id: 18, sku: 'NLE-FTW-004', name: 'Sandals', price: 39.99, stock: 65, category: 'Footwear', image: '👡', barcode: '8901234567818', brand: 'Nile Summer', rating: 4.3 },
+                { id: 19, sku: 'NLE-FTW-005', name: 'Hiking Boots', price: 159.99, stock: 18, category: 'Footwear', image: '🥾', barcode: '8901234567819', brand: 'Nile Outdoor', rating: 4.8 },
+                
+                // Accessories
+                { id: 20, sku: 'NLE-ACC-001', name: 'Leather Wallet', price: 49.99, stock: 95, category: 'Accessories', image: '👛', barcode: '8901234567820', brand: 'Nile Leather', rating: 4.6 },
+                { id: 21, sku: 'NLE-ACC-002', name: 'Sunglasses', price: 69.99, stock: 52, category: 'Accessories', image: '🕶️', barcode: '8901234567821', brand: 'Nile Eyewear', rating: 4.5 },
+                { id: 22, sku: 'NLE-ACC-003', name: 'Backpack', price: 89.99, stock: 38, category: 'Accessories', image: '🎒', barcode: '8901234567822', brand: 'Nile Travel', rating: 4.7 },
+                { id: 23, sku: 'NLE-ACC-004', name: 'Watch Band', price: 19.99, stock: 110, category: 'Accessories', image: '⌚', barcode: '8901234567823', brand: 'Nile Accessories', rating: 4.2 },
+                { id: 24, sku: 'NLE-ACC-005', name: 'Phone Case', price: 24.99, stock: 145, category: 'Accessories', image: '📱', barcode: '8901234567824', brand: 'Nile Protection', rating: 4.4 },
+                
+                // Groceries
+                { id: 25, sku: 'NLE-GRO-001', name: 'Fresh Milk 1L', price: 1.99, stock: 200, category: 'Groceries', image: '🥛', barcode: '8901234567825', brand: 'Nile Dairy', rating: 4.5 },
+                { id: 26, sku: 'NLE-GRO-002', name: 'Brown Bread', price: 2.49, stock: 150, category: 'Groceries', image: '🍞', barcode: '8901234567826', brand: 'Nile Bakery', rating: 4.4 },
+                { id: 27, sku: 'NLE-GRO-003', name: 'Eggs (12 pcs)', price: 3.99, stock: 80, category: 'Groceries', image: '🥚', barcode: '8901234567827', brand: 'Nile Farms', rating: 4.6 },
+                { id: 28, sku: 'NLE-GRO-004', name: 'Rice 5kg', price: 8.99, stock: 45, category: 'Groceries', image: '🍚', barcode: '8901234567828', brand: 'Nile Grains', rating: 4.5 },
+                { id: 29, sku: 'NLE-GRO-005', name: 'Cooking Oil 2L', price: 6.99, stock: 60, category: 'Groceries', image: '🫒', barcode: '8901234567829', brand: 'Nile Oil', rating: 4.3 },
+                { id: 30, sku: 'NLE-GRO-006', name: 'Tomatoes 1kg', price: 2.49, stock: 120, category: 'Groceries', image: '🍅', barcode: '8901234567830', brand: 'Nile Fresh', rating: 4.4 },
+                { id: 31, sku: 'NLE-GRO-007', name: 'Onions 1kg', price: 1.99, stock: 130, category: 'Groceries', image: '🧅', barcode: '8901234567831', brand: 'Nile Fresh', rating: 4.3 },
+                { id: 32, sku: 'NLE-GRO-008', name: 'Potatoes 2kg', price: 3.49, stock: 90, category: 'Groceries', image: '🥔', barcode: '8901234567832', brand: 'Nile Fresh', rating: 4.4 },
+                
+                // Pharmacy
+                { id: 33, sku: 'NLE-PHA-001', name: 'Pain Relief Tablets', price: 4.99, stock: 200, category: 'Pharmacy', image: '💊', barcode: '8901234567833', brand: 'Nile Health', rating: 4.5, prescription: false },
+                { id: 34, sku: 'NLE-PHA-002', name: 'Vitamin C 1000mg', price: 12.99, stock: 85, category: 'Pharmacy', image: '🍊', barcode: '8901234567834', brand: 'Nile Vitamins', rating: 4.7 },
+                { id: 35, sku: 'NLE-PHA-003', name: 'First Aid Kit', price: 24.99, stock: 42, category: 'Pharmacy', image: '🩹', barcode: '8901234567835', brand: 'Nile Medical', rating: 4.8 },
+                { id: 36, sku: 'NLE-PHA-004', name: 'Face Mask (10pcs)', price: 5.99, stock: 300, category: 'Pharmacy', image: '😷', barcode: '8901234567836', brand: 'Nile Safety', rating: 4.4 },
+                { id: 37, sku: 'NLE-PHA-005', name: 'Hand Sanitizer', price: 3.99, stock: 150, category: 'Pharmacy', image: '🧴', barcode: '8901234567837', brand: 'Nile Hygiene', rating: 4.5 },
+                
+                // Furniture
+                { id: 38, sku: 'NLE-FUR-001', name: 'Office Chair', price: 199.99, stock: 15, category: 'Furniture', image: '🪑', barcode: '8901234567838', brand: 'Nile Office', rating: 4.6 },
+                { id: 39, sku: 'NLE-FUR-002', name: 'Dining Table', price: 399.99, stock: 8, category: 'Furniture', image: '🍽️', barcode: '8901234567839', brand: 'Nile Home', rating: 4.7 },
+                { id: 40, sku: 'NLE-FUR-003', name: 'Bookshelf', price: 149.99, stock: 12, category: 'Furniture', image: '📚', barcode: '8901234567840', brand: 'Nile Home', rating: 4.5 },
+                { id: 41, sku: 'NLE-FUR-004', name: 'Bed Frame Queen', price: 499.99, stock: 5, category: 'Furniture', image: '🛏️', barcode: '8901234567841', brand: 'Nile Bedding', rating: 4.8 },
+                { id: 42, sku: 'NLE-FUR-005', name: 'Desk Lamp', price: 29.99, stock: 35, category: 'Furniture', image: '💡', barcode: '8901234567842', brand: 'Nile Lighting', rating: 4.4 },
+                { id: 43, sku: 'NLE-FUR-006', name: 'Sofa Set', price: 799.99, stock: 3, category: 'Furniture', image: '🛋️', barcode: '8901234567843', brand: 'Nile Living', rating: 4.9 },
+                
+                // More Electronics
+                { id: 44, sku: 'NLE-ELC-009', name: 'Smart Speaker', price: 79.99, stock: 28, category: 'Electronics', image: '🔊', barcode: '8901234567844', brand: 'Nile Audio', rating: 4.5 },
+                { id: 45, sku: 'NLE-ELC-010', name: '4K Action Camera', price: 199.99, stock: 15, category: 'Electronics', image: '📷', barcode: '8901234567845', brand: 'Nile Cam', rating: 4.6 },
+                { id: 46, sku: 'NLE-ELC-011', name: 'Drone Mini', price: 299.99, stock: 8, category: 'Electronics', image: '🚁', barcode: '8901234567846', brand: 'Nile Fly', rating: 4.7 },
+                { id: 47, sku: 'NLE-ELC-012', name: 'Mechanical Keyboard', price: 89.99, stock: 22, category: 'Electronics', image: '⌨️', barcode: '8901234567847', brand: 'Nile Gaming', rating: 4.6 },
+                
+                // More Apparel
+                { id: 48, sku: 'NLE-APR-007', name: 'Summer Dress', price: 49.99, stock: 42, category: 'Apparel', image: '👗', barcode: '8901234567848', brand: 'Nile Fashion', rating: 4.5 },
+                { id: 49, sku: 'NLE-APR-008', name: 'Sports Bra', price: 29.99, stock: 38, category: 'Apparel', image: '🏃‍♀️', barcode: '8901234567849', brand: 'Nile Active', rating: 4.4 },
+                { id: 50, sku: 'NLE-APR-009', name: 'Swim Trunks', price: 24.99, stock: 55, category: 'Apparel', image: '🏊', barcode: '8901234567850', brand: 'Nile Swim', rating: 4.3 }
+            ];
+
+            // Coupons Database
+            const coupons = {
+                'WELCOME10': { type: 'percentage', value: 10, minPurchase: 50 },
+                'SAVE20': { type: 'percentage', value: 20, minPurchase: 100 },
+                'FLAT50': { type: 'fixed', value: 50, minPurchase: 200 },
+                'FREESHIP': { type: 'shipping', value: 0, minPurchase: 50 }
+            };
+
             // ============================================
             // STATE MANAGEMENT
             // ============================================
             let cart = [];
             let currentCustomer = null;
-            let products = [];
-            let categories = [];
-            let currentTier = 'freemium';
+            let appliedCoupon = null;
+            let discountAmount = 0;
             let currentUser = null;
             let isOffline = false;
-            let pendingSync = [];
+            let selectedPaymentMethod = 'cash';
+            let currentCategory = 'all';
+            let searchTerm = '';
 
             // DOM Elements
             const productsGrid = document.getElementById('productsGrid');
             const cartItemsDiv = document.getElementById('cartItems');
             const subtotalSpan = document.getElementById('subtotal');
+            const discountSpan = document.getElementById('discountAmount');
             const taxSpan = document.getElementById('tax');
             const totalSpan = document.getElementById('total');
             const checkoutBtn = document.getElementById('checkoutBtn');
@@ -627,161 +853,92 @@
             const customerBadge = document.getElementById('customerBadge');
             const customerNameSpan = document.getElementById('customerName');
             const cashierNameSpan = document.getElementById('cashierName');
-            const offlineBadge = document.getElementById('offlineBadge');
-            const categoryTabs = document.getElementById('categoryTabs');
+            const cartItemCountSpan = document.getElementById('cartItemCount');
+            const customerPointsSpan = document.getElementById('customerPoints');
 
             // ============================================
-            // DEMO PRODUCT DATA
+            // HELPER FUNCTIONS
             // ============================================
-            const demoProducts = [
-                { id: 1, sku: 'PRD-001', name: 'Classic T-Shirt', price: 29.99, category: 'Apparel', image: '👕', stock: 50 },
-                { id: 2, sku: 'PRD-002', name: 'Slim Fit Jeans', price: 59.99, category: 'Apparel', image: '👖', stock: 35 },
-                { id: 3, sku: 'PRD-003', name: 'Running Shoes', price: 89.99, category: 'Footwear', image: '👟', stock: 20 },
-                { id: 4, sku: 'PRD-004', name: 'Leather Wallet', price: 39.99, category: 'Accessories', image: '👛', stock: 45 },
-                { id: 5, sku: 'PRD-005', name: 'Smart Watch', price: 199.99, category: 'Electronics', image: '⌚', stock: 12 },
-                { id: 6, sku: 'PRD-006', name: 'Wireless Earbuds', price: 79.99, category: 'Electronics', image: '🎧', stock: 28 },
-                { id: 7, sku: 'PRD-007', name: 'Sunglasses', price: 49.99, category: 'Accessories', image: '🕶️', stock: 30 },
-                { id: 8, sku: 'PRD-008', name: 'Backpack', price: 69.99, category: 'Accessories', image: '🎒', stock: 18 },
-                { id: 9, sku: 'PRD-009', name: 'Hoodie', price: 54.99, category: 'Apparel', image: '🧥', stock: 25 },
-                { id: 10, sku: 'PRD-010', name: 'Sneakers', price: 74.99, category: 'Footwear', image: '👞', stock: 22 },
-                { id: 11, sku: 'PRD-011', name: 'Phone Case', price: 24.99, category: 'Electronics', image: '📱', stock: 60 },
-                { id: 12, sku: 'PRD-012', name: 'Water Bottle', price: 19.99, category: 'Accessories', image: '💧', stock: 40 }
-            ];
-
-            const demoCategories = ['All Products', 'Apparel', 'Footwear', 'Accessories', 'Electronics'];
-
-            // ============================================
-            // INITIALIZATION
-            // ============================================
-            function init() {
-                loadUserSession();
-                detectTier();
-                loadDemoData();
-                loadCartFromStorage();
-                setupEventListeners();
-                setupKeyboardShortcuts();
-                setupNetworkListeners();
-                renderCategories();
-                renderProducts();
-                renderCart();
-                updateCustomerDisplay();
-                startBarcodeScanner();
+            function getStockStatus(stock) {
+                if (stock <= 0) return { class: 'stock-low', text: 'Out of Stock' };
+                if (stock < 10) return { class: 'stock-medium', text: `Only ${stock} left` };
+                if (stock < 25) return { class: 'stock-medium', text: `${stock} in stock` };
+                return { class: 'stock-high', text: 'In Stock' };
             }
 
-            function loadUserSession() {
-                const userStr = localStorage.getItem('pos_user');
-                if (userStr) {
-                    currentUser = JSON.parse(userStr);
-                    const name = currentUser.name || currentUser.email;
-                    cashierNameSpan.textContent = name.split('@')[0];
-                    const avatar = document.getElementById('userAvatar');
-                    if (avatar && name) {
-                        avatar.textContent = name.charAt(0).toUpperCase();
+            function calculateCartTotals() {
+                const subtotal = cart.reduce((sum, item) => sum + item.lineTotal, 0);
+                let finalSubtotal = subtotal;
+                
+                // Apply coupon discount
+                discountAmount = 0;
+                if (appliedCoupon && subtotal >= appliedCoupon.minPurchase) {
+                    if (appliedCoupon.type === 'percentage') {
+                        discountAmount = (subtotal * appliedCoupon.value) / 100;
+                    } else if (appliedCoupon.type === 'fixed') {
+                        discountAmount = Math.min(appliedCoupon.value, subtotal);
                     }
-                } else {
-                    cashierNameSpan.textContent = 'Guest';
-                }
-            }
-
-            function detectTier() {
-                const tier = localStorage.getItem('pos_tier') || 'freemium';
-                currentTier = tier;
-                
-                // Apply tier-based UI restrictions
-                if (currentTier === 'freemium') {
-                    // Show upgrade prompts
-                    console.log('Freemium mode - upgrade for more features');
-                }
-            }
-
-            function loadDemoData() {
-                products = demoProducts;
-                categories = demoCategories;
-            }
-
-            function loadCartFromStorage() {
-                const saved = localStorage.getItem('pos_cart');
-                if (saved) {
-                    try {
-                        cart = JSON.parse(saved);
-                        renderCart();
-                    } catch(e) {}
-                }
-            }
-
-            function saveCartToStorage() {
-                localStorage.setItem('pos_cart', JSON.stringify(cart));
-            }
-
-            // ============================================
-            // CATEGORY RENDERING
-            // ============================================
-            function renderCategories() {
-                categoryTabs.innerHTML = '';
-                categories.forEach(cat => {
-                    const btn = document.createElement('button');
-                    btn.className = 'category-tab';
-                    if (cat === 'All Products') btn.classList.add('active');
-                    btn.textContent = cat;
-                    btn.dataset.category = cat;
-                    btn.addEventListener('click', () => {
-                        document.querySelectorAll('.category-tab').forEach(t => t.classList.remove('active'));
-                        btn.classList.add('active');
-                        renderProducts(cat === 'All Products' ? null : cat);
-                    });
-                    categoryTabs.appendChild(btn);
-                });
-            }
-
-            // ============================================
-            // PRODUCT RENDERING
-            // ============================================
-            function renderProducts(category = null) {
-                let filtered = products;
-                if (category && category !== 'All Products') {
-                    filtered = products.filter(p => p.category === category);
                 }
                 
-                const searchTerm = productSearch.value.toLowerCase();
-                if (searchTerm) {
-                    filtered = filtered.filter(p => 
-                        p.name.toLowerCase().includes(searchTerm) || 
-                        p.sku.toLowerCase().includes(searchTerm)
-                    );
-                }
+                const afterDiscount = subtotal - discountAmount;
+                const tax = afterDiscount * 0.18; // 18% VAT (Uganda standard)
+                const total = afterDiscount + tax;
                 
-                if (filtered.length === 0) {
-                    productsGrid.innerHTML = '<div style="grid-column:1/-1; text-align:center; color:#94a3b8; padding:40px;">No products found</div>';
+                return { subtotal, discountAmount, tax, total };
+            }
+
+            function updateCartDisplay() {
+                if (cart.length === 0) {
+                    cartItemsDiv.innerHTML = '<div style="text-align: center; color: var(--gray); padding: 40px;">No items in cart</div>';
+                    cartItemCountSpan.textContent = '0';
+                    checkoutBtn.disabled = true;
                     return;
                 }
                 
-                productsGrid.innerHTML = filtered.map(product => `
-                    <div class="product-card" data-product='${JSON.stringify(product)}'>
-                        <div class="product-image">${product.image || '📦'}</div>
-                        <div class="product-name">${escapeHtml(product.name)}</div>
-                        <div class="product-price">$${product.price.toFixed(2)}</div>
-                        <div class="product-sku">${product.sku}</div>
+                cartItemsDiv.innerHTML = cart.map(item => `
+                    <div class="cart-item" data-id="${item.id}">
+                        <div class="cart-item-info">
+                            <div class="cart-item-name">${escapeHtml(item.name)}</div>
+                            <div class="cart-item-price">${formatMoney(item.price)} each</div>
+                        </div>
+                        <div class="cart-item-quantity">
+                            <button onclick="window.posController.updateQuantity(${item.id}, -1)">-</button>
+                            <span>${item.quantity}</span>
+                            <button onclick="window.posController.updateQuantity(${item.id}, 1)">+</button>
+                        </div>
+                        <div class="cart-item-total">${formatMoney(item.lineTotal)}</div>
+                        <button class="cart-item-remove" onclick="window.posController.removeFromCart(${item.id})">✕</button>
                     </div>
                 `).join('');
                 
-                // Add click handlers
-                document.querySelectorAll('.product-card').forEach(card => {
-                    card.addEventListener('click', () => {
-                        const product = JSON.parse(card.dataset.product);
-                        addToCart(product);
-                    });
-                });
+                const { subtotal, discountAmount: disc, tax, total } = calculateCartTotals();
+                subtotalSpan.textContent = formatMoney(subtotal);
+                discountSpan.textContent = `-${formatMoney(disc)}`;
+                taxSpan.textContent = formatMoney(tax);
+                totalSpan.textContent = formatMoney(total);
+                cartItemCountSpan.textContent = cart.reduce((sum, item) => sum + item.quantity, 0);
+                checkoutBtn.disabled = false;
             }
 
-            // ============================================
-            // CART MANAGEMENT
-            // ============================================
             function addToCart(product, quantity = 1) {
+                if (product.stock <= 0) {
+                    showToast(`${product.name} is out of stock!`, 'error');
+                    return;
+                }
+                
                 const existing = cart.find(item => item.id === product.id);
                 if (existing) {
+                    if (existing.quantity + quantity > product.stock) {
+                        showToast(`Only ${product.stock} ${product.name}(s) available`, 'warning');
+                        return;
+                    }
                     existing.quantity += quantity;
                     existing.lineTotal = existing.quantity * existing.price;
                 } else {
+                    if (quantity > product.stock) {
+                        showToast(`Only ${product.stock} ${product.name}(s) available`, 'warning');
+                        return;
+                    }
                     cart.push({
                         id: product.id,
                         sku: product.sku,
@@ -792,7 +949,8 @@
                         image: product.image
                     });
                 }
-                renderCart();
+                
+                updateCartDisplay();
                 saveCartToStorage();
                 showToast(`Added ${product.name} to cart`, 'success');
                 playSound('scan-beep');
@@ -800,20 +958,24 @@
 
             function removeFromCart(itemId) {
                 cart = cart.filter(item => item.id !== itemId);
-                renderCart();
+                updateCartDisplay();
                 saveCartToStorage();
             }
 
             function updateQuantity(itemId, delta) {
                 const item = cart.find(i => i.id === itemId);
+                const product = products.find(p => p.id === itemId);
                 if (item) {
-                    item.quantity += delta;
-                    if (item.quantity <= 0) {
+                    const newQuantity = item.quantity + delta;
+                    if (newQuantity <= 0) {
                         removeFromCart(itemId);
-                    } else {
+                    } else if (newQuantity <= product.stock) {
+                        item.quantity = newQuantity;
                         item.lineTotal = item.quantity * item.price;
-                        renderCart();
+                        updateCartDisplay();
                         saveCartToStorage();
+                    } else {
+                        showToast(`Only ${product.stock} ${product.name}(s) available`, 'warning');
                     }
                 }
             }
@@ -821,46 +983,73 @@
             function clearCart() {
                 if (cart.length > 0 && confirm('Clear entire cart?')) {
                     cart = [];
-                    renderCart();
+                    appliedCoupon = null;
+                    discountAmount = 0;
+                    updateCartDisplay();
                     saveCartToStorage();
                     showToast('Cart cleared', 'info');
                 }
             }
 
-            function renderCart() {
-                if (cart.length === 0) {
-                    cartItemsDiv.innerHTML = '<div style="text-align: center; color: #94a3b8; padding: 40px;">No items in cart</div>';
-                    subtotalSpan.textContent = '$0.00';
-                    taxSpan.textContent = '$0.00';
-                    totalSpan.textContent = '$0.00';
-                    checkoutBtn.disabled = true;
+            function applyCoupon() {
+                const code = document.getElementById('couponCode').value.trim().toUpperCase();
+                const subtotal = cart.reduce((sum, item) => sum + item.lineTotal, 0);
+                
+                if (coupons[code]) {
+                    const coupon = coupons[code];
+                    if (subtotal >= coupon.minPurchase) {
+                        appliedCoupon = { ...coupon, code };
+                        updateCartDisplay();
+                        showToast(`Coupon ${code} applied!`, 'success');
+                    } else {
+                        showToast(`Minimum purchase of $${coupon.minPurchase} required`, 'error');
+                    }
+                } else {
+                    showToast('Invalid coupon code', 'error');
+                }
+                document.getElementById('couponCode').value = '';
+            }
+
+            function renderProducts() {
+                let filtered = products;
+                
+                if (currentCategory !== 'all') {
+                    filtered = filtered.filter(p => p.category === currentCategory);
+                }
+                
+                if (searchTerm) {
+                    filtered = filtered.filter(p => 
+                        p.name.toLowerCase().includes(searchTerm) || 
+                        p.sku.toLowerCase().includes(searchTerm) ||
+                        p.barcode.includes(searchTerm)
+                    );
+                }
+                
+                if (filtered.length === 0) {
+                    productsGrid.innerHTML = '<div style="grid-column:1/-1; text-align:center; color:var(--gray); padding:40px;">No products found</div>';
                     return;
                 }
                 
-                cartItemsDiv.innerHTML = cart.map(item => `
-                    <div class="cart-item">
-                        <div class="cart-item-info">
-                            <div class="cart-item-name">${escapeHtml(item.name)}</div>
-                            <div class="cart-item-price">$${item.price.toFixed(2)} each</div>
+                productsGrid.innerHTML = filtered.map(product => {
+                    const stockStatus = getStockStatus(product.stock);
+                    return `
+                        <div class="product-card" data-product='${JSON.stringify(product)}'>
+                            <div class="product-badge">${product.image}</div>
+                            <div class="product-image">${product.image}</div>
+                            <div class="product-name">${escapeHtml(product.name)}</div>
+                            <div class="product-price">${formatMoney(product.price)}</div>
+                            <div class="product-sku">${product.sku}</div>
+                            <div class="stock-badge ${stockStatus.class}">${stockStatus.text}</div>
                         </div>
-                        <div class="cart-item-quantity">
-                            <button onclick="window.posController.updateQuantity(${item.id}, -1)">-</button>
-                            <span>${item.quantity}</span>
-                            <button onclick="window.posController.updateQuantity(${item.id}, 1)">+</button>
-                        </div>
-                        <div class="cart-item-total">$${item.lineTotal.toFixed(2)}</div>
-                        <button class="cart-item-remove" onclick="window.posController.removeFromCart(${item.id})">✕</button>
-                    </div>
-                `).join('');
+                    `;
+                }).join('');
                 
-                const subtotal = cart.reduce((sum, item) => sum + item.lineTotal, 0);
-                const tax = subtotal * 0.10; // 10% tax
-                const total = subtotal + tax;
-                
-                subtotalSpan.textContent = `$${subtotal.toFixed(2)}`;
-                taxSpan.textContent = `$${tax.toFixed(2)}`;
-                totalSpan.textContent = `$${total.toFixed(2)}`;
-                checkoutBtn.disabled = false;
+                document.querySelectorAll('.product-card').forEach(card => {
+                    card.addEventListener('click', () => {
+                        const product = JSON.parse(card.dataset.product);
+                        addToCart(product);
+                    });
+                });
             }
 
             // ============================================
@@ -872,126 +1061,120 @@
                     return;
                 }
                 
-                const total = cart.reduce((sum, item) => sum + item.lineTotal, 0) * 1.10;
+                const { total } = calculateCartTotals();
                 const modal = document.getElementById('paymentModal');
-                document.getElementById('modalTotal').textContent = `$${total.toFixed(2)}`;
+                document.getElementById('modalTotal').textContent = formatMoney(total);
                 modal.classList.add('active');
                 
-                // Reset cash section
+                // Reset payment sections
+                document.getElementById('cashSection').style.display = 'none';
+                document.getElementById('mobileSection').style.display = 'none';
+                document.getElementById('giftCardSection').style.display = 'none';
                 document.getElementById('cashTendered').value = '';
-                document.getElementById('changeDue').textContent = '$0.00';
+                document.getElementById('changeDue').textContent = formatMoney(0);
+                selectedPaymentMethod = 'cash';
+                
+                document.querySelectorAll('.payment-method-btn').forEach(btn => {
+                    btn.classList.toggle('selected', btn.dataset.method === 'cash');
+                });
             }
 
             function processPayment() {
-                const method = document.getElementById('paymentMethod').value;
-                const total = cart.reduce((sum, item) => sum + item.lineTotal, 0) * 1.10;
+                const { total } = calculateCartTotals();
+                const method = selectedPaymentMethod;
                 
                 if (method === 'cash') {
                     const tendered = parseFloat(document.getElementById('cashTendered').value);
                     if (isNaN(tendered) || tendered < total) {
-                        showToast(`Insufficient cash. Need $${total.toFixed(2)}`, 'error');
+                        showToast(`Insufficient cash. Need ${formatMoney(total)}`, 'error');
                         return;
                     }
                     const change = tendered - total;
-                    showToast(`Payment successful! Change: $${change.toFixed(2)}`, 'success');
+                    showToast(`Payment successful! Change: ${formatMoney(change)}`, 'success');
+                } else if (method === 'mobile') {
+                    const mobileNumber = document.getElementById('mobileNumber').value;
+                    const provider = document.getElementById('mobileProvider').value;
+                    if (!mobileNumber) {
+                        showToast('Please enter mobile number', 'error');
+                        return;
+                    }
+                    showToast(`Payment of ${formatMoney(total)} processed via ${provider}`, 'success');
                 } else {
-                    showToast(`Payment of $${total.toFixed(2)} processed via ${method}`, 'success');
+                    showToast(`Payment of ${formatMoney(total)} processed via ${method}`, 'success');
                 }
                 
                 playSound('payment-success');
                 printReceipt();
                 
-                // Clear cart and close modal
+                // Add loyalty points
+                if (currentCustomer) {
+                    const pointsEarned = Math.floor(total / 10);
+                    currentCustomer.points = (currentCustomer.points || 0) + pointsEarned;
+                    showToast(`You earned ${pointsEarned} loyalty points!`, 'success');
+                    updateCustomerDisplay();
+                }
+                
                 cart = [];
-                renderCart();
+                appliedCoupon = null;
+                updateCartDisplay();
                 saveCartToStorage();
                 document.getElementById('paymentModal').classList.remove('active');
-                
-                // Update customer loyalty (if applicable)
-                if (currentCustomer) {
-                    showToast(`You earned ${Math.floor(total / 10)} loyalty points!`, 'info');
-                }
             }
 
             function printReceipt() {
-                const receiptHtml = generateReceiptHtml();
+                const { subtotal, discountAmount: disc, tax, total } = calculateCartTotals();
+                const receiptHtml = `
+                    <div style="font-family: monospace; padding: 20px; max-width: 300px; margin: 0 auto;">
+                        <div style="text-align: center; border-bottom: 1px dashed #000; padding-bottom: 10px;">
+                            <h3>Nile Shopping POS</h3>
+                            <p>${new Date().toLocaleString()}</p>
+                            <p>Register: 01 | Cashier: ${currentUser?.name || 'Guest'}</p>
+                        </div>
+                        <div style="margin: 20px 0;">
+                            ${cart.map(item => `
+                                <div style="display: flex; justify-content: space-between; margin: 5px 0;">
+                                    <span>${item.name} x${item.quantity}</span>
+                                    <span>${formatMoney(item.lineTotal)}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                        <div style="border-top: 1px solid #000; padding-top: 10px;">
+                            <div style="display: flex; justify-content: space-between;"><span>Subtotal:</span><span>${formatMoney(subtotal)}</span></div>
+                            ${disc > 0 ? `<div style="display: flex; justify-content: space-between;"><span>Discount:</span><span>-${formatMoney(disc)}</span></div>` : ''}
+                            <div style="display: flex; justify-content: space-between;"><span>VAT (18%):</span><span>${formatMoney(tax)}</span></div>
+                            <div style="display: flex; justify-content: space-between; font-weight: bold; margin-top: 10px;"><span>TOTAL:</span><span>${formatMoney(total)}</span></div>
+                        </div>
+                        <div style="text-align: center; margin-top: 20px; font-size: 11px;">
+                            Thank you for shopping with us!
+                            ${currentCustomer ? `<br>Loyalty Points: ${currentCustomer.points || 0}` : ''}
+                        </div>
+                    </div>
+                `;
+                
                 const printWindow = window.open('', '_blank');
                 printWindow.document.write(`
                     <!DOCTYPE html>
                     <html>
-                    <head>
-                        <title>Receipt</title>
-                        <style>
-                            body { font-family: monospace; padding: 20px; max-width: 300px; margin: 0 auto; }
-                            .header { text-align: center; border-bottom: 1px dashed #000; padding-bottom: 10px; }
-                            .items { margin: 20px 0; }
-                            .item { display: flex; justify-content: space-between; margin: 5px 0; }
-                            .total { border-top: 1px solid #000; margin-top: 10px; padding-top: 10px; }
-                            .footer { text-align: center; margin-top: 20px; font-size: 12px; }
-                        </style>
-                    </head>
-                    <body>
-                        ${receiptHtml}
-                        <script>window.print(); window.close();<\/script>
-                    </body>
+                    <head><title>Receipt</title></head>
+                    <body>${receiptHtml}<script>window.print(); window.close();<\/script></body>
                     </html>
                 `);
-            }
-
-            function generateReceiptHtml() {
-                const subtotal = cart.reduce((sum, item) => sum + item.lineTotal, 0);
-                const tax = subtotal * 0.10;
-                const total = subtotal + tax;
-                const date = new Date().toLocaleString();
-                
-                let itemsHtml = '';
-                cart.forEach(item => {
-                    itemsHtml += `
-                        <div class="item">
-                            <span>${item.name} x${item.quantity}</span>
-                            <span>$${item.lineTotal.toFixed(2)}</span>
-                        </div>
-                    `;
-                });
-                
-                return `
-                    <div class="header">
-                        <h3>Nile Shopping POS</h3>
-                        <p>${date}</p>
-                    </div>
-                    <div class="items">
-                        ${itemsHtml}
-                    </div>
-                    <div class="total">
-                        <div class="item"><strong>Subtotal</strong><strong>$${subtotal.toFixed(2)}</strong></div>
-                        <div class="item">Tax (10%)$${tax.toFixed(2)}</div>
-                        <div class="item"><strong>TOTAL</strong><strong>$${total.toFixed(2)}</strong></div>
-                    </div>
-                    <div class="footer">
-                        Thank you for shopping with us!
-                        ${currentTier === 'freemium' ? '<br><small>Powered by Nile Shopping POS</small>' : ''}
-                    </div>
-                `;
             }
 
             // ============================================
             // CUSTOMER MANAGEMENT
             // ============================================
             function openCustomerModal() {
-                const modal = document.getElementById('customerModal');
-                modal.classList.add('active');
+                document.getElementById('customerModal').classList.add('active');
                 document.getElementById('customerSearch').focus();
             }
 
             function searchCustomers() {
                 const searchTerm = document.getElementById('customerSearch').value.toLowerCase();
-                const resultsDiv = document.getElementById('customerResults');
-                
-                // Demo customers
                 const demoCustomers = [
-                    { id: 1, name: 'John Doe', email: 'john@example.com', phone: '555-0101', points: 150 },
-                    { id: 2, name: 'Jane Smith', email: 'jane@example.com', phone: '555-0102', points: 320 },
-                    { id: 3, name: 'Bob Johnson', email: 'bob@example.com', phone: '555-0103', points: 45 }
+                    { id: 1, name: 'John Davies', email: 'john@example.com', phone: '+256 712 345678', points: 1250, tier: 'gold' },
+                    { id: 2, name: 'Sarah O\'Brien', email: 'sarah@example.com', phone: '+256 712 345679', points: 3450, tier: 'platinum' },
+                    { id: 3, name: 'David Mwangi', email: 'david@example.com', phone: '+256 712 345680', points: 450, tier: 'silver' }
                 ];
                 
                 const filtered = demoCustomers.filter(c => 
@@ -1000,16 +1183,17 @@
                     c.phone.includes(searchTerm)
                 );
                 
+                const resultsDiv = document.getElementById('customerResults');
                 if (filtered.length === 0) {
-                    resultsDiv.innerHTML = '<div style="padding: 20px; text-align: center; color: #94a3b8;">No customers found</div>';
+                    resultsDiv.innerHTML = '<div style="padding: 20px; text-align: center; color: var(--gray);">No customers found</div>';
                     return;
                 }
                 
                 resultsDiv.innerHTML = filtered.map(c => `
-                    <div class="customer-result" style="padding: 12px; border-bottom: 1px solid #e2e8f0; cursor: pointer;" data-customer='${JSON.stringify(c)}'>
+                    <div class="customer-result" style="padding: 12px; border-bottom: 1px solid var(--border); cursor: pointer;" data-customer='${JSON.stringify(c)}'>
                         <div><strong>${escapeHtml(c.name)}</strong></div>
-                        <div style="font-size: 12px; color: #64748b;">${c.email} | ${c.phone}</div>
-                        <div style="font-size: 12px; color: #667eea;">${c.points} loyalty points</div>
+                        <div style="font-size: 12px; color: var(--gray);">${c.email} | ${c.phone}</div>
+                        <div style="font-size: 12px; color: var(--primary);">${c.points} points | ${c.tier.toUpperCase()}</div>
                     </div>
                 `).join('');
                 
@@ -1037,79 +1221,44 @@
             function updateCustomerDisplay() {
                 if (currentCustomer) {
                     customerNameSpan.textContent = currentCustomer.name;
+                    customerPointsSpan.textContent = `🏆 ${currentCustomer.points} pts`;
                     customerBadge.style.background = '#e0e7ff';
                 } else {
                     customerNameSpan.textContent = 'Guest';
-                    customerBadge.style.background = '#f1f5f9';
+                    customerPointsSpan.textContent = '';
+                    customerBadge.style.background = 'var(--light)';
                 }
             }
 
             // ============================================
-            // BARCODE SCANNER (Keyboard wedge)
+            // BARCODE SCANNER
             // ============================================
             let scannerBuffer = '';
             let scannerTimeout = null;
             
             function startBarcodeScanner() {
                 document.addEventListener('keydown', (e) => {
-                    // Ignore if input is focused
-                    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
-                        return;
-                    }
+                    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
                     
                     if (e.key === 'Enter') {
                         if (scannerBuffer.length > 0) {
-                            processBarcode(scannerBuffer);
+                            const product = products.find(p => p.barcode === scannerBuffer || p.sku === scannerBuffer.toUpperCase());
+                            if (product) {
+                                addToCart(product);
+                                playSound('scan-beep');
+                            } else {
+                                showToast(`Product not found: ${scannerBuffer}`, 'error');
+                            }
                             scannerBuffer = '';
                             clearTimeout(scannerTimeout);
                             e.preventDefault();
                         }
-                    } else if (e.key.length === 1) {
+                    } else if (e.key.length === 1 && e.key.match(/[0-9a-zA-Z]/)) {
                         clearTimeout(scannerTimeout);
                         scannerBuffer += e.key;
-                        scannerTimeout = setTimeout(() => {
-                            scannerBuffer = '';
-                        }, 50);
+                        scannerTimeout = setTimeout(() => { scannerBuffer = ''; }, 100);
                     }
                 });
-            }
-            
-            function processBarcode(barcode) {
-                const product = products.find(p => p.sku === barcode || p.sku === barcode.toUpperCase());
-                if (product) {
-                    addToCart(product);
-                    playSound('scan-beep');
-                } else {
-                    showToast(`Product not found: ${barcode}`, 'error');
-                    playSound('error-alert');
-                }
-            }
-
-            // ============================================
-            // OFFLINE MODE
-            // ============================================
-            function setupNetworkListeners() {
-                window.addEventListener('online', () => {
-                    isOffline = false;
-                    offlineBadge.classList.add('hidden');
-                    showToast('Connection restored. Syncing data...', 'success');
-                    syncOfflineData();
-                });
-                
-                window.addEventListener('offline', () => {
-                    isOffline = true;
-                    offlineBadge.classList.remove('hidden');
-                    showToast('You are offline. Transactions will be saved locally.', 'warning');
-                });
-            }
-            
-            function syncOfflineData() {
-                // Sync pending transactions
-                const pending = localStorage.getItem('offline_transactions');
-                if (pending) {
-                    // Process sync
-                    localStorage.removeItem('offline_transactions');
-                }
             }
 
             // ============================================
@@ -1119,15 +1268,19 @@
                 const container = document.getElementById('toastContainer');
                 const toast = document.createElement('div');
                 toast.className = 'toast';
-                toast.style.background = type === 'error' ? '#ef4444' : type === 'success' ? '#10b981' : '#1e293b';
+                const colors = { error: '#dc2626', success: '#10b981', warning: '#f59e0b', info: '#1e293b' };
+                toast.style.background = colors[type] || colors.info;
                 toast.textContent = message;
                 container.appendChild(toast);
                 setTimeout(() => toast.remove(), 3000);
             }
             
             function playSound(soundName) {
-                // Silent in demo - actual sound would play
-                console.log(`Play sound: ${soundName}`);
+                try {
+                    const audio = new Audio(`data:audio/wav;base64,U3RlcmVv`);
+                    audio.volume = 0.3;
+                    audio.play().catch(() => {});
+                } catch(e) {}
             }
             
             function escapeHtml(str) {
@@ -1136,31 +1289,48 @@
                 return div.innerHTML;
             }
             
-            function showKeyboardShortcuts() {
-                showToast('F1: Help | Ctrl+F: Search | F2: Customer | Ctrl+C: Clear', 'info');
+            function saveCartToStorage() {
+                localStorage.setItem('pos_cart', JSON.stringify(cart));
+                localStorage.setItem('pos_cart_discount', JSON.stringify(appliedCoupon));
+            }
+            
+            function loadCartFromStorage() {
+                const saved = localStorage.getItem('pos_cart');
+                if (saved) {
+                    try {
+                        cart = JSON.parse(saved);
+                        const savedCoupon = localStorage.getItem('pos_cart_discount');
+                        if (savedCoupon) appliedCoupon = JSON.parse(savedCoupon);
+                        updateCartDisplay();
+                    } catch(e) {}
+                }
             }
 
             // ============================================
-            // KEYBOARD SHORTCUTS
+            // CURRENCY & KEYBOARD SHORTCUTS
             // ============================================
+            function initCurrencySelector() {
+                document.querySelectorAll('.currency-option').forEach(opt => {
+                    opt.classList.toggle('active', opt.dataset.currency === currentCurrency);
+                    opt.addEventListener('click', () => {
+                        currentCurrency = opt.dataset.currency;
+                        localStorage.setItem('pos_currency', currentCurrency);
+                        document.querySelectorAll('.currency-option').forEach(o => o.classList.remove('active'));
+                        opt.classList.add('active');
+                        renderProducts();
+                        updateCartDisplay();
+                        showToast(`Currency switched to ${currentCurrency === 'UGX' ? 'Ugandan Shilling' : 'US Dollar'}`, 'success');
+                    });
+                });
+            }
+            
             function setupKeyboardShortcuts() {
                 document.addEventListener('keydown', (e) => {
-                    if (e.key === 'F1') {
-                        e.preventDefault();
-                        showKeyboardShortcuts();
-                    }
-                    if (e.key === 'F2') {
-                        e.preventDefault();
-                        openCustomerModal();
-                    }
-                    if (e.ctrlKey && e.key === 'f') {
-                        e.preventDefault();
-                        productSearch.focus();
-                    }
-                    if (e.ctrlKey && e.key === 'c') {
-                        e.preventDefault();
-                        clearCart();
-                    }
+                    if (e.key === 'F1') showToast('F1: Help | Ctrl+F: Search | F2: Customer | Ctrl+C: Clear | Ctrl+D: Discount', 'info');
+                    if (e.key === 'F2') { e.preventDefault(); openCustomerModal(); }
+                    if (e.ctrlKey && e.key === 'f') { e.preventDefault(); productSearch.focus(); }
+                    if (e.ctrlKey && e.key === 'c') { e.preventDefault(); clearCart(); }
+                    if (e.ctrlKey && e.key === 'd') { e.preventDefault(); document.getElementById('couponCode').focus(); }
                     if (e.key === 'Enter' && cart.length > 0 && !e.target.matches('input, button')) {
                         e.preventDefault();
                         openPaymentModal();
@@ -1174,16 +1344,37 @@
             function setupEventListeners() {
                 checkoutBtn.addEventListener('click', openPaymentModal);
                 clearCartBtn.addEventListener('click', clearCart);
-                productSearch.addEventListener('input', () => renderProducts());
-                customerBadge.addEventListener('click', openCustomerModal);
-                
-                document.getElementById('scanBtn')?.addEventListener('click', () => {
-                    showToast('Please scan a barcode using your scanner', 'info');
+                productSearch.addEventListener('input', (e) => {
+                    searchTerm = e.target.value.toLowerCase();
+                    renderProducts();
                 });
-                
+                customerBadge.addEventListener('click', openCustomerModal);
+                document.getElementById('scanBtn')?.addEventListener('click', () => showToast('Scan a barcode using your scanner', 'info'));
+                document.getElementById('applyCouponBtn')?.addEventListener('click', applyCoupon);
                 document.getElementById('processPaymentBtn')?.addEventListener('click', processPayment);
                 document.getElementById('guestCustomerBtn')?.addEventListener('click', setGuestCustomer);
+                document.getElementById('newCustomerBtn')?.addEventListener('click', () => showToast('Customer creation form would open here', 'info'));
                 document.getElementById('customerSearch')?.addEventListener('input', searchCustomers);
+                
+                // Payment method selection
+                document.querySelectorAll('.payment-method-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        document.querySelectorAll('.payment-method-btn').forEach(b => b.classList.remove('selected'));
+                        btn.classList.add('selected');
+                        selectedPaymentMethod = btn.dataset.method;
+                        
+                        document.getElementById('cashSection').style.display = selectedPaymentMethod === 'cash' ? 'block' : 'none';
+                        document.getElementById('mobileSection').style.display = selectedPaymentMethod === 'mobile' ? 'block' : 'none';
+                        document.getElementById('giftCardSection').style.display = selectedPaymentMethod === 'gift_card' ? 'block' : 'none';
+                    });
+                });
+                
+                document.getElementById('cashTendered')?.addEventListener('input', () => {
+                    const { total } = calculateCartTotals();
+                    const tendered = parseFloat(document.getElementById('cashTendered').value) || 0;
+                    const change = tendered - total;
+                    document.getElementById('changeDue').textContent = formatMoney(change >= 0 ? change : 0);
+                });
                 
                 document.querySelectorAll('.close-modal').forEach(btn => {
                     btn.addEventListener('click', () => {
@@ -1191,19 +1382,45 @@
                     });
                 });
                 
-                document.getElementById('paymentMethod')?.addEventListener('change', (e) => {
-                    const cashSection = document.getElementById('cashSection');
-                    cashSection.style.display = e.target.value === 'cash' ? 'block' : 'none';
-                });
-                
-                document.getElementById('cashTendered')?.addEventListener('input', () => {
-                    const total = cart.reduce((sum, item) => sum + item.lineTotal, 0) * 1.10;
-                    const tendered = parseFloat(document.getElementById('cashTendered').value) || 0;
-                    const change = tendered - total;
-                    document.getElementById('changeDue').textContent = change >= 0 ? `$${change.toFixed(2)}` : `-$${Math.abs(change).toFixed(2)}`;
+                // Category tabs
+                document.querySelectorAll('.category-tab').forEach(tab => {
+                    tab.addEventListener('click', () => {
+                        document.querySelectorAll('.category-tab').forEach(t => t.classList.remove('active'));
+                        tab.classList.add('active');
+                        currentCategory = tab.dataset.category;
+                        renderProducts();
+                    });
                 });
             }
 
+            function loadUserSession() {
+                const userStr = localStorage.getItem('pos_user');
+                if (userStr) {
+                    currentUser = JSON.parse(userStr);
+                    cashierNameSpan.textContent = currentUser.name?.split(' ')[0] || currentUser.email?.split('@')[0] || 'Cashier';
+                    document.getElementById('userName').textContent = currentUser.name || '';
+                    const avatar = document.getElementById('userAvatar');
+                    if (avatar && currentUser.name) avatar.textContent = currentUser.name.charAt(0).toUpperCase();
+                } else {
+                    cashierNameSpan.textContent = 'Guest';
+                }
+            }
+
+            // ============================================
+            // INITIALIZATION
+            // ============================================
+            function init() {
+                loadUserSession();
+                loadCartFromStorage();
+                initCurrencySelector();
+                setupKeyboardShortcuts();
+                setupEventListeners();
+                startBarcodeScanner();
+                renderProducts();
+                updateCustomerDisplay();
+                console.log('Nile POS Enhanced - Ready with 50+ products!');
+            }
+            
             // Expose for inline onclick handlers
             window.posController = {
                 updateQuantity: updateQuantity,
@@ -1211,7 +1428,6 @@
                 addToCart: addToCart
             };
             
-            // Start
             init();
         })();
     </script>
