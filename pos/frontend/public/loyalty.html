@@ -1,16 +1,15 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nile POS - Loyalty Program</title>
+    <title>Nile POS - Loyalty Program | Earn Points</title>
     <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+            background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
             padding: 24px;
             min-height: 100vh;
         }
@@ -21,8 +20,10 @@
             align-items: center;
             margin-bottom: 24px;
             color: white;
+            flex-wrap: wrap;
+            gap: 16px;
         }
-        h1 { font-size: 24px; }
+        h1 { font-size: 24px; display: flex; align-items: center; gap: 8px; }
         .back-btn {
             background: rgba(255,255,255,0.2);
             border: 1px solid rgba(255,255,255,0.3);
@@ -31,6 +32,23 @@
             cursor: pointer;
             text-decoration: none;
             color: white;
+        }
+        .currency-switch {
+            display: flex;
+            gap: 8px;
+            background: rgba(255,255,255,0.15);
+            padding: 4px 12px;
+            border-radius: 100px;
+        }
+        .currency-opt {
+            padding: 4px 12px;
+            border-radius: 100px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+        .currency-opt.active {
+            background: white;
+            color: #2563eb;
         }
         .tier-showcase {
             display: grid;
@@ -48,8 +66,7 @@
         .tier-card:hover { transform: translateY(-4px); }
         .tier-icon { font-size: 40px; margin-bottom: 12px; }
         .tier-name { font-size: 18px; font-weight: 700; }
-        .tier-points { font-size: 12px; color: #64748b; margin: 8px 0; }
-        .tier-benefits { font-size: 11px; color: #10b981; }
+        .tier-points { font-size: 12px; color: #6b7280; margin: 8px 0; }
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -62,7 +79,7 @@
             padding: 20px;
             text-align: center;
         }
-        .stat-value { font-size: 32px; font-weight: 700; color: #667eea; }
+        .stat-value { font-size: 28px; font-weight: 700; color: #2563eb; }
         .customer-section {
             background: white;
             border-radius: 20px;
@@ -76,9 +93,10 @@
         }
         .search-box input {
             flex: 1;
-            padding: 12px;
-            border: 1px solid #e2e8f0;
+            padding: 12px 16px;
+            border: 1px solid #e5e7eb;
             border-radius: 12px;
+            font-size: 14px;
         }
         .rewards-grid {
             display: grid;
@@ -86,25 +104,22 @@
             gap: 16px;
         }
         .reward-card {
-            background: #f8fafc;
+            background: #f9fafb;
             border-radius: 16px;
             padding: 16px;
-            border: 1px solid #e2e8f0;
+            border: 1px solid #e5e7eb;
         }
-        .reward-points {
-            font-size: 24px;
-            font-weight: 700;
-            color: #f59e0b;
-        }
+        .reward-points { font-size: 24px; font-weight: 700; color: #f59e0b; }
         .redeem-btn {
             width: 100%;
             margin-top: 12px;
-            padding: 8px;
-            background: #667eea;
+            padding: 10px;
+            background: #2563eb;
             color: white;
             border: none;
             border-radius: 8px;
             cursor: pointer;
+            font-weight: 600;
         }
         @media (max-width: 768px) {
             .tier-showcase { grid-template-columns: repeat(2, 1fr); }
@@ -115,14 +130,20 @@
     <div class="container">
         <div class="header">
             <h1>🎯 Loyalty Program</h1>
-            <a href="/index.html" class="back-btn">← Back</a>
+            <div style="display: flex; gap: 12px; align-items: center;">
+                <div class="currency-switch">
+                    <span class="currency-opt" data-currency="USD">USD</span>
+                    <span class="currency-opt" data-currency="UGX">UGX</span>
+                </div>
+                <a href="/index.html" class="back-btn">← Back</a>
+            </div>
         </div>
 
         <div class="tier-showcase">
             <div class="tier-card"><div class="tier-icon">🥉</div><div class="tier-name">Bronze</div><div class="tier-points">0-499 points</div><div class="tier-benefits">✓ 1% cashback</div></div>
             <div class="tier-card"><div class="tier-icon">🥈</div><div class="tier-name">Silver</div><div class="tier-points">500-999 points</div><div class="tier-benefits">✓ 2% cashback ✓ Early access</div></div>
             <div class="tier-card"><div class="tier-icon">🥇</div><div class="tier-name">Gold</div><div class="tier-points">1000-2499 points</div><div class="tier-benefits">✓ 3% cashback ✓ Free shipping</div></div>
-            <div class="tier-card"><div class="tier-icon">💎</div><div class="tier-name">Platinum</div><div class="tier-points">2500+ points</div><div class="tier-benefits">✓ 5% cashback ✓ VIP support ✓ Birthday gift</div></div>
+            <div class="tier-card"><div class="tier-icon">💎</div><div class="tier-name">Platinum</div><div class="tier-points">2500+ points</div><div class="tier-benefits">✓ 5% cashback ✓ VIP support</div></div>
         </div>
 
         <div class="stats-grid">
@@ -136,7 +157,7 @@
             <h3>Customer Lookup</h3>
             <div class="search-box">
                 <input type="text" id="customerSearch" placeholder="Search by name, email, or phone">
-                <button id="searchBtn" style="padding:12px 24px; background:#667eea; color:white; border:none; border-radius:12px;">Search</button>
+                <button id="searchBtn" style="padding:12px 24px; background:#2563eb; color:white; border:none; border-radius:12px;">Search</button>
             </div>
             <div id="customerResult"></div>
         </div>
@@ -149,18 +170,27 @@
 
     <script>
         (function() {
+            const EXCHANGE_RATE = localStorage.getItem('exchange_rate') ? parseFloat(localStorage.getItem('exchange_rate')) : 3700;
+            let currentCurrency = localStorage.getItem('pos_currency') || 'UGX';
+            
+            function formatMoney(amountUSD) {
+                if (currentCurrency === 'UGX') {
+                    return `UGX ${Math.round(amountUSD * EXCHANGE_RATE).toLocaleString('en-UG')}`;
+                }
+                return `$${amountUSD.toFixed(2)}`;
+            }
+            
             const customers = [
-                { id: 1, name: 'John Doe', email: 'john@example.com', phone: '555-0101', points: 1250, tier: 'gold', lifetimeSpend: 1240.50 },
-                { id: 2, name: 'Jane Smith', email: 'jane@example.com', phone: '555-0102', points: 3450, tier: 'platinum', lifetimeSpend: 2780.00 },
-                { id: 3, name: 'Bob Johnson', email: 'bob@example.com', phone: '555-0103', points: 450, tier: 'silver', lifetimeSpend: 890.75 }
+                { id: 1, name: 'John Davies', email: 'john@example.com', phone: '+256 712 345678', points: 1250, tier: 'gold', lifetimeSpendUSD: 1240.50 },
+                { id: 2, name: 'Sarah O\'Brien', email: 'sarah@example.com', phone: '+256 712 345679', points: 3450, tier: 'platinum', lifetimeSpendUSD: 2780.00 },
+                { id: 3, name: 'David Mwangi', email: 'david@example.com', phone: '+256 712 345680', points: 450, tier: 'silver', lifetimeSpendUSD: 890.75 }
             ];
             
             const rewards = [
-                { id: 1, name: '$5 Off Coupon', points: 500, description: 'Save $5 on your next purchase' },
-                { id: 2, name: '$10 Off Coupon', points: 1000, description: 'Save $10 on your next purchase' },
-                { id: 3, name: 'Free Shipping', points: 300, description: 'Free shipping on any order' },
-                { id: 4, name: 'Free Small Coffee', points: 150, description: 'Complimentary coffee' },
-                { id: 5, name: 'Birthday Discount (20%)', points: 750, description: '20% off on your birthday month' }
+                { id: 1, name: '$5 Off Coupon', points: 500, valueUSD: 5, description: 'Save $5 on your next purchase' },
+                { id: 2, name: '$10 Off Coupon', points: 1000, valueUSD: 10, description: 'Save $10 on your next purchase' },
+                { id: 3, name: 'Free Shipping', points: 300, valueUSD: 0, description: 'Free shipping on any order' },
+                { id: 4, name: '20% Off', points: 750, valueUSD: 0, description: '20% discount on entire purchase' }
             ];
             
             let selectedCustomer = null;
@@ -188,19 +218,15 @@
                             <div><strong>${result.name}</strong> - ${result.tier.toUpperCase()}</div>
                             <div>📧 ${result.email} | 📞 ${result.phone}</div>
                             <div style="font-size:24px; font-weight:700; margin:12px 0;">${result.points} points</div>
-                            <div>Lifetime spend: $${result.lifetimeSpend.toFixed(2)}</div>
-                            <button id="viewHistoryBtn" style="margin-top:12px; padding:8px 16px; background:#667eea; color:white; border:none; border-radius:8px;">View History</button>
+                            <div>Lifetime spend: ${formatMoney(result.lifetimeSpendUSD)}</div>
+                            <button id="viewHistoryBtn" style="margin-top:12px; padding:8px 16px; background:#2563eb; color:white; border:none; border-radius:8px;">View History</button>
                         </div>
                     `;
-                    document.getElementById('viewHistoryBtn')?.addEventListener('click', () => showHistory(result));
+                    document.getElementById('viewHistoryBtn')?.addEventListener('click', () => alert(`Transaction history for ${result.name}:\nPoints earned: ${result.points}\nTier: ${result.tier}\nLifetime spend: ${formatMoney(result.lifetimeSpendUSD)}`));
                 } else {
                     selectedCustomer = null;
                     resultDiv.innerHTML = '<div style="padding:16px; background:#fef2f2; border-radius:12px;">Customer not found</div>';
                 }
-            }
-            
-            function showHistory(customer) {
-                alert(`Transaction history for ${customer.name}:\nPoints earned: ${customer.points}\nTier: ${customer.tier}\nLifetime spend: $${customer.lifetimeSpend}`);
             }
             
             function renderRewards() {
@@ -209,7 +235,8 @@
                     <div class="reward-card">
                         <div><strong>${r.name}</strong></div>
                         <div class="reward-points">${r.points} points</div>
-                        <div style="font-size:12px; color:#64748b;">${r.description}</div>
+                        <div style="font-size:12px; color:#6b7280;">${r.description}</div>
+                        ${r.valueUSD > 0 ? `<div style="font-size:11px; color:#10b981;">≈ ${formatMoney(r.valueUSD)} value</div>` : ''}
                         <button class="redeem-btn" data-id="${r.id}" data-points="${r.points}">Redeem</button>
                     </div>
                 `).join('');
@@ -221,7 +248,7 @@
                             if (selectedCustomer.points >= points) {
                                 selectedCustomer.points -= points;
                                 alert(`Redeemed successfully! Remaining points: ${selectedCustomer.points}`);
-                                searchCustomer(); // Refresh display
+                                searchCustomer();
                                 updateStats();
                             } else {
                                 alert(`Insufficient points. You have ${selectedCustomer.points} points, need ${points}.`);
@@ -233,9 +260,24 @@
                 });
             }
             
+            function initCurrencySelector() {
+                document.querySelectorAll('.currency-opt').forEach(opt => {
+                    opt.classList.toggle('active', opt.dataset.currency === currentCurrency);
+                    opt.addEventListener('click', () => {
+                        currentCurrency = opt.dataset.currency;
+                        localStorage.setItem('pos_currency', currentCurrency);
+                        document.querySelectorAll('.currency-opt').forEach(o => o.classList.remove('active'));
+                        opt.classList.add('active');
+                        if (selectedCustomer) searchCustomer();
+                        renderRewards();
+                    });
+                });
+            }
+            
             function init() {
                 updateStats();
                 renderRewards();
+                initCurrencySelector();
                 document.getElementById('searchBtn').addEventListener('click', searchCustomer);
                 document.getElementById('customerSearch').addEventListener('keypress', (e) => {
                     if (e.key === 'Enter') searchCustomer();
