@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nile POS - Multi-Tenant Management</title>
+    <title>Nile POS Enterprise - Multi-Tenant Management</title>
     <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: #f1f5f9;
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+            background: #f3f4f6;
             padding: 24px;
         }
         .container { max-width: 1400px; margin: 0 auto; }
@@ -18,15 +18,53 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 24px;
+            flex-wrap: wrap;
+            gap: 16px;
         }
-        h1 { font-size: 24px; color: #1e293b; }
+        h1 { font-size: 24px; color: #111827; display: flex; align-items: center; gap: 12px; }
+        .enterprise-badge {
+            background: #8b5cf6;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 100px;
+            font-size: 11px;
+        }
         .back-btn, .new-btn {
             padding: 8px 16px;
             border-radius: 8px;
             cursor: pointer;
+            text-decoration: none;
         }
-        .back-btn { background: white; border: 1px solid #e2e8f0; text-decoration: none; color: #475569; }
-        .new-btn { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; font-weight: 600; }
+        .back-btn { background: white; border: 1px solid #e5e7eb; color: #374151; }
+        .new-btn { background: #8b5cf6; color: white; border: none; font-weight: 600; }
+        .currency-switch {
+            display: flex;
+            gap: 8px;
+            background: #e5e7eb;
+            padding: 4px 12px;
+            border-radius: 100px;
+        }
+        .currency-opt {
+            padding: 4px 12px;
+            border-radius: 100px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+        .currency-opt.active { background: #8b5cf6; color: white; }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .stat-card {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .stat-value { font-size: 28px; font-weight: 700; color: #8b5cf6; }
         .tenant-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
@@ -36,10 +74,19 @@
             background: white;
             border-radius: 20px;
             overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
         }
-        .tenant-header { padding: 20px; background: #1e293b; color: white; }
+        .tenant-card:hover { transform: translateY(-2px); }
+        .tenant-header {
+            padding: 20px;
+            background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+            color: white;
+        }
+        .tenant-name { font-size: 18px; font-weight: 700; }
+        .tenant-location { font-size: 12px; opacity: 0.8; margin-top: 4px; }
         .tenant-body { padding: 20px; }
-        .stats { display: flex; justify-content: space-between; margin: 12px 0; }
+        .tenant-stats { display: flex; justify-content: space-between; margin: 12px 0; padding: 8px 0; border-bottom: 1px solid #f3f4f6; }
         .modal {
             display: none;
             position: fixed;
@@ -59,22 +106,46 @@
             max-width: 500px;
             width: 90%;
         }
-        .modal-header { padding: 20px; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; }
+        .modal-header { padding: 20px; border-bottom: 1px solid #e5e7eb; display: flex; justify-content: space-between; }
         .modal-body { padding: 20px; }
         .form-group { margin-bottom: 16px; }
         .form-group label { display: block; margin-bottom: 6px; font-weight: 500; }
-        .form-group input, .form-group select { width: 100%; padding: 10px; border: 1px solid #e2e8f0; border-radius: 8px; }
+        .form-group input, .form-group select { width: 100%; padding: 10px; border: 1px solid #e5e7eb; border-radius: 8px; }
+        .view-btn {
+            background: #8b5cf6;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-top: 12px;
+            width: 100%;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>🏢 Multi-Tenant Management</h1>
+            <div style="display: flex; align-items: center; gap: 16px;">
+                <h1>🏢 Multi-Tenant Management <span class="enterprise-badge">Enterprise</span></h1>
+                <div class="currency-switch">
+                    <span class="currency-opt" data-currency="USD">USD</span>
+                    <span class="currency-opt" data-currency="UGX">UGX</span>
+                </div>
+            </div>
             <div style="display: flex; gap: 12px;">
                 <a href="/index.html" class="back-btn">← Back</a>
                 <button class="new-btn" id="newTenantBtn">+ Add Franchise</button>
             </div>
         </div>
+
+        <div class="stats-grid">
+            <div class="stat-card"><div class="stat-value" id="totalTenants">0</div><div class="stat-label">Total Franchises</div></div>
+            <div class="stat-card"><div class="stat-value" id="activeStores">0</div><div class="stat-label">Active Stores</div></div>
+            <div class="stat-card"><div class="stat-value" id="totalRevenue">$0</div><div class="stat-label">Total Revenue (MTD)</div></div>
+            <div class="stat-card"><div class="stat-value" id="totalUsers">0</div><div class="stat-label">Total Users</div></div>
+        </div>
+
         <div class="tenant-grid" id="tenantGrid"></div>
     </div>
 
@@ -87,9 +158,20 @@
                     <div class="form-group"><label>Location / Address</label><input type="text" id="location"></div>
                     <div class="form-group"><label>Admin Email</label><input type="email" id="adminEmail" required></div>
                     <div class="form-group"><label>Plan</label>
-                        <select id="plan"><option value="basic">Basic</option><option value="professional">Professional</option><option value="premium">Premium</option></select>
+                        <select id="plan">
+                            <option value="basic">Basic - $29/mo</option>
+                            <option value="professional">Professional - $79/mo</option>
+                            <option value="premium">Premium - $199/mo</option>
+                            <option value="enterprise">Enterprise - Custom</option>
+                        </select>
                     </div>
-                    <button type="submit" class="new-btn" style="width:100%;">Create Tenant</button>
+                    <div class="form-group"><label>Currency</label>
+                        <select id="currency">
+                            <option value="USD">USD ($)</option>
+                            <option value="UGX">UGX (Ugandan Shilling)</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="new-btn" style="width:100%; background:#8b5cf6;">Create Tenant</button>
                 </form>
             </div>
         </div>
@@ -97,30 +179,57 @@
 
     <script>
         (function() {
+            const EXCHANGE_RATE = localStorage.getItem('exchange_rate') ? parseFloat(localStorage.getItem('exchange_rate')) : 3700;
+            let currentCurrency = localStorage.getItem('pos_currency') || 'UGX';
+            
+            function formatMoney(amountUSD) {
+                if (currentCurrency === 'UGX') {
+                    return `UGX ${Math.round(amountUSD * EXCHANGE_RATE).toLocaleString('en-UG')}`;
+                }
+                return `$${amountUSD.toFixed(2)}`;
+            }
+            
             let tenants = [
-                { id: 1, name: 'Nile Downtown', location: '123 Main St', adminEmail: 'downtown@nile.com', plan: 'premium', status: 'active', stores: 3, users: 12, sales: 28450.00 },
-                { id: 2, name: 'Nile Mall', location: 'Westfield Mall', adminEmail: 'mall@nile.com', plan: 'professional', status: 'active', stores: 2, users: 8, sales: 18720.00 },
-                { id: 3, name: 'Nile Airport', location: 'Terminal B', adminEmail: 'airport@nile.com', plan: 'basic', status: 'active', stores: 1, users: 4, sales: 8930.00 }
+                { id: 1, name: 'Nile Downtown', location: '123 Main St, Kampala', adminEmail: 'downtown@nileshopping.com', plan: 'premium', currency: 'UGX', status: 'active', stores: 3, users: 12, revenueUSD: 28450.00 },
+                { id: 2, name: 'Nile Mall', location: 'Acacia Mall, Kampala', adminEmail: 'mall@nileshopping.com', plan: 'professional', currency: 'UGX', status: 'active', stores: 2, users: 8, revenueUSD: 18720.00 },
+                { id: 3, name: 'Nile Airport', location: 'Entebbe International Airport', adminEmail: 'airport@nileshopping.com', plan: 'basic', currency: 'USD', status: 'active', stores: 1, users: 4, revenueUSD: 8930.00 }
             ];
             let nextId = 4;
+            
+            function updateStats() {
+                document.getElementById('totalTenants').textContent = tenants.length;
+                document.getElementById('activeStores').textContent = tenants.reduce((s, t) => s + t.stores, 0);
+                document.getElementById('totalRevenue').textContent = formatMoney(tenants.reduce((s, t) => s + t.revenueUSD, 0));
+                document.getElementById('totalUsers').textContent = tenants.reduce((s, t) => s + t.users, 0);
+            }
             
             function renderTenants() {
                 const grid = document.getElementById('tenantGrid');
                 grid.innerHTML = tenants.map(tenant => `
                     <div class="tenant-card">
                         <div class="tenant-header">
-                            <div style="font-weight:700;">${tenant.name}</div>
-                            <div style="font-size:12px;">${tenant.location}</div>
+                            <div class="tenant-name">${escapeHtml(tenant.name)}</div>
+                            <div class="tenant-location">📍 ${tenant.location}</div>
                         </div>
                         <div class="tenant-body">
-                            <div class="stats"><span>📧 Admin:</span><span>${tenant.adminEmail}</span></div>
-                            <div class="stats"><span>📊 Plan:</span><span>${tenant.plan.toUpperCase()}</span></div>
-                            <div class="stats"><span>🏪 Stores:</span><span>${tenant.stores}</span></div>
-                            <div class="stats"><span>👥 Users:</span><span>${tenant.users}</span></div>
-                            <div class="stats"><span>💰 Sales (MTD):</span><span>$${tenant.sales.toFixed(2)}</span></div>
+                            <div class="tenant-stats"><span>📧 Admin:</span><span>${tenant.adminEmail}</span></div>
+                            <div class="tenant-stats"><span>📊 Plan:</span><span>${tenant.plan.toUpperCase()}</span></div>
+                            <div class="tenant-stats"><span>💰 Currency:</span><span>${tenant.currency}</span></div>
+                            <div class="tenant-stats"><span>🏪 Stores:</span><span>${tenant.stores}</span></div>
+                            <div class="tenant-stats"><span>👥 Users:</span><span>${tenant.users}</span></div>
+                            <div class="tenant-stats"><span>💵 Revenue (MTD):</span><span>${tenant.currency === 'UGX' ? formatMoney(tenant.revenueUSD) : `$${tenant.revenueUSD.toFixed(2)}`}</span></div>
+                            <button class="view-btn" data-id="${tenant.id}">View Details</button>
                         </div>
                     </div>
                 `).join('');
+                
+                document.querySelectorAll('.view-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const id = parseInt(btn.dataset.id);
+                        const tenant = tenants.find(t => t.id === id);
+                        alert(`Tenant: ${tenant.name}\nPlan: ${tenant.plan}\nCurrency: ${tenant.currency}\nStores: ${tenant.stores}\nUsers: ${tenant.users}\nRevenue: ${tenant.currency === 'UGX' ? formatMoney(tenant.revenueUSD) : `$${tenant.revenueUSD.toFixed(2)}`}`);
+                    });
+                });
             }
             
             function addTenant(event) {
@@ -131,20 +240,45 @@
                     location: document.getElementById('location').value,
                     adminEmail: document.getElementById('adminEmail').value,
                     plan: document.getElementById('plan').value,
+                    currency: document.getElementById('currency').value,
                     status: 'active',
                     stores: 1,
                     users: 1,
-                    sales: 0
+                    revenueUSD: 0
                 };
                 tenants.push(newTenant);
                 renderTenants();
+                updateStats();
                 document.getElementById('tenantModal').classList.remove('active');
                 document.getElementById('tenantForm').reset();
-                alert(`Franchise ${newTenant.name} created!`);
+                alert(`Franchise ${newTenant.name} created with ${newTenant.currency} currency!`);
+            }
+            
+            function initCurrencySelector() {
+                document.querySelectorAll('.currency-opt').forEach(opt => {
+                    opt.classList.toggle('active', opt.dataset.currency === currentCurrency);
+                    opt.addEventListener('click', () => {
+                        currentCurrency = opt.dataset.currency;
+                        localStorage.setItem('pos_currency', currentCurrency);
+                        document.querySelectorAll('.currency-opt').forEach(o => o.classList.remove('active'));
+                        opt.classList.add('active');
+                        updateStats();
+                        renderTenants();
+                    });
+                });
+            }
+            
+            function escapeHtml(str) {
+                const div = document.createElement('div');
+                div.textContent = str;
+                return div.innerHTML;
             }
             
             function init() {
                 renderTenants();
+                updateStats();
+                initCurrencySelector();
+                
                 document.getElementById('newTenantBtn').addEventListener('click', () => {
                     document.getElementById('tenantModal').classList.add('active');
                 });
