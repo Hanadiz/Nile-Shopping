@@ -3,366 +3,349 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nile POS - Dashboard</title>
+    <title>Dashboard | Nile POS</title>
     <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico">
+    <link rel="stylesheet" href="/assets/css/layout.css">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        /* Dashboard specific styles */
+        .dashboard-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 24px;
         }
-
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #f1f5f9;
+        
+        .stat-card {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            transition: transform 0.2s;
         }
-
-        .dashboard-container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 24px;
+        
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px -5px rgba(0,0,0,0.1);
         }
-
-        /* Header */
-        .dashboard-header {
+        
+        .stat-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 32px;
+            margin-bottom: 16px;
         }
-
-        .title h1 {
-            font-size: 28px;
-            color: #1e293b;
+        
+        .stat-icon {
+            font-size: 32px;
         }
-
-        .title p {
-            color: #64748b;
-            margin-top: 4px;
+        
+        .stat-title {
+            font-size: 13px;
+            color: var(--gray);
         }
-
-        .date-range {
-            display: flex;
-            gap: 12px;
-        }
-
-        .date-range input {
-            padding: 8px 12px;
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
-        }
-
-        .refresh-btn {
-            background: white;
-            border: 1px solid #e2e8f0;
-            padding: 8px 16px;
-            border-radius: 8px;
-            cursor: pointer;
-        }
-
-        /* KPI Cards */
-        .kpi-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-            gap: 20px;
-            margin-bottom: 32px;
-        }
-
-        .kpi-card {
-            background: white;
-            border-radius: 20px;
-            padding: 20px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-        }
-
-        .kpi-title {
-            font-size: 14px;
-            color: #64748b;
-            margin-bottom: 8px;
-        }
-
-        .kpi-value {
+        
+        .stat-value {
             font-size: 32px;
             font-weight: 700;
-            color: #1e293b;
+            color: var(--dark);
         }
-
-        .kpi-change {
+        
+        .stat-change {
             font-size: 12px;
             margin-top: 8px;
         }
-
-        .kpi-change.positive { color: #10b981; }
-        .kpi-change.negative { color: #ef4444; }
-
-        /* Charts Grid */
-        .charts-grid {
+        
+        .stat-change.positive { color: var(--success); }
+        .stat-change.negative { color: var(--danger); }
+        
+        .dashboard-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             gap: 20px;
-            margin-bottom: 32px;
+            margin-bottom: 24px;
         }
-
-        .chart-card {
+        
+        .dashboard-card {
             background: white;
             border-radius: 20px;
             padding: 20px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.05);
         }
-
-        .chart-title {
+        
+        .card-title {
             font-size: 16px;
             font-weight: 600;
             margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border);
         }
-
-        .chart-container {
-            height: 250px;
-            position: relative;
+        
+        .activity-list {
+            list-style: none;
         }
-
-        /* Top Products Table */
-        .products-table {
-            background: white;
-            border-radius: 20px;
-            overflow: hidden;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        
+        .activity-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--light);
         }
-
-        .table-header {
-            padding: 16px 20px;
-            border-bottom: 1px solid #e2e8f0;
-            font-weight: 600;
+        
+        .activity-icon {
+            width: 36px;
+            height: 36px;
+            background: var(--light);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
+        
+        .activity-content {
+            flex: 1;
         }
-
-        th, td {
-            padding: 12px 20px;
-            text-align: left;
-            border-bottom: 1px solid #f1f5f9;
+        
+        .activity-title {
+            font-size: 14px;
+            font-weight: 500;
         }
-
-        th {
-            background: #f8fafc;
-            font-weight: 600;
-            color: #475569;
-        }
-
-        .tier-badge {
-            position: fixed;
-            bottom: 16px;
-            right: 16px;
-            background: #1e293b;
-            color: #94a3b8;
-            padding: 6px 12px;
-            border-radius: 8px;
+        
+        .activity-time {
             font-size: 11px;
+            color: var(--gray);
         }
-
+        
+        .product-list {
+            list-style: none;
+        }
+        
+        .product-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--light);
+        }
+        
+        .product-name {
+            font-weight: 500;
+        }
+        
+        .product-sales {
+            color: var(--primary);
+            font-weight: 600;
+        }
+        
         @media (max-width: 768px) {
-            .charts-grid {
+            .dashboard-grid {
                 grid-template-columns: 1fr;
             }
-            .kpi-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
+        }
+        
+        /* Permission-based visibility */
+        [data-permission].hidden-by-permission,
+        [data-role].hidden-by-role,
+        [data-tier].hidden-by-tier {
+            display: none !important;
         }
     </style>
 </head>
 <body>
-    <div class="dashboard-container">
-        <div class="dashboard-header">
-            <div class="title">
-                <h1>Dashboard</h1>
-                <p>Real-time sales and inventory insights</p>
-            </div>
-            <div class="date-range">
-                <input type="date" id="startDate">
-                <input type="date" id="endDate">
-                <button class="refresh-btn" id="refreshBtn">⟳ Refresh</button>
-            </div>
-        </div>
-
-        <!-- KPI Cards -->
-        <div class="kpi-grid">
-            <div class="kpi-card">
-                <div class="kpi-title">Today's Sales</div>
-                <div class="kpi-value" id="todaySales">$0</div>
-                <div class="kpi-change positive" id="salesChange">+0% vs yesterday</div>
-            </div>
-            <div class="kpi-card">
-                <div class="kpi-title">Transactions</div>
-                <div class="kpi-value" id="transactions">0</div>
-                <div class="kpi-change" id="transactionsChange">0 today</div>
-            </div>
-            <div class="kpi-card">
-                <div class="kpi-title">Average Order Value</div>
-                <div class="kpi-value" id="avgOrder">$0</div>
-                <div class="kpi-change" id="avgChange">+0%</div>
-            </div>
-            <div class="kpi-card">
-                <div class="kpi-title">Inventory Value</div>
-                <div class="kpi-value" id="inventoryValue">$0</div>
-                <div class="kpi-change" id="lowStockCount">0 low stock items</div>
-            </div>
-        </div>
-
-        <!-- Charts -->
-        <div class="charts-grid">
-            <div class="chart-card">
-                <div class="chart-title">Sales by Hour</div>
-                <div class="chart-container">
-                    <canvas id="hourlyChart"></canvas>
+    <div class="app-layout">
+        <!-- Sidebar Component -->
+        <div id="sidebarContainer"></div>
+        
+        <div class="main-content">
+            <!-- Header Component -->
+            <div id="headerContainer"></div>
+            
+            <div style="padding: 24px;">
+                <!-- Hero Section -->
+                <div id="heroContainer"></div>
+                
+                <!-- Dashboard Content -->
+                <div class="dashboard-stats">
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <span class="stat-title">Total Revenue</span>
+                            <span class="stat-icon">💰</span>
+                        </div>
+                        <div class="stat-value" id="totalRevenue">$0</div>
+                        <div class="stat-change positive" id="revenueChange">+12.5% vs last month</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <span class="stat-title">Total Orders</span>
+                            <span class="stat-icon">📦</span>
+                        </div>
+                        <div class="stat-value" id="totalOrders">0</div>
+                        <div class="stat-change positive" id="ordersChange">+8.2% vs last month</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <span class="stat-title">Average Order Value</span>
+                            <span class="stat-icon">📊</span>
+                        </div>
+                        <div class="stat-value" id="avgOrderValue">$0</div>
+                        <div class="stat-change positive" id="avgChange">+5.3% vs last month</div>
+                    </div>
+                    <div class="stat-card" data-permission="customer.view">
+                        <div class="stat-header">
+                            <span class="stat-title">Active Customers</span>
+                            <span class="stat-icon">👥</span>
+                        </div>
+                        <div class="stat-value" id="activeCustomers">0</div>
+                        <div class="stat-change positive" id="customerChange">+18 new this week</div>
+                    </div>
                 </div>
-            </div>
-            <div class="chart-card">
-                <div class="chart-title">Top Categories</div>
-                <div class="chart-container">
-                    <canvas id="categoryChart"></canvas>
+                
+                <div class="dashboard-grid">
+                    <div class="dashboard-card">
+                        <div class="card-title">Recent Activity</div>
+                        <ul class="activity-list" id="activityList">
+                            <li class="activity-item">
+                                <div class="activity-icon">💰</div>
+                                <div class="activity-content">
+                                    <div class="activity-title">Sale completed #TRX-001</div>
+                                    <div class="activity-time">2 minutes ago</div>
+                                </div>
+                            </li>
+                            <li class="activity-item">
+                                <div class="activity-icon">👤</div>
+                                <div class="activity-content">
+                                    <div class="activity-title">New customer registered</div>
+                                    <div class="activity-time">15 minutes ago</div>
+                                </div>
+                            </li>
+                            <li class="activity-item">
+                                <div class="activity-icon">📦</div>
+                                <div class="activity-content">
+                                    <div class="activity-title">Low stock alert: Running Shoes</div>
+                                    <div class="activity-time">1 hour ago</div>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                    
+                    <div class="dashboard-card" data-permission="product.view">
+                        <div class="card-title">Top Selling Products</div>
+                        <ul class="product-list" id="topProductsList">
+                            <li class="product-item">
+                                <span class="product-name">Classic T-Shirt</span>
+                                <span class="product-sales">48 units sold</span>
+                            </li>
+                            <li class="product-item">
+                                <span class="product-name">Running Shoes</span>
+                                <span class="product-sales">35 units sold</span>
+                            </li>
+                            <li class="product-item">
+                                <span class="product-name">Smart Watch</span>
+                                <span class="product-sales">22 units sold</span>
+                            </li>
+                        </ul>
+                    </div>
                 </div>
+                
+                <!-- Footer Component -->
+                <div id="footerContainer"></div>
             </div>
-        </div>
-
-        <!-- Top Products -->
-        <div class="products-table">
-            <div class="table-header">🏆 Top Selling Products</div>
-            <table>
-                <thead>
-                    <tr><th>Product</th><th>SKU</th><th>Units Sold</th><th>Revenue</th></tr>
-                </thead>
-                <tbody id="topProductsBody">
-                    <tr><td colspan="4" style="text-align:center">Loading...</td></tr>
-                </tbody>
-            </table>
         </div>
     </div>
-    <div class="tier-badge" id="tierBadge">Freemium</div>
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="/assets/js/rbac.js"></script>
+    <script src="/assets/js/layout.js"></script>
     <script>
-        (function() {
-            let hourlyChart = null;
-            let categoryChart = null;
-            let currentTier = 'freemium';
-
+        // Load components dynamically
+        async function loadComponents() {
+            // Load sidebar
+            const sidebarResp = await fetch('/components/Sidebar.html');
+            const sidebarHtml = await sidebarResp.text();
+            document.getElementById('sidebarContainer').innerHTML = sidebarHtml;
+            
+            // Load header
+            const headerResp = await fetch('/components/Header.html');
+            const headerHtml = await headerResp.text();
+            document.getElementById('headerContainer').innerHTML = headerHtml;
+            
+            // Load hero
+            const heroResp = await fetch('/components/Hero.html');
+            const heroHtml = await heroResp.text();
+            document.getElementById('heroContainer').innerHTML = heroHtml;
+            
+            // Load footer
+            const footerResp = await fetch('/components/Footer.html');
+            const footerHtml = await footerResp.text();
+            document.getElementById('footerContainer').innerHTML = footerHtml;
+            
+            // Re-initialize RBAC after components load
+            if (window.rbac) {
+                window.rbac.updateUIByPermissions();
+            }
+            
+            // Re-initialize layout
+            if (window.layout) {
+                window.layout.updateUserInfo();
+                window.layout.setActiveNavItem();
+            }
+            
+            // Load dashboard data
+            loadDashboardData();
+        }
+        
+        function loadDashboardData() {
+            const currency = localStorage.getItem('pos_currency') || 'UGX';
+            const exchangeRate = 3700;
+            
             // Demo data
-            const demoData = {
-                todaySales: 1247.50,
-                yesterdaySales: 1120.00,
-                transactions: 42,
-                avgOrder: 29.70,
-                inventoryValue: 12580.00,
-                lowStockCount: 3,
-                hourlySales: [120, 85, 65, 90, 145, 210, 280, 245, 190, 150, 110, 80],
-                categorySales: { Apparel: 520, Footwear: 380, Accessories: 210, Electronics: 450 },
-                topProducts: [
-                    { name: 'Classic T-Shirt', sku: 'PRD-001', units: 28, revenue: 839.72 },
-                    { name: 'Running Shoes', sku: 'PRD-003', units: 15, revenue: 1349.85 },
-                    { name: 'Smart Watch', sku: 'PRD-005', units: 8, revenue: 1599.92 },
-                    { name: 'Wireless Earbuds', sku: 'PRD-006', units: 12, revenue: 959.88 },
-                    { name: 'Slim Fit Jeans', sku: 'PRD-002', units: 10, revenue: 599.90 }
-                ]
+            const revenue = 28450.75;
+            const orders = 342;
+            const avgOrder = revenue / orders;
+            
+            const formatMoney = (amount) => {
+                if (currency === 'UGX') {
+                    return `UGX ${Math.round(amount * exchangeRate).toLocaleString('en-UG')}`;
+                }
+                return `$${amount.toFixed(2)}`;
             };
-
-            function loadTier() {
-                currentTier = localStorage.getItem('pos_tier') || 'freemium';
-                document.getElementById('tierBadge').textContent = currentTier.charAt(0).toUpperCase() + currentTier.slice(1);
-            }
-
-            function updateKPIs() {
-                document.getElementById('todaySales').textContent = `$${demoData.todaySales.toFixed(2)}`;
-                const percentChange = ((demoData.todaySales - demoData.yesterdaySales) / demoData.yesterdaySales * 100).toFixed(1);
-                const changeEl = document.getElementById('salesChange');
-                changeEl.textContent = `${percentChange > 0 ? '+' : ''}${percentChange}% vs yesterday`;
-                changeEl.className = `kpi-change ${percentChange >= 0 ? 'positive' : 'negative'}`;
-                
-                document.getElementById('transactions').textContent = demoData.transactions;
-                document.getElementById('avgOrder').textContent = `$${demoData.avgOrder.toFixed(2)}`;
-                document.getElementById('inventoryValue').textContent = `$${demoData.inventoryValue.toFixed(2)}`;
-                document.getElementById('lowStockCount').textContent = `${demoData.lowStockCount} low stock items`;
-            }
-
-            function initHourlyChart() {
-                const ctx = document.getElementById('hourlyChart').getContext('2d');
-                if (hourlyChart) hourlyChart.destroy();
-                hourlyChart = new Chart(ctx, {
-                    type: 'line',
-                    data: {
-                        labels: ['8am', '9am', '10am', '11am', '12pm', '1pm', '2pm', '3pm', '4pm', '5pm', '6pm', '7pm'],
-                        datasets: [{
-                            label: 'Sales ($)',
-                            data: demoData.hourlySales,
-                            borderColor: '#667eea',
-                            backgroundColor: 'rgba(102, 126, 234, 0.1)',
-                            fill: true,
-                            tension: 0.4
-                        }]
-                    },
-                    options: { responsive: true, maintainAspectRatio: false }
-                });
-            }
-
-            function initCategoryChart() {
-                const ctx = document.getElementById('categoryChart').getContext('2d');
-                if (categoryChart) categoryChart.destroy();
-                categoryChart = new Chart(ctx, {
-                    type: 'doughnut',
-                    data: {
-                        labels: Object.keys(demoData.categorySales),
-                        datasets: [{
-                            data: Object.values(demoData.categorySales),
-                            backgroundColor: ['#667eea', '#764ba2', '#f59e0b', '#10b981']
-                        }]
-                    },
-                    options: { responsive: true, maintainAspectRatio: false }
-                });
-            }
-
-            function renderTopProducts() {
-                const tbody = document.getElementById('topProductsBody');
-                tbody.innerHTML = demoData.topProducts.map(p => `
-                    <tr>
-                        <td>${escapeHtml(p.name)}</td>
-                        <td>${p.sku}</td>
-                        <td>${p.units}</td>
-                        <td>$${p.revenue.toFixed(2)}</td>
-                    </tr>
-                `).join('');
-            }
-
-            function escapeHtml(str) {
-                const div = document.createElement('div');
-                div.textContent = str;
-                return div.innerHTML;
-            }
-
-            function setDateRange() {
-                const today = new Date().toISOString().split('T')[0];
-                const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-                document.getElementById('startDate').value = weekAgo;
-                document.getElementById('endDate').value = today;
-            }
-
-            function refresh() {
-                updateKPIs();
-                initHourlyChart();
-                initCategoryChart();
-                renderTopProducts();
-            }
-
-            function init() {
-                loadTier();
-                setDateRange();
-                refresh();
-                document.getElementById('refreshBtn').addEventListener('click', refresh);
-            }
-
-            init();
-        })();
+            
+            document.getElementById('totalRevenue').textContent = formatMoney(revenue);
+            document.getElementById('totalOrders').textContent = orders;
+            document.getElementById('avgOrderValue').textContent = formatMoney(avgOrder);
+            document.getElementById('activeCustomers').textContent = '1,247';
+        }
+        
+        // Apply permission-based visibility
+        function applyPermissions() {
+            if (!window.rbac) return;
+            
+            document.querySelectorAll('[data-permission]').forEach(el => {
+                const perm = el.dataset.permission;
+                if (!window.rbac.hasPermission(perm)) {
+                    el.classList.add('hidden-by-permission');
+                }
+            });
+            
+            document.querySelectorAll('[data-role]').forEach(el => {
+                const role = el.dataset.role;
+                if (!window.rbac.isAtLeast(role)) {
+                    el.classList.add('hidden-by-role');
+                }
+            });
+            
+            document.querySelectorAll('[data-tier]').forEach(el => {
+                const tier = el.dataset.tier;
+                const userTier = window.rbac.currentUser?.tier || 'freemium';
+                const tierLevels = { freemium: 0, basic: 1, professional: 2, premium: 3, enterprise: 4 };
+                if (tierLevels[userTier] < tierLevels[tier]) {
+                    el.classList.add('hidden-by-tier');
+                }
+            });
+        }
+        
+        // Initialize
+        loadComponents();
+        setTimeout(applyPermissions, 500);
     </script>
 </body>
 </html>
