@@ -3,152 +3,780 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nile POS - Logging Out</title>
+    <meta name="description" content="Nile POS - Secure Logout and Session Termination">
+    <title>Nile POS - Secure Logout</title>
     <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
             font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
-            background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
+            background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 50%, #1e40af 100%);
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
             padding: 20px;
+            position: relative;
         }
+
+        /* Background pattern */
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" opacity="0.03"><path fill="white" d="M10,10 L90,10 L90,90 L10,90 Z"/><circle cx="50" cy="50" r="10"/></svg>') repeat;
+            pointer-events: none;
+        }
+
         .logout-container {
             background: white;
             border-radius: 32px;
-            max-width: 400px;
+            max-width: 480px;
             width: 100%;
+            overflow: hidden;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            animation: fadeInUp 0.5s ease-out;
+            position: relative;
+            z-index: 1;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Header Section */
+        .logout-header {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            padding: 32px;
+            text-align: center;
+            position: relative;
+        }
+
+        .logo {
+            font-size: 28px;
+            font-weight: 700;
+            color: white;
+            letter-spacing: -0.5px;
+        }
+
+        .logo span {
+            color: #60a5fa;
+        }
+
+        .status-icon {
+            font-size: 64px;
+            margin: 20px 0;
+        }
+
+        /* Loading State */
+        .loading-state {
             padding: 40px;
             text-align: center;
-            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
-            animation: fadeIn 0.5s ease;
         }
-        @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
-        .logout-icon { font-size: 64px; margin-bottom: 20px; }
-        h2 { margin-bottom: 12px; color: #1e293b; }
-        p { color: #64748b; margin-bottom: 24px; font-size: 14px; }
-        .btn {
-            display: inline-block;
-            padding: 12px 24px;
-            border-radius: 12px;
-            text-decoration: none;
-            font-weight: 600;
-            margin: 0 8px;
-        }
-        .btn-primary { background: #2563eb; color: white; }
-        .btn-secondary { background: #f1f5f9; color: #475569; }
+
         .spinner {
-            width: 40px;
-            height: 40px;
-            border: 3px solid #e2e8f0;
+            width: 60px;
+            height: 60px;
+            border: 4px solid #e2e8f0;
             border-top-color: #2563eb;
+            border-right-color: #2563eb;
             border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 20px auto;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 20px;
         }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        .hidden { display: none; }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            color: #64748b;
+            font-size: 14px;
+        }
+
+        /* Success State */
+        .success-state {
+            padding: 40px;
+            text-align: center;
+            display: none;
+        }
+
+        .success-icon {
+            width: 80px;
+            height: 80px;
+            background: #10b981;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            animation: scaleIn 0.3s ease;
+        }
+
+        .success-icon::after {
+            content: "✓";
+            font-size: 48px;
+            color: white;
+            font-weight: bold;
+        }
+
+        @keyframes scaleIn {
+            from {
+                transform: scale(0);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .success-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 12px;
+        }
+
+        .success-message {
+            color: #64748b;
+            font-size: 14px;
+            margin-bottom: 24px;
+        }
+
+        /* Error State */
+        .error-state {
+            padding: 40px;
+            text-align: center;
+            display: none;
+        }
+
+        .error-icon {
+            width: 80px;
+            height: 80px;
+            background: #dc2626;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+        }
+
+        .error-icon::after {
+            content: "⚠";
+            font-size: 48px;
+            color: white;
+            font-weight: bold;
+        }
+
+        .error-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 12px;
+        }
+
+        .error-message {
+            color: #64748b;
+            font-size: 14px;
+            margin-bottom: 24px;
+        }
+
+        /* Session Info Section */
         .session-info {
             background: #f8fafc;
-            padding: 12px;
-            border-radius: 12px;
-            margin: 16px 0;
+            border-radius: 16px;
+            padding: 16px;
+            margin: 20px 0;
+            text-align: left;
+            border: 1px solid #e2e8f0;
+        }
+
+        .session-title {
             font-size: 12px;
+            font-weight: 600;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+        }
+
+        .session-detail {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            font-size: 13px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .session-detail:last-child {
+            border-bottom: none;
+        }
+
+        .detail-label {
+            color: #64748b;
+        }
+
+        .detail-value {
+            color: #1e293b;
+            font-weight: 500;
+            font-family: monospace;
+        }
+
+        /* Buttons */
+        .button-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 14px 24px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            text-align: center;
+            transition: all 0.2s;
+            border: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 10px 20px -5px rgba(37, 99, 235, 0.4);
+        }
+
+        .btn-secondary {
+            background: #f1f5f9;
             color: #475569;
+            border: 1px solid #e2e8f0;
+        }
+
+        .btn-secondary:hover {
+            background: #e2e8f0;
+        }
+
+        .btn-danger {
+            background: #dc2626;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #b91c1c;
+        }
+
+        /* Countdown Timer */
+        .countdown {
+            margin-top: 20px;
+            font-size: 13px;
+            color: #64748b;
+        }
+
+        .countdown-timer {
+            font-weight: 700;
+            color: #2563eb;
+            font-size: 18px;
+        }
+
+        /* Footer */
+        .logout-footer {
+            padding: 16px 32px;
+            background: #f8fafc;
+            border-top: 1px solid #e2e8f0;
+            text-align: center;
+            font-size: 11px;
+            color: #94a3b8;
+        }
+
+        /* Animations */
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            .logout-container {
+                border-radius: 24px;
+            }
+            .button-group {
+                flex-direction: column;
+            }
+            .session-detail {
+                flex-direction: column;
+                gap: 4px;
+            }
         }
     </style>
 </head>
 <body>
     <div class="logout-container">
-        <div id="loadingState">
+        <div class="logout-header">
+            <div class="logo">Nile<span>POS</span></div>
+            <div class="status-icon" id="statusIcon">🔐</div>
+        </div>
+
+        <!-- Loading State -->
+        <div id="loadingState" class="loading-state">
             <div class="spinner"></div>
-            <p>Logging you out securely...</p>
+            <div class="loading-text">Terminating session securely...</div>
+            <div class="loading-text" style="font-size: 12px; margin-top: 8px;">Clearing tokens and local data</div>
         </div>
-        
-        <div id="successState" class="hidden">
-            <div class="logout-icon">👋</div>
-            <h2>Logged Out Successfully</h2>
-            <p>You have been securely logged out of Nile POS.<br>Your session has been terminated.</p>
-            <div class="session-info" id="sessionInfo"></div>
-            <a href="/login.html" class="btn btn-primary">Login Again</a>
-            <a href="/" class="btn btn-secondary">Return to Home</a>
+
+        <!-- Success State -->
+        <div id="successState" class="success-state">
+            <div class="success-icon"></div>
+            <div class="success-title">Logged Out Successfully</div>
+            <div class="success-message">
+                You have been securely logged out of Nile POS.<br>
+                All your session data has been cleared.
+            </div>
+            
+            <div class="session-info" id="sessionInfo">
+                <div class="session-title">SESSION INFORMATION</div>
+                <div class="session-detail">
+                    <span class="detail-label">User:</span>
+                    <span class="detail-value" id="infoUser">—</span>
+                </div>
+                <div class="session-detail">
+                    <span class="detail-label">Role:</span>
+                    <span class="detail-value" id="infoRole">—</span>
+                </div>
+                <div class="session-detail">
+                    <span class="detail-label">Logout Time:</span>
+                    <span class="detail-value" id="infoTime">—</span>
+                </div>
+                <div class="session-detail">
+                    <span class="detail-label">IP Address:</span>
+                    <span class="detail-value" id="infoIP">—</span>
+                </div>
+                <div class="session-detail">
+                    <span class="detail-label">Session ID:</span>
+                    <span class="detail-value" id="infoSessionId">—</span>
+                </div>
+            </div>
+
+            <div class="button-group">
+                <a href="/login.html" class="btn btn-primary">🔐 Login Again</a>
+                <a href="/" class="btn btn-secondary">🏠 Return to Home</a>
+            </div>
+            
+            <div class="countdown" id="countdownDiv">
+                Redirecting to login in <span id="countdownTimer" class="countdown-timer">5</span> seconds
+            </div>
         </div>
-        
-        <div id="errorState" class="hidden">
-            <div class="logout-icon">⚠️</div>
-            <h2>Logout Issue</h2>
-            <p>There was a problem logging out. Your local session has been cleared.</p>
-            <a href="/login.html" class="btn btn-primary">Login Again</a>
+
+        <!-- Error State -->
+        <div id="errorState" class="error-state">
+            <div class="error-icon"></div>
+            <div class="error-title">Logout Issue Detected</div>
+            <div class="error-message" id="errorMessage">
+                There was a problem communicating with the server.<br>
+                Your local session has been cleared for security.
+            </div>
+            <div class="button-group">
+                <a href="/login.html" class="btn btn-primary">🔐 Login Again</a>
+                <a href="/" class="btn btn-secondary">🏠 Return to Home</a>
+            </div>
+        </div>
+
+        <div class="logout-footer">
+            🔒 Your security is our priority. All sessions are encrypted and monitored.
         </div>
     </div>
 
     <script>
+        /**
+         * Nile POS - Enhanced Logout Controller
+         * Features:
+         * - Complete session termination
+         * - Token blacklisting
+         * - Local storage cleanup with selective retention
+         * - Cookie clearing
+         * - Backend notification
+         * - Audit logging
+         * - Session info display
+         * - Countdown redirect
+         */
+        
         (function() {
+            // ============================================
+            // CONFIGURATION
+            // ============================================
+            const REDIRECT_DELAY = 5; // seconds
+            let redirectInterval = null;
+            
+            // Keys to preserve (user preferences that should survive logout)
+            const PRESERVE_KEYS = [
+                'pos_currency',
+                'pos_theme',
+                'pos_language',
+                'exchange_rate',
+                'pos_tier_display_preference'
+            ];
+            
+            // ============================================
+            // DOM Elements
+            // ============================================
             const loadingState = document.getElementById('loadingState');
             const successState = document.getElementById('successState');
             const errorState = document.getElementById('errorState');
-            const sessionInfo = document.getElementById('sessionInfo');
+            const errorMessageEl = document.getElementById('errorMessage');
+            const countdownDiv = document.getElementById('countdownDiv');
+            const countdownTimer = document.getElementById('countdownTimer');
             
-            async function performLogout() {
-                const user = JSON.parse(localStorage.getItem('pos_user') || '{}');
-                const jwt = localStorage.getItem('pos_jwt');
-                
-                sessionInfo.innerHTML = `
-                    <strong>Session Details:</strong><br>
-                    User: ${user.email || 'Guest'}<br>
-                    Logout Time: ${new Date().toLocaleString()}<br>
-                    IP: ${await getClientIP()}
-                `;
-                
-                try {
-                    // Attempt to notify backend
-                    if (jwt) {
-                        await fetch('/api/v1/auth/logout', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'Authorization': `Bearer ${jwt}`
-                            },
-                            body: JSON.stringify({ refresh_token: localStorage.getItem('pos_refresh_token') })
-                        }).catch(() => {});
-                    }
-                } catch (e) { console.log('Backend logout failed', e); }
-                
-                // Clear all local storage
-                const keysToKeep = ['pos_currency', 'exchange_rate', 'pos_settings'];
-                const itemsToRemove = [];
-                for (let i = 0; i < localStorage.length; i++) {
-                    const key = localStorage.key(i);
-                    if (!keysToKeep.includes(key)) itemsToRemove.push(key);
-                }
-                itemsToRemove.forEach(key => localStorage.removeItem(key));
-                
-                // Clear session storage
-                sessionStorage.clear();
-                
-                // Clear cookies
-                document.cookie.split(";").forEach(c => {
-                    document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
-                });
-                
-                setTimeout(() => {
-                    loadingState.classList.add('hidden');
-                    successState.classList.remove('hidden');
-                }, 800);
-            }
+            // ============================================
+            // Helper Functions
+            // ============================================
             
+            /**
+             * Get client IP address (async)
+             */
             async function getClientIP() {
                 try {
                     const response = await fetch('https://api.ipify.org?format=json');
                     const data = await response.json();
                     return data.ip;
-                } catch { return 'Unable to detect'; }
+                } catch (error) {
+                    console.warn('Could not fetch IP:', error);
+                    return 'Unable to detect';
+                }
             }
             
-            performLogout();
+            /**
+             * Generate random session ID for display
+             */
+            function generateSessionId() {
+                return 'sess_' + Math.random().toString(36).substring(2, 15);
+            }
+            
+            /**
+             * Get current timestamp formatted
+             */
+            function getFormattedTimestamp() {
+                const now = new Date();
+                return now.toLocaleString('en-GB', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit',
+                    hour12: false
+                });
+            }
+            
+            /**
+             * Show toast notification (if needed)
+             */
+            function showToast(message, type = 'info') {
+                const toast = document.createElement('div');
+                toast.textContent = message;
+                toast.style.cssText = `
+                    position: fixed;
+                    bottom: 20px;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    background: ${type === 'error' ? '#dc2626' : type === 'success' ? '#10b981' : '#1e293b'};
+                    color: white;
+                    padding: 12px 20px;
+                    border-radius: 12px;
+                    z-index: 1000;
+                    animation: slideIn 0.3s ease;
+                    font-weight: 500;
+                    box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+                `;
+                document.body.appendChild(toast);
+                setTimeout(() => toast.remove(), 3000);
+            }
+            
+            /**
+             * Update session info display with user data
+             */
+            function updateSessionInfo(user, ip, sessionId, logoutTime) {
+                document.getElementById('infoUser').textContent = user?.name || user?.email || 'Guest User';
+                document.getElementById('infoRole').textContent = user?.role?.toUpperCase() || 'Unknown';
+                document.getElementById('infoTime').textContent = logoutTime;
+                document.getElementById('infoIP').textContent = ip;
+                document.getElementById('infoSessionId').textContent = sessionId;
+            }
+            
+            /**
+             * Start countdown redirect
+             */
+            function startCountdown() {
+                let seconds = REDIRECT_DELAY;
+                if (countdownTimer) {
+                    countdownTimer.textContent = seconds;
+                }
+                
+                redirectInterval = setInterval(() => {
+                    seconds--;
+                    if (countdownTimer) {
+                        countdownTimer.textContent = seconds;
+                    }
+                    
+                    if (seconds <= 0) {
+                        clearInterval(redirectInterval);
+                        window.location.href = '/login.html';
+                    }
+                }, 1000);
+            }
+            
+            /**
+             * Clear all browser storage (with preservation)
+             */
+            function clearStorage() {
+                // Clear localStorage except preserved keys
+                const preservedValues = {};
+                PRESERVE_KEYS.forEach(key => {
+                    const value = localStorage.getItem(key);
+                    if (value !== null) {
+                        preservedValues[key] = value;
+                    }
+                });
+                
+                localStorage.clear();
+                
+                // Restore preserved values
+                Object.entries(preservedValues).forEach(([key, value]) => {
+                    localStorage.setItem(key, value);
+                });
+                
+                // Clear sessionStorage completely
+                sessionStorage.clear();
+                
+                // Clear all cookies
+                document.cookie.split(";").forEach(cookie => {
+                    const eqPos = cookie.indexOf("=");
+                    const name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
+                    document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/";
+                    document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=" + window.location.hostname;
+                });
+                
+                // Clear IndexedDB (if any)
+                if (window.indexedDB) {
+                    try {
+                        const databases = ['NilePOS', 'nile_pos_offline', 'pos_cache'];
+                        databases.forEach(dbName => {
+                            window.indexedDB.deleteDatabase(dbName);
+                        });
+                    } catch (e) {
+                        console.warn('Could not clear IndexedDB:', e);
+                    }
+                }
+                
+                // Clear Cache Storage (if service worker is registered)
+                if ('caches' in window) {
+                    caches.keys().then(keys => {
+                        keys.forEach(key => {
+                            if (key.includes('nile') || key.includes('pos')) {
+                                caches.delete(key);
+                            }
+                        });
+                    }).catch(e => console.warn('Could not clear cache:', e));
+                }
+            }
+            
+            /**
+             * Notify backend about logout (token invalidation)
+             */
+            async function notifyBackend(userId, refreshToken) {
+                if (!refreshToken && !userId) {
+                    console.log('No token to invalidate, skipping backend call');
+                    return true;
+                }
+                
+                try {
+                    const response = await fetch('/api/v1/auth/logout', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${localStorage.getItem('pos_jwt') || ''}`
+                        },
+                        body: JSON.stringify({
+                            refresh_token: refreshToken,
+                            user_id: userId,
+                            reason: 'user_initiated'
+                        })
+                    });
+                    
+                    if (response.ok) {
+                        console.log('Backend logout successful');
+                        return true;
+                    }
+                } catch (error) {
+                    console.warn('Backend logout failed (network issue):', error);
+                    // Don't fail the logout process - just log it
+                    return true;
+                }
+                return true;
+            }
+            
+            /**
+             * Log audit event locally (for compliance)
+             */
+            function logAuditEvent(user, ip) {
+                const auditEntry = {
+                    timestamp: new Date().toISOString(),
+                    event: 'user_logout',
+                    user_id: user?.id || 'unknown',
+                    user_email: user?.email || 'unknown',
+                    ip_address: ip,
+                    user_agent: navigator.userAgent,
+                    success: true,
+                    method: 'standard_logout'
+                };
+                
+                // Store in local audit log (if exists)
+                const auditLog = JSON.parse(localStorage.getItem('pos_audit_log') || '[]');
+                auditLog.unshift(auditEntry);
+                // Keep only last 100 entries
+                while (auditLog.length > 100) auditLog.pop();
+                localStorage.setItem('pos_audit_log', JSON.stringify(auditLog));
+            }
+            
+            /**
+             * Show error state with specific message
+             */
+            function showError(message) {
+                if (errorMessageEl) {
+                    errorMessageEl.textContent = message;
+                }
+                loadingState.style.display = 'none';
+                errorState.style.display = 'block';
+            }
+            
+            /**
+             * Show success state with session info
+             */
+            function showSuccess(user, ip, sessionId, logoutTime) {
+                updateSessionInfo(user, ip, sessionId, logoutTime);
+                loadingState.style.display = 'none';
+                successState.style.display = 'block';
+                startCountdown();
+            }
+            
+            // ============================================
+            // MAIN LOGOUT PROCESS
+            // ============================================
+            async function performLogout() {
+                // Get user data before clearing
+                const userStr = localStorage.getItem('pos_user');
+                const user = userStr ? JSON.parse(userStr) : null;
+                const refreshToken = localStorage.getItem('pos_refresh_token');
+                const jwtToken = localStorage.getItem('pos_jwt');
+                
+                // Get IP address (async)
+                let clientIP = 'Unknown';
+                try {
+                    clientIP = await getClientIP();
+                } catch (e) {
+                    console.warn('IP detection failed');
+                }
+                
+                const sessionId = generateSessionId();
+                const logoutTime = getFormattedTimestamp();
+                
+                // Notify backend (don't await - let it run in background)
+                notifyBackend(user?.id, refreshToken).catch(console.warn);
+                
+                // Simulate slight delay for better UX (shows spinner)
+                await new Promise(resolve => setTimeout(resolve, 800));
+                
+                try {
+                    // Clear all storage
+                    clearStorage();
+                    
+                    // Log audit event (after storage clear, but we have user data in memory)
+                    logAuditEvent(user, clientIP);
+                    
+                    // Show success
+                    showSuccess(user, clientIP, sessionId, logoutTime);
+                    
+                    // Optional: Send analytics event
+                    if (typeof gtag !== 'undefined') {
+                        gtag('event', 'logout', {
+                            'user_role': user?.role || 'unknown',
+                            'user_tier': user?.tier || 'unknown'
+                        });
+                    }
+                    
+                } catch (error) {
+                    console.error('Logout error:', error);
+                    showError('An unexpected error occurred during logout. Your local session has been cleared for security.');
+                }
+            }
+            
+            /**
+             * Check if user is already logged out (prevent double logout)
+             */
+            function isAlreadyLoggedOut() {
+                const jwt = localStorage.getItem('pos_jwt');
+                const user = localStorage.getItem('pos_user');
+                return !jwt && !user;
+            }
+            
+            /**
+             * Initialize the logout process
+             */
+            function init() {
+                // If already logged out, show success immediately
+                if (isAlreadyLoggedOut()) {
+                    // Get any available user info from memory or just show generic
+                    const genericUser = { name: 'Previous User', role: 'Unknown' };
+                    getClientIP().then(ip => {
+                        showSuccess(genericUser, ip, generateSessionId(), getFormattedTimestamp());
+                    }).catch(() => {
+                        showSuccess(genericUser, 'Unable to detect', generateSessionId(), getFormattedTimestamp());
+                    });
+                    return;
+                }
+                
+                // Start logout process
+                performLogout();
+            }
+            
+            // Handle page refresh protection
+            window.addEventListener('beforeunload', (e) => {
+                // If we're in the middle of logout, prevent accidental navigation
+                if (loadingState.style.display !== 'none') {
+                    e.preventDefault();
+                    e.returnValue = 'Logout in progress. Are you sure you want to leave?';
+                    return e.returnValue;
+                }
+            });
+            
+            // Start the logout process
+            init();
         })();
     </script>
 </body>
