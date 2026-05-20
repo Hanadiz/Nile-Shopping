@@ -8,6 +8,10 @@
     <link rel="stylesheet" href="/assets/css/layout.css">
     <style>
         /* Dashboard specific styles */
+        .dashboard-welcome {
+            margin-bottom: 24px;
+        }
+        
         .dashboard-stats {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -20,7 +24,8 @@
             border-radius: 20px;
             padding: 20px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-            transition: transform 0.2s;
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
         }
         
         .stat-card:hover {
@@ -68,16 +73,31 @@
         .dashboard-card {
             background: white;
             border-radius: 20px;
-            padding: 20px;
+            overflow: hidden;
             box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        
+        .card-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
         
         .card-title {
             font-size: 16px;
             font-weight: 600;
-            margin-bottom: 16px;
-            padding-bottom: 12px;
-            border-bottom: 1px solid var(--border);
+        }
+        
+        .card-link {
+            font-size: 12px;
+            color: var(--primary);
+            text-decoration: none;
+        }
+        
+        .card-body {
+            padding: 0;
         }
         
         .activity-list {
@@ -88,8 +108,14 @@
             display: flex;
             align-items: center;
             gap: 12px;
-            padding: 12px 0;
+            padding: 14px 20px;
             border-bottom: 1px solid var(--light);
+            transition: background 0.2s;
+            cursor: pointer;
+        }
+        
+        .activity-item:hover {
+            background: var(--light);
         }
         
         .activity-icon {
@@ -100,6 +126,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            font-size: 18px;
         }
         
         .activity-content {
@@ -114,6 +141,7 @@
         .activity-time {
             font-size: 11px;
             color: var(--gray);
+            margin-top: 4px;
         }
         
         .product-list {
@@ -124,22 +152,68 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 12px 0;
+            padding: 14px 20px;
             border-bottom: 1px solid var(--light);
+        }
+        
+        .product-rank {
+            width: 28px;
+            height: 28px;
+            background: var(--light);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 12px;
+        }
+        
+        .product-info {
+            flex: 1;
+            margin-left: 12px;
         }
         
         .product-name {
             font-weight: 500;
+            font-size: 14px;
+        }
+        
+        .product-sku {
+            font-size: 10px;
+            color: var(--gray);
+        }
+        
+        .product-stats {
+            text-align: right;
         }
         
         .product-sales {
-            color: var(--primary);
             font-weight: 600;
+            color: var(--primary);
+        }
+        
+        .product-revenue {
+            font-size: 11px;
+            color: var(--gray);
+        }
+        
+        .chart-container {
+            padding: 20px;
+            height: 300px;
+        }
+        
+        canvas {
+            max-height: 260px;
+            width: 100%;
         }
         
         @media (max-width: 768px) {
             .dashboard-grid {
                 grid-template-columns: 1fr;
+            }
+            
+            .stat-value {
+                font-size: 24px;
             }
         }
         
@@ -153,20 +227,17 @@
 </head>
 <body>
     <div class="app-layout">
-        <!-- Sidebar Component -->
         <div id="sidebarContainer"></div>
         
         <div class="main-content">
-            <!-- Header Component -->
             <div id="headerContainer"></div>
             
-            <div style="padding: 24px;">
-                <!-- Hero Section -->
+            <div class="content-container">
                 <div id="heroContainer"></div>
                 
-                <!-- Dashboard Content -->
+                <!-- Additional Dashboard Stats -->
                 <div class="dashboard-stats">
-                    <div class="stat-card">
+                    <div class="stat-card" data-stat="revenue" data-permission="report.sales">
                         <div class="stat-header">
                             <span class="stat-title">Total Revenue</span>
                             <span class="stat-icon">💰</span>
@@ -174,7 +245,7 @@
                         <div class="stat-value" id="totalRevenue">$0</div>
                         <div class="stat-change positive" id="revenueChange">+12.5% vs last month</div>
                     </div>
-                    <div class="stat-card">
+                    <div class="stat-card" data-stat="orders" data-permission="report.sales">
                         <div class="stat-header">
                             <span class="stat-title">Total Orders</span>
                             <span class="stat-icon">📦</span>
@@ -182,7 +253,7 @@
                         <div class="stat-value" id="totalOrders">0</div>
                         <div class="stat-change positive" id="ordersChange">+8.2% vs last month</div>
                     </div>
-                    <div class="stat-card">
+                    <div class="stat-card" data-stat="aov" data-permission="report.sales">
                         <div class="stat-header">
                             <span class="stat-title">Average Order Value</span>
                             <span class="stat-icon">📊</span>
@@ -190,7 +261,7 @@
                         <div class="stat-value" id="avgOrderValue">$0</div>
                         <div class="stat-change positive" id="avgChange">+5.3% vs last month</div>
                     </div>
-                    <div class="stat-card" data-permission="customer.view">
+                    <div class="stat-card" data-stat="customers" data-permission="customer.view">
                         <div class="stat-header">
                             <span class="stat-title">Active Customers</span>
                             <span class="stat-icon">👥</span>
@@ -200,152 +271,281 @@
                     </div>
                 </div>
                 
+                <!-- Dashboard Grid -->
                 <div class="dashboard-grid">
+                    <!-- Recent Activity -->
                     <div class="dashboard-card">
-                        <div class="card-title">Recent Activity</div>
-                        <ul class="activity-list" id="activityList">
-                            <li class="activity-item">
-                                <div class="activity-icon">💰</div>
-                                <div class="activity-content">
-                                    <div class="activity-title">Sale completed #TRX-001</div>
-                                    <div class="activity-time">2 minutes ago</div>
-                                </div>
-                            </li>
-                            <li class="activity-item">
-                                <div class="activity-icon">👤</div>
-                                <div class="activity-content">
-                                    <div class="activity-title">New customer registered</div>
-                                    <div class="activity-time">15 minutes ago</div>
-                                </div>
-                            </li>
-                            <li class="activity-item">
-                                <div class="activity-icon">📦</div>
-                                <div class="activity-content">
-                                    <div class="activity-title">Low stock alert: Running Shoes</div>
-                                    <div class="activity-time">1 hour ago</div>
-                                </div>
-                            </li>
-                        </ul>
+                        <div class="card-header">
+                            <span class="card-title">Recent Activity</span>
+                            <a href="/reports-custom.html" class="card-link">View All →</a>
+                        </div>
+                        <div class="card-body">
+                            <ul class="activity-list" id="activityList">
+                                <li class="activity-item" data-transaction="TRX-001">
+                                    <div class="activity-icon">💰</div>
+                                    <div class="activity-content">
+                                        <div class="activity-title">Sale completed #TRX-001</div>
+                                        <div class="activity-time">2 minutes ago</div>
+                                    </div>
+                                </li>
+                                <li class="activity-item" data-customer="john">
+                                    <div class="activity-icon">👤</div>
+                                    <div class="activity-content">
+                                        <div class="activity-title">New customer registered</div>
+                                        <div class="activity-time">15 minutes ago</div>
+                                    </div>
+                                </li>
+                                <li class="activity-item" data-product="shoes">
+                                    <div class="activity-icon">📦</div>
+                                    <div class="activity-content">
+                                        <div class="activity-title">Low stock alert: Running Shoes</div>
+                                        <div class="activity-time">1 hour ago</div>
+                                    </div>
+                                </li>
+                                <li class="activity-item" data-return="TRX-002">
+                                    <div class="activity-icon">🔄</div>
+                                    <div class="activity-content">
+                                        <div class="activity-title">Return processed #TRX-002</div>
+                                        <div class="activity-time">3 hours ago</div>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
                     </div>
                     
+                    <!-- Top Products -->
                     <div class="dashboard-card" data-permission="product.view">
-                        <div class="card-title">Top Selling Products</div>
-                        <ul class="product-list" id="topProductsList">
-                            <li class="product-item">
-                                <span class="product-name">Classic T-Shirt</span>
-                                <span class="product-sales">48 units sold</span>
-                            </li>
-                            <li class="product-item">
-                                <span class="product-name">Running Shoes</span>
-                                <span class="product-sales">35 units sold</span>
-                            </li>
-                            <li class="product-item">
-                                <span class="product-name">Smart Watch</span>
-                                <span class="product-sales">22 units sold</span>
-                            </li>
-                        </ul>
+                        <div class="card-header">
+                            <span class="card-title">Top Selling Products</span>
+                            <a href="/products.html" class="card-link">Manage →</a>
+                        </div>
+                        <div class="card-body">
+                            <ul class="product-list" id="topProductsList">
+                                <li class="product-item">
+                                    <div class="product-rank">#1</div>
+                                    <div class="product-info">
+                                        <div class="product-name">Classic T-Shirt</div>
+                                        <div class="product-sku">NLE-APR-001</div>
+                                    </div>
+                                    <div class="product-stats">
+                                        <div class="product-sales">48 units</div>
+                                        <div class="product-revenue">$1,439.52</div>
+                                    </div>
+                                </li>
+                                <li class="product-item">
+                                    <div class="product-rank">#2</div>
+                                    <div class="product-info">
+                                        <div class="product-name">Running Shoes</div>
+                                        <div class="product-sku">NLE-FTW-003</div>
+                                    </div>
+                                    <div class="product-stats">
+                                        <div class="product-sales">35 units</div>
+                                        <div class="product-revenue">$4,199.65</div>
+                                    </div>
+                                </li>
+                                <li class="product-item">
+                                    <div class="product-rank">#3</div>
+                                    <div class="product-info">
+                                        <div class="product-name">Smart Watch Pro</div>
+                                        <div class="product-sku">NLE-ELC-005</div>
+                                    </div>
+                                    <div class="product-stats">
+                                        <div class="product-sales">22 units</div>
+                                        <div class="product-revenue">$6,599.78</div>
+                                    </div>
+                                </li>
+                                <li class="product-item">
+                                    <div class="product-rank">#4</div>
+                                    <div class="product-info">
+                                        <div class="product-name">Leather Wallet</div>
+                                        <div class="product-sku">NLE-ACC-004</div>
+                                    </div>
+                                    <div class="product-stats">
+                                        <div class="product-sales">18 units</div>
+                                        <div class="product-revenue">$899.82</div>
+                                    </div>
+                                </li>
+                                <li class="product-item">
+                                    <div class="product-rank">#5</div>
+                                    <div class="product-info">
+                                        <div class="product-name">Wireless Earbuds</div>
+                                        <div class="product-sku">NLE-ELC-006</div>
+                                    </div>
+                                    <div class="product-stats">
+                                        <div class="product-sales">15 units</div>
+                                        <div class="product-revenue">$1,349.85</div>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
                 
-                <!-- Footer Component -->
+                <!-- Sales Chart (for Professional+ tiers) -->
+                <div class="dashboard-card" data-tier="professional" id="salesChartCard" style="display: none;">
+                    <div class="card-header">
+                        <span class="card-title">Sales Overview (Last 7 Days)</span>
+                        <select id="chartPeriod" class="card-link" style="background:none; border:none;">
+                            <option value="7">Last 7 days</option>
+                            <option value="30">Last 30 days</option>
+                            <option value="90">Last 90 days</option>
+                        </select>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="salesChart"></canvas>
+                    </div>
+                </div>
+                
                 <div id="footerContainer"></div>
             </div>
         </div>
     </div>
-
+    
+    <!-- Scripts -->
     <script src="/assets/js/rbac.js"></script>
     <script src="/assets/js/layout.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    
     <script>
-        // Load components dynamically
-        async function loadComponents() {
-            // Load sidebar
-            const sidebarResp = await fetch('/components/Sidebar.html');
-            const sidebarHtml = await sidebarResp.text();
-            document.getElementById('sidebarContainer').innerHTML = sidebarHtml;
-            
-            // Load header
-            const headerResp = await fetch('/components/Header.html');
-            const headerHtml = await headerResp.text();
-            document.getElementById('headerContainer').innerHTML = headerHtml;
-            
-            // Load hero
-            const heroResp = await fetch('/components/Hero.html');
-            const heroHtml = await heroResp.text();
-            document.getElementById('heroContainer').innerHTML = heroHtml;
-            
-            // Load footer
-            const footerResp = await fetch('/components/Footer.html');
-            const footerHtml = await footerResp.text();
-            document.getElementById('footerContainer').innerHTML = footerHtml;
-            
-            // Re-initialize RBAC after components load
-            if (window.rbac) {
-                window.rbac.updateUIByPermissions();
-            }
-            
-            // Re-initialize layout
-            if (window.layout) {
-                window.layout.updateUserInfo();
-                window.layout.setActiveNavItem();
-            }
-            
-            // Load dashboard data
-            loadDashboardData();
-        }
-        
-        function loadDashboardData() {
+        (function() {
+            // Currency configuration
             const currency = localStorage.getItem('pos_currency') || 'UGX';
             const exchangeRate = 3700;
             
-            // Demo data
-            const revenue = 28450.75;
-            const orders = 342;
-            const avgOrder = revenue / orders;
-            
-            const formatMoney = (amount) => {
+            function formatMoney(amountUSD) {
                 if (currency === 'UGX') {
-                    return `UGX ${Math.round(amount * exchangeRate).toLocaleString('en-UG')}`;
+                    return `UGX ${Math.round(amountUSD * exchangeRate).toLocaleString('en-UG')}`;
                 }
-                return `$${amount.toFixed(2)}`;
-            };
+                return `$${amountUSD.toFixed(2)}`;
+            }
             
-            document.getElementById('totalRevenue').textContent = formatMoney(revenue);
-            document.getElementById('totalOrders').textContent = orders;
-            document.getElementById('avgOrderValue').textContent = formatMoney(avgOrder);
-            document.getElementById('activeCustomers').textContent = '1,247';
-        }
-        
-        // Apply permission-based visibility
-        function applyPermissions() {
-            if (!window.rbac) return;
+            // Load dashboard data
+            function loadDashboardData() {
+                const revenueUSD = 28450.75;
+                const orders = 342;
+                const avgOrderUSD = revenueUSD / orders;
+                const customers = 1247;
+                
+                document.getElementById('totalRevenue').textContent = formatMoney(revenueUSD);
+                document.getElementById('totalOrders').textContent = orders;
+                document.getElementById('avgOrderValue').textContent = formatMoney(avgOrderUSD);
+                document.getElementById('activeCustomers').textContent = customers.toLocaleString();
+            }
             
-            document.querySelectorAll('[data-permission]').forEach(el => {
-                const perm = el.dataset.permission;
-                if (!window.rbac.hasPermission(perm)) {
-                    el.classList.add('hidden-by-permission');
+            // Load components
+            async function loadComponents() {
+                try {
+                    const sidebarResp = await fetch('/components/Sidebar.html');
+                    document.getElementById('sidebarContainer').innerHTML = await sidebarResp.text();
+                    
+                    const headerResp = await fetch('/components/Header.html');
+                    document.getElementById('headerContainer').innerHTML = await headerResp.text();
+                    
+                    const heroResp = await fetch('/components/Hero.html');
+                    document.getElementById('heroContainer').innerHTML = await heroResp.text();
+                    
+                    const footerResp = await fetch('/components/Footer.html');
+                    document.getElementById('footerContainer').innerHTML = await footerResp.text();
+                    
+                    // Re-initialize after components load
+                    if (window.rbac) {
+                        window.rbac.renderSidebar();
+                        window.rbac.updateUIByPermissions();
+                    }
+                    if (window.layout) {
+                        window.layout.updateUserInfo();
+                        window.layout.setActiveNavItem();
+                    }
+                    
+                    loadDashboardData();
+                    initSalesChart();
+                    
+                    // Show/hide professional tier features
+                    const userTier = localStorage.getItem('pos_tier') || 'freemium';
+                    const chartCard = document.getElementById('salesChartCard');
+                    if (chartCard) {
+                        chartCard.style.display = (userTier === 'professional' || userTier === 'premium' || userTier === 'enterprise') ? 'block' : 'none';
+                    }
+                    
+                } catch (error) {
+                    console.warn('Error loading components:', error);
+                }
+            }
+            
+            // Initialize sales chart
+            let salesChart = null;
+            
+            function initSalesChart() {
+                const ctx = document.getElementById('salesChart')?.getContext('2d');
+                if (!ctx) return;
+                
+                const chartData = {
+                    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                    datasets: [{
+                        label: currency === 'UGX' ? 'Sales (UGX)' : 'Sales (USD)',
+                        data: [1250, 1480, 1350, 1680, 1920, 2150, 1840],
+                        borderColor: '#2563eb',
+                        backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                        fill: true,
+                        tension: 0.4
+                    }]
+                };
+                
+                if (currency === 'UGX') {
+                    chartData.datasets[0].data = chartData.datasets[0].data.map(v => v * exchangeRate);
+                }
+                
+                salesChart = new Chart(ctx, {
+                    type: 'line',
+                    data: chartData,
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        plugins: {
+                            legend: { position: 'top' },
+                            tooltip: { callbacks: { label: (ctx) => `${currency === 'UGX' ? 'UGX' : '$'} ${ctx.raw.toLocaleString()}` } }
+                        }
+                    }
+                });
+            }
+            
+            // Update chart on period change
+            document.getElementById('chartPeriod')?.addEventListener('change', (e) => {
+                if (salesChart) {
+                    // Update chart data based on period
+                    salesChart.update();
                 }
             });
             
-            document.querySelectorAll('[data-role]').forEach(el => {
-                const role = el.dataset.role;
-                if (!window.rbac.isAtLeast(role)) {
-                    el.classList.add('hidden-by-role');
+            // Activity item click handlers
+            document.addEventListener('click', (e) => {
+                const activityItem = e.target.closest('.activity-item');
+                if (activityItem) {
+                    if (activityItem.dataset.transaction) {
+                        window.location.href = `/transactions.html?id=${activityItem.dataset.transaction}`;
+                    } else if (activityItem.dataset.customer) {
+                        window.location.href = `/customer-management.html`;
+                    } else if (activityItem.dataset.product) {
+                        window.location.href = `/products.html`;
+                    } else if (activityItem.dataset.return) {
+                        window.location.href = `/returns-refunds.html`;
+                    }
+                }
+                
+                const statCard = e.target.closest('.stat-card');
+                if (statCard) {
+                    const statType = statCard.dataset.stat;
+                    if (statType === 'revenue' || statType === 'orders' || statType === 'aov') {
+                        window.location.href = '/reports-custom.html';
+                    } else if (statType === 'customers') {
+                        window.location.href = '/customer-management.html';
+                    }
                 }
             });
             
-            document.querySelectorAll('[data-tier]').forEach(el => {
-                const tier = el.dataset.tier;
-                const userTier = window.rbac.currentUser?.tier || 'freemium';
-                const tierLevels = { freemium: 0, basic: 1, professional: 2, premium: 3, enterprise: 4 };
-                if (tierLevels[userTier] < tierLevels[tier]) {
-                    el.classList.add('hidden-by-tier');
-                }
-            });
-        }
-        
-        // Initialize
-        loadComponents();
-        setTimeout(applyPermissions, 500);
+            // Initialize
+            loadComponents();
+        })();
     </script>
 </body>
 </html>
