@@ -1,1 +1,81 @@
 
+<!-- ============================================
+     Nile POS - Header Component
+     Include this in any page using JavaScript fetch
+     ============================================ -->
+
+<header class="app-header">
+    <div class="header-left">
+        <button class="mobile-menu-toggle" id="mobileMenuToggle">
+            ☰
+        </button>
+        <h1 class="page-title" id="pageTitle">Dashboard</h1>
+    </div>
+    
+    <div class="header-right">
+        <div class="header-search">
+            <span class="search-icon">🔍</span>
+            <input type="text" placeholder="Search products, customers..." id="globalSearch">
+        </div>
+        
+        <button class="notification-btn" id="notificationBtn">
+            🔔
+            <span class="notification-badge"></span>
+        </button>
+        
+        <div class="user-dropdown" id="userDropdown">
+            <div class="user-dropdown-trigger">
+                <div class="user-avatar" id="headerUserAvatar">U</div>
+                <span id="headerUserName">User</span>
+                <span>▼</span>
+            </div>
+            <div class="user-dropdown-menu">
+                <a href="/profile.html" class="dropdown-item">
+                    <span>👤</span> My Profile
+                </a>
+                <a href="/settings.html" class="dropdown-item" data-permission="settings.view">
+                    <span>⚙️</span> Settings
+                </a>
+                <div class="dropdown-divider"></div>
+                <a href="#" class="dropdown-item" id="logoutBtn">
+                    <span>🚪</span> Logout
+                </a>
+            </div>
+        </div>
+    </div>
+</header>
+
+<script>
+    // Header initialization script
+    (function() {
+        // Update user info
+        const user = JSON.parse(localStorage.getItem('pos_user') || '{}');
+        const userNameSpan = document.getElementById('headerUserName');
+        const userAvatar = document.getElementById('headerUserAvatar');
+        
+        if (userNameSpan) userNameSpan.textContent = user.name || user.email?.split('@')[0] || 'User';
+        if (userAvatar) userAvatar.textContent = (user.name?.charAt(0) || 'U').toUpperCase();
+        
+        // Logout handler
+        const logoutBtn = document.getElementById('logoutBtn');
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                localStorage.removeItem('pos_jwt');
+                localStorage.removeItem('pos_user');
+                localStorage.removeItem('pos_permissions');
+                window.location.href = '/login.html';
+            });
+        }
+        
+        // Global search
+        const searchInput = document.getElementById('globalSearch');
+        if (searchInput) {
+            searchInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter' && e.target.value.length > 2) {
+                    window.location.href = `/search.html?q=${encodeURIComponent(e.target.value)}`;
+                }
+            });
+        }
+    })();
+</script>
