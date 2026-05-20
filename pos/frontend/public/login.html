@@ -3,396 +3,123 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <meta name="description" content="Nile Shopping POS - Secure Login with MFA, Biometric, and PIN support">
-    <title>Nile POS - Login | Secure Point of Sale</title>
+    <title>Login | Nile POS</title>
     <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico">
+    <link rel="stylesheet" href="/assets/css/auth.css">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
-            background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 50%, #1e40af 100%);
-            min-height: 100vh;
+        .login-options {
             display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-            position: relative;
-        }
-
-        /* Background pattern */
-        body::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" opacity="0.05"><path fill="white" d="M10,10 L90,10 L90,90 L10,90 Z"/><circle cx="50" cy="50" r="10"/></svg>') repeat;
-            pointer-events: none;
-        }
-
-        .login-container {
-            background: white;
-            border-radius: 32px;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-            width: 100%;
-            max-width: 460px;
-            overflow: hidden;
-            animation: slideUp 0.5s ease-out;
-            position: relative;
-            z-index: 1;
-        }
-
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .login-header {
-            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-            padding: 32px;
-            text-align: center;
-            position: relative;
-        }
-
-        .logo {
-            font-size: 32px;
-            font-weight: 700;
-            color: white;
-            letter-spacing: -0.5px;
-        }
-
-        .logo span {
-            color: #60a5fa;
-        }
-
-        .tagline {
-            color: #94a3b8;
-            font-size: 13px;
-            margin-top: 8px;
-        }
-
-        .currency-badge {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: rgba(255,255,255,0.1);
-            padding: 4px 12px;
-            border-radius: 100px;
-            font-size: 11px;
-            color: #94a3b8;
-            display: flex;
-            gap: 8px;
-        }
-
-        .currency-badge span {
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .currency-badge span.active {
-            color: #60a5fa;
-            font-weight: 600;
-        }
-
-        .login-body {
-            padding: 32px;
-        }
-
-        .tier-badge {
-            background: #f1f5f9;
-            border-radius: 100px;
-            padding: 6px 14px;
-            font-size: 12px;
-            font-weight: 500;
-            color: #475569;
-            display: inline-block;
+            gap: 16px;
             margin-bottom: 24px;
         }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        label {
-            display: block;
-            font-size: 13px;
-            font-weight: 500;
-            color: #1e293b;
-            margin-bottom: 8px;
-        }
-
-        .input-wrapper {
-            position: relative;
-        }
-
-        .input-icon {
-            position: absolute;
-            left: 14px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #94a3b8;
-            font-size: 18px;
-        }
-
-        input {
-            width: 100%;
-            padding: 14px 14px 14px 45px;
-            border: 2px solid #e2e8f0;
-            border-radius: 14px;
-            font-size: 15px;
-            transition: all 0.2s;
-            font-family: inherit;
-        }
-
-        input:focus {
-            outline: none;
-            border-color: #2563eb;
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-        }
-
-        input.error {
-            border-color: #dc2626;
-        }
-
-        .password-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 8px;
-        }
-
-        .forgot-link {
-            font-size: 12px;
-            color: #2563eb;
-            text-decoration: none;
-        }
-
-        .forgot-link:hover {
-            text-decoration: underline;
-        }
-
-        .pin-option {
-            margin: 20px 0;
+        .login-option {
+            flex: 1;
             text-align: center;
-        }
-
-        .pin-toggle {
-            background: none;
-            border: none;
-            color: #64748b;
-            font-size: 13px;
+            padding: 10px;
+            border-bottom: 2px solid var(--border);
             cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 8px 16px;
-            border-radius: 100px;
-            transition: all 0.2s;
+            font-weight: 500;
+            color: var(--gray);
         }
-
-        .pin-toggle:hover {
-            background: #f1f5f9;
-            color: #2563eb;
+        .login-option.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
         }
-
         .pin-inputs {
             display: flex;
             gap: 12px;
             justify-content: center;
             margin: 20px 0;
         }
-
         .pin-digit {
             width: 55px;
             height: 65px;
             text-align: center;
             font-size: 24px;
             font-weight: 600;
-            border: 2px solid #e2e8f0;
+            border: 2px solid var(--border);
             border-radius: 14px;
             background: white;
             font-family: monospace;
+            padding: 0;
         }
-
         .pin-digit:focus {
-            border-color: #2563eb;
+            border-color: var(--primary);
         }
-
-        .login-btn {
-            width: 100%;
-            padding: 14px;
-            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-            color: white;
-            border: none;
-            border-radius: 14px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .login-btn:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 10px 20px -5px rgba(37, 99, 235, 0.4);
-        }
-
-        .login-btn:active {
-            transform: translateY(0);
-        }
-
-        .login-btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .error-message {
-            background: #fef2f2;
-            border: 1px solid #fecaca;
-            border-radius: 14px;
-            padding: 12px 16px;
-            color: #dc2626;
-            font-size: 13px;
-            margin-bottom: 20px;
-            display: none;
-        }
-
-        .error-message.show {
-            display: block;
-            animation: shake 0.3s ease-out;
-        }
-
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-5px); }
-            75% { transform: translateX(5px); }
-        }
-
-        .loading-spinner {
-            display: inline-block;
-            width: 18px;
-            height: 18px;
-            border: 2px solid rgba(255,255,255,0.3);
-            border-top-color: white;
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-            margin-right: 8px;
-            vertical-align: middle;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        .register-footer {
-            text-align: center;
-            margin-top: 24px;
-            padding-top: 24px;
-            border-top: 1px solid #e2e8f0;
-            font-size: 13px;
-            color: #64748b;
-        }
-
-        .register-footer a {
-            color: #2563eb;
-            text-decoration: none;
-            font-weight: 500;
-        }
-
-        .biometric-btn, .mfa-btn {
-            width: 100%;
-            padding: 12px;
-            background: #f1f5f9;
-            border: none;
+        .hidden { display: none; }
+        .demo-credentials {
+            background: #f8fafc;
             border-radius: 12px;
-            font-size: 14px;
-            cursor: pointer;
-            margin-top: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            transition: all 0.2s;
-            font-weight: 500;
-        }
-
-        .biometric-btn:hover, .mfa-btn:hover {
-            background: #e2e8f0;
-        }
-
-        .hidden {
-            display: none;
-        }
-
-        .security-notice {
-            font-size: 11px;
-            color: #94a3b8;
-            text-align: center;
+            padding: 12px;
             margin-top: 20px;
-            padding-top: 16px;
-            border-top: 1px solid #f1f5f9;
+            font-size: 11px;
+            color: var(--gray);
+            text-align: center;
         }
-
-        @media (max-width: 480px) {
-            .login-body { padding: 24px; }
-            .pin-digit { width: 48px; height: 58px; font-size: 20px; }
-            .currency-badge { top: 12px; right: 12px; }
+        .demo-credentials details {
+            cursor: pointer;
+        }
+        .demo-credentials summary {
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+        .demo-list {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            text-align: left;
+            margin-top: 8px;
+        }
+        .demo-list span {
+            font-family: monospace;
+            color: var(--dark);
         }
     </style>
 </head>
 <body>
-    <div class="login-container">
-        <div class="login-header">
+    <div class="auth-container">
+        <div class="auth-header">
             <div class="logo">Nile<span>POS</span></div>
-            <div class="tagline">Point of Sale System</div>
-            <div class="currency-badge">
-                <span data-currency="USD">USD</span>
-                <span data-currency="UGX">UGX</span>
-            </div>
+            <div class="tagline">Secure Point of Sale System</div>
         </div>
-        <div class="login-body">
-            <div style="text-align: center;">
-                <span class="tier-badge" id="tierBadge">Freemium</span>
+        
+        <div class="auth-body">
+            <!-- Login Options Tabs -->
+            <div class="login-options">
+                <div class="login-option active" data-method="password">Email & Password</div>
+                <div class="login-option" data-method="pin">PIN Login</div>
             </div>
-
+            
             <div id="errorMessage" class="error-message"></div>
-
+            <div id="successMessage" class="success-message"></div>
+            
             <!-- Email/Password Login Form -->
-            <form id="loginForm">
+            <form id="passwordForm">
                 <div class="form-group">
                     <label>Email Address</label>
                     <div class="input-wrapper">
                         <span class="input-icon">📧</span>
-                        <input type="email" id="email" placeholder="cashier@nile.com" autocomplete="email" required>
+                        <input type="email" id="email" placeholder="Enter your email" autocomplete="email" required>
                     </div>
                 </div>
                 <div class="form-group">
-                    <div class="password-header">
-                        <label>Password</label>
-                        <a href="#" class="forgot-link" id="forgotLink">Forgot password?</a>
-                    </div>
+                    <label>Password</label>
                     <div class="input-wrapper">
                         <span class="input-icon">🔒</span>
-                        <input type="password" id="password" placeholder="••••••••" autocomplete="current-password" required>
+                        <input type="password" id="password" placeholder="Enter your password" autocomplete="current-password" required>
                     </div>
                 </div>
-                <button type="submit" class="login-btn" id="loginBtn">Sign In</button>
+                <div class="form-group" style="display: flex; justify-content: space-between; align-items: center;">
+                    <label style="display: flex; align-items: center; gap: 8px; margin: 0;">
+                        <input type="checkbox" id="rememberMe"> Remember me
+                    </label>
+                    <a href="/forgot-password.html" style="font-size: 12px; color: var(--primary); text-decoration: none;">Forgot password?</a>
+                </div>
+                <button type="submit" class="btn" id="loginBtn">Sign In</button>
             </form>
-
+            
             <!-- PIN Login Form -->
-            <div id="pinForm" class="hidden">
+            <form id="pinForm" class="hidden">
                 <div class="form-group">
                     <label>Enter Your 4-Digit PIN</label>
                     <div class="pin-inputs" id="pinInputs">
@@ -402,326 +129,194 @@
                         <input type="text" maxlength="1" class="pin-digit" data-idx="3" inputmode="numeric">
                     </div>
                 </div>
-                <button class="login-btn" id="pinLoginBtn">Verify PIN</button>
+                <button type="submit" class="btn" id="pinLoginBtn">Verify PIN</button>
+            </form>
+            
+            <div class="auth-footer">
+                Don't have an account? <a href="/register.html">Create an account</a>
             </div>
-
-            <!-- MFA Form (2FA) -->
-            <div id="mfaForm" class="hidden">
-                <div class="form-group">
-                    <label>Enter 6-Digit Authentication Code</label>
-                    <div class="pin-inputs" id="mfaInputs">
-                        <input type="text" maxlength="1" class="pin-digit" data-idx="0" inputmode="numeric">
-                        <input type="text" maxlength="1" class="pin-digit" data-idx="1" inputmode="numeric">
-                        <input type="text" maxlength="1" class="pin-digit" data-idx="2" inputmode="numeric">
-                        <input type="text" maxlength="1" class="pin-digit" data-idx="3" inputmode="numeric">
-                        <input type="text" maxlength="1" class="pin-digit" data-idx="4" inputmode="numeric">
-                        <input type="text" maxlength="1" class="pin-digit" data-idx="5" inputmode="numeric">
+            
+            <!-- Demo Credentials (Development Only) -->
+            <div class="demo-credentials">
+                <details>
+                    <summary>Demo Credentials</summary>
+                    <div class="demo-list">
+                        <div><strong>Admin:</strong> <span>admin@nile.com</span> / <span>Admin123!</span></div>
+                        <div><strong>Manager:</strong> <span>manager@nile.com</span> / <span>Manager123!</span></div>
+                        <div><strong>Cashier:</strong> <span>cashier@nile.com</span> / <span>Cashier123!</span></div>
+                        <div><strong>PIN:</strong> <span>1234</span> (for cashier)</div>
+                        <div><strong>Demo:</strong> <span>demo@nile.com</span> / <span>demo123</span></div>
                     </div>
-                </div>
-                <button class="login-btn" id="mfaLoginBtn">Verify</button>
-                <button class="biometric-btn" id="backupCodeBtn">Use Backup Code</button>
-            </div>
-
-            <!-- Login Method Toggle -->
-            <div class="pin-option">
-                <button type="button" class="pin-toggle" id="togglePinBtn">
-                    <span>🔢</span> Use PIN instead
-                </button>
-            </div>
-
-            <!-- Biometric Login (Professional tier+) -->
-            <div id="biometricSection" class="hidden">
-                <button type="button" class="biometric-btn" id="biometricBtn">
-                    <span>👆</span> Use Fingerprint / Face ID
-                </button>
-            </div>
-
-            <div class="register-footer">
-                Don't have an account? <a href="#" id="registerLink">Start Free Trial</a>
-            </div>
-            <div class="security-notice">
-                🔒 Secure login protected by SSL encryption | GDPR Compliant
+                </details>
             </div>
         </div>
     </div>
-
+    
+    <script src="/assets/js/rbac.js"></script>
     <script>
-        // ============================================
-        // NILE POS - ENHANCED LOGIN CONTROLLER
-        // Supports: Email/Password, PIN, Biometric, MFA
-        // Currencies: USD & UGX
-        // ============================================
-
         (function() {
-            // ============================================
             // DOM Elements
-            // ============================================
-            const loginForm = document.getElementById('loginForm');
+            const passwordForm = document.getElementById('passwordForm');
             const pinForm = document.getElementById('pinForm');
-            const mfaForm = document.getElementById('mfaForm');
             const emailInput = document.getElementById('email');
             const passwordInput = document.getElementById('password');
             const loginBtn = document.getElementById('loginBtn');
             const pinLoginBtn = document.getElementById('pinLoginBtn');
-            const mfaLoginBtn = document.getElementById('mfaLoginBtn');
-            const togglePinBtn = document.getElementById('togglePinBtn');
+            const rememberCheckbox = document.getElementById('rememberMe');
             const errorDiv = document.getElementById('errorMessage');
-            const tierBadge = document.getElementById('tierBadge');
-            const biometricSection = document.getElementById('biometricSection');
-            const biometricBtn = document.getElementById('biometricBtn');
-            const forgotLink = document.getElementById('forgotLink');
-            const registerLink = document.getElementById('registerLink');
-            const backupCodeBtn = document.getElementById('backupCodeBtn');
-
-            // ============================================
-            // State Management
-            // ============================================
-            let isPinMode = false;
-            let currentTier = 'freemium';
+            const successDiv = document.getElementById('successMessage');
+            
+            // State
             let pinDigits = ['', '', '', ''];
-            let mfaDigits = ['', '', '', '', '', ''];
-            let lockUntil = null;
-            let pendingUser = null;
-            let currentCurrency = localStorage.getItem('pos_currency') || 'UGX';
-
-            // ============================================
-            // Currency Display
-            // ============================================
-            function updateCurrencyDisplay() {
-                document.querySelectorAll('.currency-badge span').forEach(span => {
-                    span.classList.toggle('active', span.dataset.currency === currentCurrency);
-                });
-            }
-
-            document.querySelectorAll('.currency-badge span').forEach(span => {
-                span.addEventListener('click', () => {
-                    currentCurrency = span.dataset.currency;
-                    localStorage.setItem('pos_currency', currentCurrency);
-                    updateCurrencyDisplay();
-                    showToast(`Currency switched to ${currentCurrency === 'UGX' ? 'Ugandan Shilling' : 'US Dollar'}`, 'info');
+            let currentMethod = 'password';
+            
+            // Tab switching
+            document.querySelectorAll('.login-option').forEach(opt => {
+                opt.addEventListener('click', () => {
+                    document.querySelectorAll('.login-option').forEach(o => o.classList.remove('active'));
+                    opt.classList.add('active');
+                    currentMethod = opt.dataset.method;
+                    
+                    if (currentMethod === 'password') {
+                        passwordForm.classList.remove('hidden');
+                        pinForm.classList.add('hidden');
+                    } else {
+                        passwordForm.classList.add('hidden');
+                        pinForm.classList.remove('hidden');
+                        resetPinInputs();
+                    }
                 });
             });
-
-            // ============================================
-            // Tier Detection
-            // ============================================
-            async function detectTier() {
-                const urlParams = new URLSearchParams(window.location.search);
-                const demo = urlParams.get('demo');
-                
-                const tiers = { premium: 'premium', professional: 'professional', enterprise: 'enterprise', basic: 'basic', freemium: 'freemium' };
-                currentTier = tiers[demo] || (localStorage.getItem('pos_tier') || 'freemium');
-                
-                tierBadge.textContent = currentTier.charAt(0).toUpperCase() + currentTier.slice(1);
-                
-                // Show biometric for Professional+
-                if (['professional', 'premium', 'enterprise'].includes(currentTier)) {
-                    biometricSection.classList.remove('hidden');
-                }
-            }
-
-            // ============================================
-            // Toast Notifications
-            // ============================================
-            function showToast(message, type = 'info') {
-                const toast = document.createElement('div');
-                toast.textContent = message;
-                const colors = { success: '#10b981', error: '#dc2626', warning: '#f59e0b', info: '#2563eb' };
-                toast.style.cssText = `
-                    position: fixed; bottom: 20px; right: 20px;
-                    background: ${colors[type] || colors.info};
-                    color: white; padding: 12px 20px; border-radius: 12px;
-                    z-index: 1000; animation: slideIn 0.3s ease;
-                    font-weight: 500;
-                `;
-                document.body.appendChild(toast);
-                setTimeout(() => toast.remove(), 3000);
-            }
-
-            // ============================================
-            // Error Handling
-            // ============================================
+            
+            // Demo users database
+            const DEMO_USERS = {
+                'admin@nile.com': { password: 'Admin123!', name: 'Admin User', role: 'admin', tier: 'enterprise', permissions: ['*'] },
+                'manager@nile.com': { password: 'Manager123!', name: 'Manager User', role: 'manager', tier: 'professional', permissions: ['user.view', 'transaction.view_all', 'report.sales'] },
+                'cashier@nile.com': { password: 'Cashier123!', name: 'Cashier User', role: 'cashier', tier: 'basic', pin: '1234', permissions: ['transaction.create', 'product.view', 'customer.create'] },
+                'demo@nile.com': { password: 'demo123', name: 'Demo User', role: 'cashier', tier: 'freemium', permissions: ['transaction.create', 'product.view'] }
+            };
+            
+            // Show error message
             function showError(message) {
                 errorDiv.textContent = message;
                 errorDiv.classList.add('show');
+                successDiv.classList.remove('show');
                 setTimeout(() => errorDiv.classList.remove('show'), 5000);
             }
-
-            function clearError() { errorDiv.classList.remove('show'); }
-
-            // ============================================
-            // Loading State
-            // ============================================
+            
+            function showSuccess(message) {
+                successDiv.textContent = message;
+                successDiv.classList.add('show');
+                errorDiv.classList.remove('show');
+                setTimeout(() => successDiv.classList.remove('show'), 3000);
+            }
+            
+            // Set loading state
             function setLoading(button, isLoading) {
                 if (isLoading) {
                     button.disabled = true;
                     button.innerHTML = '<span class="loading-spinner"></span> Authenticating...';
                 } else {
                     button.disabled = false;
-                    button.innerHTML = button.id === 'pinLoginBtn' ? 'Verify PIN' : 
-                                      button.id === 'mfaLoginBtn' ? 'Verify Code' : 'Sign In';
+                    button.innerHTML = button.id === 'pinLoginBtn' ? 'Verify PIN' : 'Sign In';
                 }
             }
-
-            // ============================================
-            // Account Lockout
-            // ============================================
-            function isAccountLocked() {
-                if (lockUntil && new Date() < lockUntil) {
-                    const remaining = Math.ceil((lockUntil - new Date()) / 1000);
-                    showError(`Too many failed attempts. Try again in ${remaining} seconds.`);
-                    return true;
-                }
-                return false;
-            }
-
-            // ============================================
-            // Token Storage
-            // ============================================
-            function storeAuthData(data) {
-                localStorage.setItem('pos_jwt', data.access_token);
-                localStorage.setItem('pos_refresh_token', data.refresh_token);
-                localStorage.setItem('pos_user', JSON.stringify(data.user));
-                localStorage.setItem('pos_tier', data.tier);
-                localStorage.setItem('pos_permissions', JSON.stringify(data.permissions));
+            
+            // Store auth data
+            function storeAuthData(userData, token) {
+                localStorage.setItem('pos_jwt', token);
+                localStorage.setItem('pos_user', JSON.stringify({
+                    id: userData.id,
+                    name: userData.name,
+                    email: userData.email,
+                    role: userData.role,
+                    tier: userData.tier
+                }));
+                localStorage.setItem('pos_tier', userData.tier);
+                localStorage.setItem('pos_permissions', JSON.stringify(userData.permissions));
                 
+                // Store user profile
+                localStorage.setItem('pos_user_profile', JSON.stringify({
+                    firstName: userData.name.split(' ')[0],
+                    lastName: userData.name.split(' ')[1] || '',
+                    email: userData.email,
+                    role: userData.role,
+                    tier: userData.tier,
+                    storeName: 'Nile Downtown',
+                    registerId: 1
+                }));
+                
+                // Set session expiry (8 hours)
                 const expires = new Date();
                 expires.setHours(expires.getHours() + 8);
                 localStorage.setItem('pos_session_expiry', expires.toISOString());
-            }
-
-            // ============================================
-            // API Calls (Simulated / Real)
-            // ============================================
-            async function callLoginAPI(email, password) {
-                // Demo mode - replace with actual API call
-                return new Promise((resolve) => {
-                    setTimeout(() => {
-                        if (email === 'demo@nile.com' && password === 'demo123') {
-                            resolve({
-                                success: true,
-                                data: {
-                                    access_token: 'demo_jwt_' + Date.now(),
-                                    refresh_token: 'demo_refresh_' + Date.now(),
-                                    user: { id: 1, name: 'Demo User', email: email, role: 'cashier', mfa_enabled: false },
-                                    tier: currentTier,
-                                    permissions: ['transaction.create', 'transaction.read', 'product.read']
-                                }
-                            });
-                        } else if (email === 'admin@nile.com' && password === 'Admin123!') {
-                            resolve({
-                                success: true,
-                                data: {
-                                    access_token: 'admin_jwt_' + Date.now(),
-                                    refresh_token: 'admin_refresh_' + Date.now(),
-                                    user: { id: 1, name: 'Admin User', email: email, role: 'admin', mfa_enabled: true },
-                                    tier: 'enterprise',
-                                    permissions: ['*']
-                                }
-                            });
-                        } else {
-                            resolve({ success: false, error: 'Invalid email or password' });
-                        }
-                    }, 800);
-                });
-            }
-
-            async function loginWithPassword(email, password) {
-                if (isAccountLocked()) return false;
                 
-                const response = await callLoginAPI(email, password);
-                
-                if (response.success) {
-                    if (response.data.user.mfa_enabled) {
-                        pendingUser = response.data;
-                        showMFAForm();
-                        return false;
-                    }
-                    storeAuthData(response.data);
-                    showToast('Login successful! Redirecting...', 'success');
-                    setTimeout(() => { window.location.href = '/index.html'; }, 500);
-                    return true;
+                // Remember me - store email for next time
+                if (rememberCheckbox && rememberCheckbox.checked) {
+                    localStorage.setItem('remembered_email', userData.email);
                 } else {
-                    showError(response.error || 'Login failed');
-                    const failedCount = (parseInt(localStorage.getItem('login_failures') || '0') + 1);
-                    localStorage.setItem('login_failures', failedCount);
-                    if (failedCount >= 5) {
-                        lockUntil = new Date(Date.now() + 15 * 60 * 1000);
-                        localStorage.setItem('login_lockout', lockUntil.toISOString());
-                    }
+                    localStorage.removeItem('remembered_email');
+                }
+            }
+            
+            // Email/Password login
+            async function loginWithPassword(email, password) {
+                const user = DEMO_USERS[email];
+                
+                if (!user || user.password !== password) {
+                    showError('Invalid email or password');
                     return false;
                 }
+                
+                // Generate token
+                const token = 'jwt_' + Date.now() + '_' + Math.random().toString(36).substr(2);
+                
+                storeAuthData({
+                    id: Math.floor(Math.random() * 1000),
+                    name: user.name,
+                    email: email,
+                    role: user.role,
+                    tier: user.tier,
+                    permissions: user.permissions
+                }, token);
+                
+                showSuccess('Login successful! Redirecting...');
+                setTimeout(() => {
+                    window.location.href = '/dashboard.html';
+                }, 1000);
+                return true;
             }
-
+            
+            // PIN login
             async function loginWithPin(pin) {
-                if (isAccountLocked()) return false;
+                // Find user with matching PIN
+                const userEntry = Object.entries(DEMO_USERS).find(([email, user]) => user.pin === pin);
                 
-                if (pin === '1234') {
-                    storeAuthData({
-                        access_token: 'pin_jwt_' + Date.now(),
-                        refresh_token: 'pin_refresh_' + Date.now(),
-                        user: { id: 3, name: 'Cashier User', email: 'cashier@nile.com', role: 'cashier', mfa_enabled: false },
-                        tier: currentTier,
-                        permissions: ['transaction.create', 'transaction.read', 'product.read']
-                    });
-                    showToast('PIN login successful!', 'success');
-                    setTimeout(() => { window.location.href = '/index.html'; }, 500);
-                    return true;
+                if (!userEntry) {
+                    showError('Invalid PIN');
+                    return false;
                 }
                 
-                showError('Invalid PIN. Try 1234 for demo.');
-                return false;
-            }
-
-            async function verifyMFA(code) {
-                if (code === '123456') {
-                    storeAuthData(pendingUser);
-                    showToast('2FA verification successful!', 'success');
-                    setTimeout(() => { window.location.href = '/index.html'; }, 500);
-                    return true;
-                }
-                showError('Invalid authentication code');
-                return false;
-            }
-
-            async function loginWithBiometric() {
-                if (!window.PublicKeyCredential) {
-                    showError('Biometric authentication is not supported on this device.', 'error');
-                    return;
-                }
-                showToast('Biometric authentication requires setup. Please login with password first.', 'warning');
-            }
-
-            // ============================================
-            // Form Display Management
-            // ============================================
-            function showMFAForm() {
-                loginForm.classList.add('hidden');
-                pinForm.classList.add('hidden');
-                mfaForm.classList.remove('hidden');
-                document.getElementById('mfaInputs').focus();
-            }
-
-            function toggleLoginMode() {
-                isPinMode = !isPinMode;
+                const [email, user] = userEntry;
+                const token = 'pin_jwt_' + Date.now() + '_' + Math.random().toString(36).substr(2);
                 
-                if (isPinMode) {
-                    loginForm.classList.add('hidden');
-                    pinForm.classList.remove('hidden');
-                    mfaForm.classList.add('hidden');
-                    togglePinBtn.innerHTML = '<span>✉️</span> Use Email instead';
-                    resetPinInputs();
-                } else {
-                    loginForm.classList.remove('hidden');
-                    pinForm.classList.add('hidden');
-                    mfaForm.classList.add('hidden');
-                    togglePinBtn.innerHTML = '<span>🔢</span> Use PIN instead';
-                }
+                storeAuthData({
+                    id: Math.floor(Math.random() * 1000),
+                    name: user.name,
+                    email: email,
+                    role: user.role,
+                    tier: user.tier,
+                    permissions: user.permissions
+                }, token);
+                
+                showSuccess('PIN login successful! Redirecting...');
+                setTimeout(() => {
+                    window.location.href = '/dashboard.html';
+                }, 1000);
+                return true;
             }
-
-            // ============================================
-            // PIN Input Handlers
-            // ============================================
+            
+            // PIN input handling
             function setupPinInputs() {
                 const inputs = document.querySelectorAll('#pinInputs .pin-digit');
                 inputs.forEach((input, idx) => {
@@ -729,10 +324,16 @@
                         const value = e.target.value;
                         if (value.length === 1 && /^\d$/.test(value)) {
                             pinDigits[idx] = value;
-                            if (idx < inputs.length - 1) inputs[idx + 1].focus();
-                            else pinLoginBtn.click();
-                        } else if (value.length === 0) pinDigits[idx] = '';
+                            if (idx < inputs.length - 1) {
+                                inputs[idx + 1].focus();
+                            } else {
+                                pinLoginBtn.click();
+                            }
+                        } else if (value.length === 0) {
+                            pinDigits[idx] = '';
+                        }
                     });
+                    
                     input.addEventListener('keydown', (e) => {
                         if (e.key === 'Backspace' && !input.value && idx > 0) {
                             inputs[idx - 1].focus();
@@ -742,138 +343,69 @@
                     });
                 });
             }
-
-            function setupMFAInputs() {
-                const inputs = document.querySelectorAll('#mfaInputs .pin-digit');
-                inputs.forEach((input, idx) => {
-                    input.addEventListener('input', (e) => {
-                        const value = e.target.value;
-                        if (value.length === 1 && /^\d$/.test(value)) {
-                            mfaDigits[idx] = value;
-                            if (idx < inputs.length - 1) inputs[idx + 1].focus();
-                            else mfaLoginBtn.click();
-                        } else if (value.length === 0) mfaDigits[idx] = '';
-                    });
-                    input.addEventListener('keydown', (e) => {
-                        if (e.key === 'Backspace' && !input.value && idx > 0) {
-                            inputs[idx - 1].focus();
-                            mfaDigits[idx - 1] = '';
-                            inputs[idx - 1].value = '';
-                        }
-                    });
-                });
-            }
-
+            
             function resetPinInputs() {
                 pinDigits = ['', '', '', ''];
                 document.querySelectorAll('#pinInputs .pin-digit').forEach(input => input.value = '');
-                if (document.querySelector('#pinInputs .pin-digit')) 
+                if (document.querySelector('#pinInputs .pin-digit')) {
                     document.querySelector('#pinInputs .pin-digit').focus();
-            }
-
-            // ============================================
-            // Forgot Password Handler
-            // ============================================
-            async function handleForgotPassword() {
-                const email = emailInput.value;
-                if (!email) {
-                    showError('Please enter your email address to reset password.');
-                    return;
                 }
-                showToast(`Password reset link sent to ${email}`, 'success');
-                // In production: API call to send reset email
             }
-
-            // ============================================
-            // Register Handler
-            // ============================================
-            function handleRegister() {
-                window.location.href = '/register.html';
-            }
-
-            // ============================================
-            // Session Check
-            // ============================================
+            
+            // Check existing session
             function checkExistingSession() {
-                const jwt = localStorage.getItem('pos_jwt');
-                const expiry = localStorage.getItem('pos_session_expiry');
+                const token = localStorage.getItem('pos_jwt');
+                const sessionExpiry = localStorage.getItem('pos_session_expiry');
                 
-                if (jwt && expiry && new Date(expiry) > new Date()) {
-                    window.location.href = '/index.html';
+                if (token && sessionExpiry && new Date(sessionExpiry) > new Date()) {
+                    window.location.href = '/dashboard.html';
+                    return true;
                 }
-                
-                const savedLockout = localStorage.getItem('login_lockout');
-                if (savedLockout && new Date(savedLockout) > new Date()) {
-                    lockUntil = new Date(savedLockout);
-                } else {
-                    localStorage.removeItem('login_lockout');
-                    localStorage.removeItem('login_failures');
+                return false;
+            }
+            
+            // Load remembered email
+            function loadRememberedEmail() {
+                const remembered = localStorage.getItem('remembered_email');
+                if (remembered && emailInput) {
+                    emailInput.value = remembered;
+                    if (rememberCheckbox) rememberCheckbox.checked = true;
                 }
             }
-
-            // ============================================
-            // Event Listeners
-            // ============================================
-            loginForm.addEventListener('submit', async (e) => {
+            
+            // Event listeners
+            passwordForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
-                clearError();
                 const email = emailInput.value.trim();
                 const password = passwordInput.value;
-                if (!email || !password) { showError('Please enter both email and password'); return; }
+                
+                if (!email || !password) {
+                    showError('Please enter both email and password');
+                    return;
+                }
+                
                 setLoading(loginBtn, true);
                 await loginWithPassword(email, password);
                 setLoading(loginBtn, false);
             });
             
-            pinLoginBtn.addEventListener('click', async () => {
-                clearError();
+            pinForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
                 const pin = pinDigits.join('');
-                if (pin.length !== 4) { showError('Please enter your 4-digit PIN'); return; }
+                if (pin.length !== 4) {
+                    showError('Please enter your 4-digit PIN');
+                    return;
+                }
                 setLoading(pinLoginBtn, true);
                 await loginWithPin(pin);
                 setLoading(pinLoginBtn, false);
             });
             
-            mfaLoginBtn.addEventListener('click', async () => {
-                clearError();
-                const code = mfaDigits.join('');
-                if (code.length !== 6) { showError('Please enter the 6-digit code'); return; }
-                setLoading(mfaLoginBtn, true);
-                await verifyMFA(code);
-                setLoading(mfaLoginBtn, false);
-            });
-            
-            togglePinBtn.addEventListener('click', toggleLoginMode);
-            forgotLink.addEventListener('click', (e) => { e.preventDefault(); handleForgotPassword(); });
-            registerLink.addEventListener('click', (e) => { e.preventDefault(); handleRegister(); });
-            backupCodeBtn?.addEventListener('click', () => { showToast('Please enter your backup code', 'info'); });
-            
-            if (biometricBtn) {
-                biometricBtn.addEventListener('click', loginWithBiometric);
-            }
-            
-            // Enter key support for PIN
-            document.addEventListener('keydown', (e) => {
-                if (isPinMode && e.key === 'Enter') {
-                    const pin = pinDigits.join('');
-                    if (pin.length === 4) pinLoginBtn.click();
-                }
-            });
-
-            // ============================================
-            // Initialization
-            // ============================================
-            async function init() {
-                await detectTier();
-                checkExistingSession();
+            // Initialize
+            if (!checkExistingSession()) {
+                loadRememberedEmail();
                 setupPinInputs();
-                setupMFAInputs();
-                updateCurrencyDisplay();
-                emailInput.focus();
-                console.log('Demo Login: demo@nile.com / demo123 | PIN: 1234 | Admin: admin@nile.com / Admin123!');
             }
-            
-            init();
         })();
     </script>
 </body>
