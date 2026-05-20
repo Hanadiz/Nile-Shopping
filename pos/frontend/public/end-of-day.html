@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nile POS - End of Day Report</title>
+    <title>Nile POS - End of Day Report | Z-Report</title>
     <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: #f1f5f9;
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+            background: #f3f4f6;
             padding: 24px;
         }
         .container { max-width: 1000px; margin: 0 auto; }
@@ -18,16 +18,35 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 24px;
+            flex-wrap: wrap;
+            gap: 16px;
         }
-        h1 { font-size: 24px; color: #1e293b; }
+        h1 { font-size: 24px; color: #111827; }
         .back-btn {
             background: white;
-            border: 1px solid #e2e8f0;
+            border: 1px solid #e5e7eb;
             padding: 8px 16px;
             border-radius: 8px;
             cursor: pointer;
             text-decoration: none;
-            color: #475569;
+            color: #374151;
+        }
+        .currency-selector {
+            display: flex;
+            gap: 8px;
+            background: #f3f4f6;
+            padding: 4px 8px;
+            border-radius: 100px;
+        }
+        .currency-opt {
+            padding: 4px 12px;
+            border-radius: 100px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+        .currency-opt.active {
+            background: #2563eb;
+            color: white;
         }
         .date-selector {
             background: white;
@@ -38,28 +57,30 @@
             gap: 16px;
             align-items: center;
             flex-wrap: wrap;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
         .date-selector input {
-            padding: 10px;
-            border: 1px solid #e2e8f0;
+            padding: 10px 14px;
+            border: 1px solid #e5e7eb;
             border-radius: 8px;
         }
         .generate-btn {
             padding: 10px 24px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #2563eb;
             color: white;
             border: none;
             border-radius: 8px;
             cursor: pointer;
+            font-weight: 500;
         }
         .report-card {
             background: white;
             border-radius: 20px;
             overflow: hidden;
-            margin-bottom: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
         .report-header {
-            background: #1e293b;
+            background: #1e3a8a;
             color: white;
             padding: 20px;
             text-align: center;
@@ -68,60 +89,44 @@
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 1px;
-            background: #e2e8f0;
+            background: #e5e7eb;
         }
         .summary-item {
             background: white;
             padding: 20px;
             text-align: center;
         }
-        .summary-label { font-size: 12px; color: #64748b; margin-bottom: 8px; }
-        .summary-value { font-size: 28px; font-weight: 700; color: #1e293b; }
+        .summary-label { font-size: 12px; color: #6b7280; margin-bottom: 8px; }
+        .summary-value { font-size: 24px; font-weight: 700; color: #111827; }
+        .tax-breakdown {
+            padding: 20px;
+            background: #f9fafb;
+            border-radius: 16px;
+            margin: 20px;
+        }
         .payment-breakdown { padding: 20px; }
         .payment-row {
             display: flex;
             justify-content: space-between;
             padding: 12px 0;
-            border-bottom: 1px solid #f1f5f9;
-        }
-        .cash-reconciliation {
-            background: #f8fafc;
-            padding: 20px;
-            border-radius: 16px;
-            margin: 20px;
-        }
-        .reconcile-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 12px;
-        }
-        .reconcile-input {
-            width: 150px;
-            padding: 8px;
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
-            text-align: right;
-        }
-        .difference { font-weight: 700; }
-        .difference.positive { color: #ef4444; }
-        .difference.negative { color: #10b981; }
-        .close-btn {
-            width: calc(100% - 40px);
-            margin: 0 20px 20px;
-            padding: 16px;
-            background: #ef4444;
-            color: white;
-            border: none;
-            border-radius: 12px;
-            font-weight: 600;
-            cursor: pointer;
+            border-bottom: 1px solid #e5e7eb;
         }
         .export-btn {
             width: calc(100% - 40px);
             margin: 0 20px 20px;
             padding: 12px;
             background: #10b981;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        .print-btn {
+            width: calc(100% - 40px);
+            margin: 0 20px 20px;
+            padding: 12px;
+            background: #6b7280;
             color: white;
             border: none;
             border-radius: 12px;
@@ -135,201 +140,140 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>📊 End of Day Report</h1>
+            <div style="display: flex; align-items: center; gap: 16px;">
+                <h1>📊 End of Day Report (Z-Report)</h1>
+                <div class="currency-selector">
+                    <span class="currency-opt" data-currency="USD">USD</span>
+                    <span class="currency-opt" data-currency="UGX">UGX</span>
+                </div>
+            </div>
             <a href="/index.html" class="back-btn">← Back</a>
         </div>
 
         <div class="date-selector">
             <input type="date" id="reportDate" value="">
             <button class="generate-btn" id="generateBtn">Generate Report</button>
-            <button class="generate-btn" id="printBtn" style="background:#475569;">🖨️ Print</button>
+            <button class="generate-btn" id="printBtn" style="background:#374151;">🖨️ Print</button>
         </div>
 
-        <div id="reportContent">
-            <!-- Report will be populated here -->
-        </div>
+        <div id="reportContent"></div>
     </div>
 
     <script>
         (function() {
-            // Demo sales data
+            const EXCHANGE_RATE = 3700;
+            let currentCurrency = localStorage.getItem('pos_currency') || 'UGX';
+            
+            function formatMoney(amountUSD) {
+                if (currentCurrency === 'UGX') {
+                    return `UGX ${Math.round(amountUSD * EXCHANGE_RATE).toLocaleString('en-UG')}`;
+                }
+                return `$${amountUSD.toFixed(2)}`;
+            }
+            
             const demoData = {
                 '2024-01-15': {
-                    date: '2024-01-15',
-                    totalSales: 1427.50,
-                    transactionCount: 42,
-                    avgTicket: 33.99,
-                    cashSales: 580.00,
-                    cardSales: 720.50,
-                    giftCardSales: 127.00,
-                    returns: 45.00,
-                    taxCollected: 129.77,
-                    topProducts: [
-                        { name: 'Classic T-Shirt', units: 12, revenue: 359.88 },
-                        { name: 'Running Shoes', units: 8, revenue: 719.92 },
-                        { name: 'Smart Watch', units: 2, revenue: 399.98 }
-                    ],
-                    hourlyBreakdown: [85, 62, 48, 73, 112, 168, 205, 189, 142, 108, 95, 72]
-                },
-                '2024-01-14': {
-                    date: '2024-01-14',
-                    totalSales: 1890.25,
-                    transactionCount: 58,
-                    avgTicket: 32.59,
-                    cashSales: 720.00,
-                    cardSales: 1050.25,
-                    giftCardSales: 120.00,
-                    returns: 28.50,
-                    taxCollected: 171.84,
-                    topProducts: [
-                        { name: 'Slim Fit Jeans', units: 15, revenue: 899.85 },
-                        { name: 'Wireless Earbuds', units: 10, revenue: 799.90 }
-                    ],
-                    hourlyBreakdown: [95, 78, 55, 82, 135, 185, 220, 210, 165, 125, 100, 85]
+                    date: '2024-01-15', totalSalesUSD: 1550.00, transactionCount: 48, avgTicketUSD: 32.29,
+                    cashUSD: 620.00, cardUSD: 850.00, mobileUSD: 80.00, returnsUSD: 45.00,
+                    taxUSD: 141.00, vatRate: 18, topProducts: [
+                        { name: 'Classic T-Shirt', units: 15, revenueUSD: 449.85 },
+                        { name: 'Running Shoes', units: 8, revenueUSD: 959.92 }
+                    ]
                 }
             };
-
+            
             let currentReport = null;
-            let actualCash = null;
-
+            
             function setDefaultDate() {
                 const today = new Date().toISOString().split('T')[0];
                 document.getElementById('reportDate').value = today;
             }
-
+            
             function generateReport() {
                 const date = document.getElementById('reportDate').value;
                 let report = demoData[date];
                 
                 if (!report) {
-                    // Generate demo data for any date
                     report = {
-                        date: date,
-                        totalSales: Math.floor(Math.random() * 2000) + 500,
+                        date: date, totalSalesUSD: Math.floor(Math.random() * 2000) + 500,
                         transactionCount: Math.floor(Math.random() * 80) + 20,
-                        avgTicket: 0,
-                        cashSales: Math.floor(Math.random() * 800) + 200,
-                        cardSales: Math.floor(Math.random() * 1000) + 300,
-                        giftCardSales: Math.floor(Math.random() * 200),
-                        returns: Math.floor(Math.random() * 100),
-                        taxCollected: 0,
-                        topProducts: [
-                            { name: 'Classic T-Shirt', units: Math.floor(Math.random() * 20) + 5, revenue: 0 },
-                            { name: 'Running Shoes', units: Math.floor(Math.random() * 15) + 3, revenue: 0 }
-                        ],
-                        hourlyBreakdown: Array(12).fill(0).map(() => Math.floor(Math.random() * 200) + 50)
+                        avgTicketUSD: 0, cashUSD: Math.floor(Math.random() * 800) + 200,
+                        cardUSD: Math.floor(Math.random() * 1000) + 300,
+                        mobileUSD: Math.floor(Math.random() * 200), returnsUSD: Math.floor(Math.random() * 100),
+                        taxUSD: 0, vatRate: 18, topProducts: []
                     };
-                    report.avgTicket = report.totalSales / report.transactionCount;
-                    report.taxCollected = report.totalSales * 0.09;
-                    report.topProducts.forEach(p => p.revenue = p.units * (p.name === 'Classic T-Shirt' ? 29.99 : 89.99));
+                    report.avgTicketUSD = report.totalSalesUSD / report.transactionCount;
+                    report.taxUSD = report.totalSalesUSD * (report.vatRate / 100);
                 }
                 
                 currentReport = report;
-                renderReport(report);
+                renderReport();
             }
-
-            function renderReport(report) {
+            
+            function renderReport() {
                 const container = document.getElementById('reportContent');
-                const expectedCash = report.cashSales;
-                const cashDifference = actualCash !== null ? actualCash - expectedCash : 0;
+                const netSalesUSD = currentReport.totalSalesUSD - currentReport.returnsUSD;
                 
                 container.innerHTML = `
                     <div class="report-card">
                         <div class="report-header">
                             <h2>Nile Shopping POS</h2>
-                            <p>End of Day Report - ${report.date}</p>
+                            <p>End of Day Report - ${currentReport.date}</p>
+                            <p>Currency: ${currentCurrency === 'UGX' ? 'Ugandan Shilling (UGX)' : 'US Dollar (USD)'}</p>
                         </div>
                         
                         <div class="summary-grid">
-                            <div class="summary-item"><div class="summary-label">Total Sales</div><div class="summary-value">$${report.totalSales.toFixed(2)}</div></div>
-                            <div class="summary-item"><div class="summary-label">Transactions</div><div class="summary-value">${report.transactionCount}</div></div>
-                            <div class="summary-item"><div class="summary-label">Average Ticket</div><div class="summary-value">$${report.avgTicket.toFixed(2)}</div></div>
-                            <div class="summary-item"><div class="summary-label">Tax Collected</div><div class="summary-value">$${report.taxCollected.toFixed(2)}</div></div>
+                            <div class="summary-item"><div class="summary-label">Total Sales</div><div class="summary-value">${formatMoney(currentReport.totalSalesUSD)}</div></div>
+                            <div class="summary-item"><div class="summary-label">Transactions</div><div class="summary-value">${currentReport.transactionCount}</div></div>
+                            <div class="summary-item"><div class="summary-label">Average Ticket</div><div class="summary-value">${formatMoney(currentReport.avgTicketUSD)}</div></div>
+                            <div class="summary-item"><div class="summary-label">Returns</div><div class="summary-value" style="color:#dc2626;">-${formatMoney(currentReport.returnsUSD)}</div></div>
+                        </div>
+                        
+                        <div class="tax-breakdown">
+                            <h3>Tax Summary</h3>
+                            <div class="payment-row"><span>VAT Rate</span><span>${currentReport.vatRate}%</span></div>
+                            <div class="payment-row"><span>Taxable Sales</span><span>${formatMoney(netSalesUSD)}</span></div>
+                            <div class="payment-row"><span>VAT Collected</span><span>${formatMoney(currentReport.taxUSD)}</span></div>
+                            <div class="payment-row" style="border-top:2px solid #e5e7eb; margin-top:8px; padding-top:12px;">
+                                <strong>Total Tax Due</strong><strong>${formatMoney(currentReport.taxUSD)}</strong>
+                            </div>
                         </div>
                         
                         <div class="payment-breakdown">
                             <h3>Payment Breakdown</h3>
-                            <div class="payment-row"><span>Cash</span><span>$${report.cashSales.toFixed(2)}</span></div>
-                            <div class="payment-row"><span>Credit/Debit Card</span><span>$${report.cardSales.toFixed(2)}</span></div>
-                            <div class="payment-row"><span>Gift Cards</span><span>$${report.giftCardSales.toFixed(2)}</span></div>
-                            <div class="payment-row"><span>Returns</span><span style="color:#ef4444;">-$${report.returns.toFixed(2)}</span></div>
-                            <div class="payment-row" style="font-weight:700; border-top:2px solid #e2e8f0; margin-top:8px; padding-top:12px;">
-                                <span>NET TOTAL</span><span>$${(report.totalSales - report.returns).toFixed(2)}</span>
+                            <div class="payment-row"><span>Cash</span><span>${formatMoney(currentReport.cashUSD)}</span></div>
+                            <div class="payment-row"><span>Credit/Debit Card</span><span>${formatMoney(currentReport.cardUSD)}</span></div>
+                            <div class="payment-row"><span>Mobile Money</span><span>${formatMoney(currentReport.mobileUSD)}</span></div>
+                            <div class="payment-row" style="font-weight:700; border-top:2px solid #e5e7eb; margin-top:8px; padding-top:12px;">
+                                <span>NET RECEIPTS</span><span>${formatMoney(currentReport.totalSalesUSD - currentReport.returnsUSD)}</span>
                             </div>
-                        </div>
-                        
-                        <div class="cash-reconciliation">
-                            <h3>Cash Reconciliation</h3>
-                            <div class="reconcile-row">
-                                <span>Expected Cash from Sales:</span>
-                                <span>$${expectedCash.toFixed(2)}</span>
-                            </div>
-                            <div class="reconcile-row">
-                                <span>Opening Float:</span>
-                                <span>$200.00</span>
-                            </div>
-                            <div class="reconcile-row">
-                                <span>Actual Cash in Drawer:</span>
-                                <span><input type="number" id="actualCashInput" class="reconcile-input" step="0.01" placeholder="Enter amount"></span>
-                            </div>
-                            <div class="reconcile-row" id="differenceRow" style="display:none;">
-                                <span>Difference:</span>
-                                <span id="differenceValue" class="difference"></span>
-                            </div>
-                        </div>
-                        
-                        <div class="payment-breakdown">
-                            <h3>Top Selling Products</h3>
-                            ${report.topProducts.map(p => `
-                                <div class="payment-row"><span>${p.name}</span><span>${p.units} units - $${p.revenue.toFixed(2)}</span></div>
-                            `).join('')}
                         </div>
                         
                         <button class="export-btn" id="exportCSVBtn">📎 Export to CSV</button>
-                        <button class="close-btn" id="closeDayBtn">🔒 Close Day & Print Report</button>
+                        <button class="print-btn" id="printReportBtn">🖨️ Print Report</button>
                     </div>
                 `;
                 
-                const actualInput = document.getElementById('actualCashInput');
-                if (actualInput) {
-                    actualInput.addEventListener('input', (e) => {
-                        actualCash = parseFloat(e.target.value);
-                        const diff = actualCash - expectedCash;
-                        const diffRow = document.getElementById('differenceRow');
-                        const diffValue = document.getElementById('differenceValue');
-                        
-                        if (!isNaN(actualCash)) {
-                            diffRow.style.display = 'flex';
-                            diffValue.textContent = `$${diff.toFixed(2)}`;
-                            diffValue.className = `difference ${diff !== 0 ? (diff > 0 ? 'positive' : 'negative') : ''}`;
-                        } else {
-                            diffRow.style.display = 'none';
-                        }
-                    });
-                }
-                
-                document.getElementById('exportCSVBtn')?.addEventListener('click', () => exportToCSV(report));
-                document.getElementById('closeDayBtn')?.addEventListener('click', () => closeDay(report));
+                document.getElementById('exportCSVBtn')?.addEventListener('click', () => exportToCSV());
+                document.getElementById('printReportBtn')?.addEventListener('click', () => window.print());
             }
-
-            function exportToCSV(report) {
+            
+            function exportToCSV() {
                 const rows = [
                     ['Nile Shopping POS - End of Day Report'],
-                    ['Date:', report.date],
+                    ['Date:', currentReport.date],
+                    ['Currency:', currentCurrency === 'UGX' ? 'Ugandan Shilling (UGX)' : 'US Dollar (USD)'],
                     [],
                     ['Metric', 'Value'],
-                    ['Total Sales', `$${report.totalSales.toFixed(2)}`],
-                    ['Transactions', report.transactionCount],
-                    ['Average Ticket', `$${report.avgTicket.toFixed(2)}`],
-                    ['Cash Sales', `$${report.cashSales.toFixed(2)}`],
-                    ['Card Sales', `$${report.cardSales.toFixed(2)}`],
-                    ['Gift Card Sales', `$${report.giftCardSales.toFixed(2)}`],
-                    ['Returns', `$${report.returns.toFixed(2)}`],
-                    ['Tax Collected', `$${report.taxCollected.toFixed(2)}`],
-                    [],
-                    ['Top Products'],
-                    ['Product', 'Units', 'Revenue'],
-                    ...report.topProducts.map(p => [p.name, p.units, `$${p.revenue.toFixed(2)}`])
+                    ['Total Sales', formatMoney(currentReport.totalSalesUSD)],
+                    ['Transactions', currentReport.transactionCount],
+                    ['Average Ticket', formatMoney(currentReport.avgTicketUSD)],
+                    ['Cash Sales', formatMoney(currentReport.cashUSD)],
+                    ['Card Sales', formatMoney(currentReport.cardUSD)],
+                    ['Mobile Money', formatMoney(currentReport.mobileUSD)],
+                    ['Returns', formatMoney(currentReport.returnsUSD)],
+                    ['VAT Collected', formatMoney(currentReport.taxUSD)],
+                    ['VAT Rate', `${currentReport.vatRate}%`]
                 ];
                 
                 const csv = rows.map(row => row.join(',')).join('\n');
@@ -337,56 +281,43 @@
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = `eod_report_${report.date}.csv`;
+                a.download = `z_report_${currentReport.date}_${currentCurrency}.csv`;
                 a.click();
                 URL.revokeObjectURL(url);
                 showToast('Report exported to CSV', 'success');
             }
-
-            function closeDay(report) {
-                if (actualCash === null) {
-                    showToast('Please enter actual cash amount before closing', 'error');
-                    return;
-                }
-                
-                const expectedCash = report.cashSales;
-                const difference = actualCash - expectedCash;
-                
-                const summary = `
-                    Day Closed: ${report.date}
-                    Total Sales: $${report.totalSales.toFixed(2)}
-                    Cash Difference: ${difference >= 0 ? '+' : ''}$${difference.toFixed(2)}
-                `;
-                
-                showToast(`Day closed successfully! ${summary}`, 'success');
-                
-                // Print report
-                window.print();
-                
-                // Reset for next day
-                setTimeout(() => {
-                    if (confirm('Start a new day?')) {
-                        window.location.href = '/index.html';
-                    }
-                }, 1000);
-            }
-
+            
             function showToast(message, type) {
                 const toast = document.createElement('div');
                 toast.textContent = message;
                 toast.style.cssText = `
                     position: fixed; bottom: 20px; right: 20px;
-                    background: ${type === 'error' ? '#ef4444' : '#10b981'};
+                    background: ${type === 'error' ? '#dc2626' : '#10b981'};
                     color: white; padding: 12px 20px; border-radius: 12px;
-                    z-index: 1000; animation: slideIn 0.3s ease;
+                    z-index: 1000;
                 `;
                 document.body.appendChild(toast);
                 setTimeout(() => toast.remove(), 3000);
             }
-
+            
+            function initCurrencySelector() {
+                document.querySelectorAll('.currency-opt').forEach(opt => {
+                    opt.classList.toggle('active', opt.dataset.currency === currentCurrency);
+                    opt.addEventListener('click', () => {
+                        currentCurrency = opt.dataset.currency;
+                        localStorage.setItem('pos_currency', currentCurrency);
+                        document.querySelectorAll('.currency-opt').forEach(o => o.classList.remove('active'));
+                        opt.classList.add('active');
+                        if (currentReport) renderReport();
+                        showToast(`Currency switched to ${currentCurrency === 'UGX' ? 'UGX' : 'USD'}`, 'success');
+                    });
+                });
+            }
+            
             function init() {
                 setDefaultDate();
                 generateReport();
+                initCurrencySelector();
                 document.getElementById('generateBtn').addEventListener('click', generateReport);
                 document.getElementById('printBtn').addEventListener('click', () => window.print());
             }
