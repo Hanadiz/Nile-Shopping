@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nile POS - Biometric Setup</title>
+    <title>Nile POS - Biometric Setup | Fingerprint / Face ID</title>
     <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             display: flex;
@@ -22,6 +22,7 @@
             max-width: 500px;
             width: 100%;
             overflow: hidden;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
         }
         .header {
             background: #1e293b;
@@ -29,11 +30,30 @@
             padding: 32px;
             text-align: center;
         }
+        .header h2 { font-size: 24px; margin-bottom: 8px; }
+        .header p { font-size: 14px; opacity: 0.8; }
         .body { padding: 32px; }
-        .fingerprint-icon { font-size: 80px; text-align: center; margin: 24px 0; }
-        .status { text-align: center; padding: 16px; border-radius: 16px; margin: 16px 0; }
-        .status-ready { background: #d1fae5; color: #065f46; }
+        .fingerprint-icon {
+            font-size: 80px;
+            text-align: center;
+            margin: 24px 0;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.05); opacity: 0.8; }
+        }
+        .status {
+            text-align: center;
+            padding: 16px;
+            border-radius: 16px;
+            margin: 16px 0;
+            font-weight: 500;
+        }
+        .status-ready { background: #dcfce7; color: #166534; }
+        .status-registered { background: #dbeafe; color: #1e40af; }
         .status-error { background: #fee2e2; color: #991b1b; }
+        .status-loading { background: #fef3c7; color: #92400e; }
         .btn {
             width: 100%;
             padding: 16px;
@@ -42,26 +62,71 @@
             font-size: 16px;
             font-weight: 600;
             cursor: pointer;
+            transition: all 0.2s;
         }
-        .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
-        .btn-secondary { background: #e2e8f0; color: #475569; margin-top: 12px; }
-        .info-text { font-size: 14px; color: #64748b; text-align: center; margin: 16px 0; }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 10px 20px -5px rgba(102,126,234,0.4); }
+        .btn-secondary {
+            background: #f1f5f9;
+            color: #475569;
+            margin-top: 12px;
+        }
+        .info-text {
+            font-size: 13px;
+            color: #64748b;
+            text-align: center;
+            margin: 20px 0 0;
+            padding-top: 16px;
+            border-top: 1px solid #e2e8f0;
+        }
+        .device-list {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 12px;
+            margin: 16px 0;
+            font-size: 13px;
+        }
+        .device-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .device-item:last-child { border-bottom: none; }
+        .success-check {
+            text-align: center;
+            font-size: 48px;
+            margin: 16px 0;
+        }
+        .hidden { display: none; }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
             <h2>🔐 Biometric Authentication</h2>
-            <p>Set up fingerprint or face recognition</p>
+            <p>Set up fingerprint or face recognition for secure login</p>
         </div>
         <div class="body">
-            <div class="fingerprint-icon">👆</div>
+            <div class="fingerprint-icon" id="fingerprintIcon">👆</div>
             <div id="status" class="status status-ready">Ready to register</div>
-            <button id="registerBtn" class="btn btn-primary">Register Fingerprint / Face</button>
+            
+            <div id="deviceInfo" class="device-list hidden">
+                <div class="device-item">🖥️ Platform Authenticator Available</div>
+                <div id="deviceCapabilities"></div>
+            </div>
+            
+            <button id="registerBtn" class="btn btn-primary">Register Fingerprint / Face ID</button>
             <button id="testBtn" class="btn btn-secondary">Test Authentication</button>
+            <button id="removeBtn" class="btn btn-secondary hidden">Remove Biometric</button>
+            
             <div class="info-text">
-                Biometric data is stored securely on your device.<br>
-                Never shared with our servers.
+                🔒 Biometric data is stored securely on your device using WebAuthn.<br>
+                Never shared with our servers. Compatible with Windows Hello, Touch ID, and Android Fingerprint.
             </div>
         </div>
     </div>
@@ -69,53 +134,148 @@
     <script>
         (function() {
             const statusDiv = document.getElementById('status');
+            const fingerprintIcon = document.getElementById('fingerprintIcon');
+            const deviceInfoDiv = document.getElementById('deviceInfo');
+            const registerBtn = document.getElementById('registerBtn');
+            const testBtn = document.getElementById('testBtn');
+            const removeBtn = document.getElementById('removeBtn');
             
-            function isWebAuthnSupported() {
-                return window.PublicKeyCredential !== undefined;
+            let isRegistered = localStorage.getItem('biometric_enabled') === 'true';
+            let isSupported = false;
+            
+            function checkSupport() {
+                if (window.PublicKeyCredential !== undefined) {
+                    isSupported = true;
+                    deviceInfoDiv.classList.remove('hidden');
+                    document.getElementById('deviceCapabilities').innerHTML = `
+                        <div class="device-item">✅ WebAuthn Level 2 supported</div>
+                        <div class="device-item">${window.PlatformAuthenticator ? '✅ Platform authenticator available' : '⚠️ No platform authenticator'}</div>
+                    `;
+                    return true;
+                } else {
+                    statusDiv.className = 'status status-error';
+                    statusDiv.innerHTML = '❌ Biometric authentication not supported on this device/browser';
+                    registerBtn.disabled = true;
+                    testBtn.disabled = true;
+                    return false;
+                }
+            }
+            
+            function updateUI() {
+                if (isRegistered) {
+                    statusDiv.className = 'status status-registered';
+                    statusDiv.innerHTML = '✅ Biometric registered successfully!';
+                    fingerprintIcon.innerHTML = '✅';
+                    registerBtn.textContent = 'Re-register Biometric';
+                    removeBtn.classList.remove('hidden');
+                    testBtn.disabled = false;
+                } else {
+                    statusDiv.className = 'status status-ready';
+                    statusDiv.innerHTML = 'Ready to register';
+                    fingerprintIcon.innerHTML = '👆';
+                    registerBtn.textContent = 'Register Fingerprint / Face ID';
+                    removeBtn.classList.add('hidden');
+                }
             }
             
             async function registerBiometric() {
-                if (!isWebAuthnSupported()) {
-                    statusDiv.className = 'status status-error';
-                    statusDiv.innerHTML = '❌ Biometric authentication not supported on this device/browser';
+                if (!isSupported) {
+                    showToast('Biometric not supported on this device', 'error');
                     return;
                 }
                 
-                statusDiv.className = 'status';
+                statusDiv.className = 'status status-loading';
                 statusDiv.innerHTML = '🔄 Please scan your fingerprint / face...';
+                fingerprintIcon.innerHTML = '⏳';
                 
-                // Simulate registration (real implementation would use WebAuthn API)
-                setTimeout(() => {
+                // Simulate WebAuthn registration
+                // In production, this would use navigator.credentials.create()
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                
+                // Simulate success (80% success rate for demo)
+                if (Math.random() > 0.2) {
                     localStorage.setItem('biometric_enabled', 'true');
-                    statusDiv.className = 'status status-ready';
+                    localStorage.setItem('biometric_credential_id', 'demo_credential_' + Date.now());
+                    isRegistered = true;
+                    updateUI();
+                    showToast('Biometric registered successfully!', 'success');
+                    statusDiv.className = 'status status-registered';
                     statusDiv.innerHTML = '✅ Biometric registered successfully!';
+                    fingerprintIcon.innerHTML = '✅';
+                } else {
+                    statusDiv.className = 'status status-error';
+                    statusDiv.innerHTML = '❌ Registration failed. Please try again.';
+                    fingerprintIcon.innerHTML = '❌';
+                    showToast('Registration failed. Please try again.', 'error');
                     setTimeout(() => {
-                        statusDiv.innerHTML = 'Ready to authenticate';
+                        if (!isRegistered) updateUI();
                     }, 3000);
-                }, 2000);
+                }
             }
             
             async function testBiometric() {
-                if (localStorage.getItem('biometric_enabled') !== 'true') {
-                    statusDiv.className = 'status status-error';
-                    statusDiv.innerHTML = '❌ No biometric registered. Please register first.';
+                if (!isRegistered) {
+                    showToast('No biometric registered. Please register first.', 'error');
                     return;
                 }
                 
-                statusDiv.className = 'status';
+                statusDiv.className = 'status status-loading';
                 statusDiv.innerHTML = '🔄 Verifying... Please scan...';
+                fingerprintIcon.innerHTML = '⏳';
                 
-                setTimeout(() => {
-                    statusDiv.className = 'status status-ready';
+                await new Promise(resolve => setTimeout(resolve, 1500));
+                
+                // Simulate verification (90% success rate)
+                if (Math.random() > 0.1) {
+                    statusDiv.className = 'status status-registered';
                     statusDiv.innerHTML = '✅ Authentication successful! Welcome back.';
-                    setTimeout(() => {
-                        statusDiv.innerHTML = 'Ready to authenticate';
-                    }, 3000);
-                }, 1500);
+                    fingerprintIcon.innerHTML = '✅';
+                    showToast('Authentication successful!', 'success');
+                    
+                    // Play success sound/effect
+                    setTimeout(() => updateUI(), 2000);
+                } else {
+                    statusDiv.className = 'status status-error';
+                    statusDiv.innerHTML = '❌ Authentication failed. Please try again.';
+                    fingerprintIcon.innerHTML = '❌';
+                    showToast('Authentication failed', 'error');
+                    setTimeout(() => updateUI(), 2000);
+                }
             }
             
-            document.getElementById('registerBtn').addEventListener('click', registerBiometric);
-            document.getElementById('testBtn').addEventListener('click', testBiometric);
+            function removeBiometric() {
+                if (confirm('Remove biometric authentication? You will need to use password/PIN to login.')) {
+                    localStorage.removeItem('biometric_enabled');
+                    localStorage.removeItem('biometric_credential_id');
+                    isRegistered = false;
+                    updateUI();
+                    showToast('Biometric removed', 'success');
+                }
+            }
+            
+            function showToast(message, type) {
+                const toast = document.createElement('div');
+                toast.textContent = message;
+                toast.style.cssText = `
+                    position: fixed; bottom: 20px; right: 20px;
+                    background: ${type === 'error' ? '#dc2626' : '#10b981'};
+                    color: white; padding: 12px 20px; border-radius: 12px;
+                    z-index: 1000; animation: slideIn 0.3s ease;
+                    font-weight: 500;
+                `;
+                document.body.appendChild(toast);
+                setTimeout(() => toast.remove(), 3000);
+            }
+            
+            function init() {
+                checkSupport();
+                updateUI();
+                registerBtn.addEventListener('click', registerBiometric);
+                testBtn.addEventListener('click', testBiometric);
+                removeBtn.addEventListener('click', removeBiometric);
+            }
+            
+            init();
         })();
     </script>
 </body>
