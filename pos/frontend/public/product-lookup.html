@@ -1,142 +1,177 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en-GB">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nile POS - Product Lookup</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <meta name="description" content="Nile POS - Advanced product lookup with barcode scanning, stock status, and VAT-inclusive pricing">
+    <title>Nile POS - Product Lookup | UK/UG Ready</title>
     <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: #f1f5f9;
-            padding: 24px;
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+            background: #f3f4f6;
+            padding: 20px;
         }
-        .container { max-width: 1200px; margin: 0 auto; }
+        .container { max-width: 1400px; margin: 0 auto; }
         .header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 24px;
+            flex-wrap: wrap;
+            gap: 16px;
         }
-        h1 { font-size: 24px; color: #1e293b; }
+        h1 { font-size: 24px; color: #111827; display: flex; align-items: center; gap: 8px; }
+        .badge-uk { background: #1e3a8a; color: white; padding: 4px 10px; border-radius: 100px; font-size: 11px; }
         .back-btn {
             background: white;
-            border: 1px solid #e2e8f0;
+            border: 1px solid #e5e7eb;
             padding: 8px 16px;
             border-radius: 8px;
             cursor: pointer;
             text-decoration: none;
-            color: #475569;
+            color: #374151;
+            font-weight: 500;
         }
         .search-section {
             background: white;
-            border-radius: 16px;
-            padding: 20px;
+            border-radius: 20px;
+            padding: 24px;
             margin-bottom: 24px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
         .search-bar {
             display: flex;
             gap: 12px;
-            margin-bottom: 16px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
         }
         .search-bar input {
             flex: 1;
-            padding: 14px;
-            border: 2px solid #e2e8f0;
+            padding: 14px 18px;
+            border: 2px solid #e5e7eb;
             border-radius: 12px;
             font-size: 16px;
+            font-family: monospace;
+            letter-spacing: 0.5px;
         }
         .search-bar input:focus {
             outline: none;
-            border-color: #667eea;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
         }
         .search-bar button {
-            padding: 14px 24px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 14px 28px;
+            background: #2563eb;
             color: white;
             border: none;
             border-radius: 12px;
             cursor: pointer;
             font-weight: 600;
+            transition: background 0.2s;
         }
+        .search-bar button:hover { background: #1d4ed8; }
         .filters {
             display: flex;
             gap: 12px;
             flex-wrap: wrap;
         }
         .filter-select {
-            padding: 8px 16px;
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
+            padding: 10px 16px;
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
             background: white;
+            font-size: 14px;
+        }
+        .vat-toggle {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #f3f4f6;
+            padding: 6px 12px;
+            border-radius: 100px;
         }
         .results-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 16px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 12px;
         }
         .product-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 16px;
+            gap: 20px;
         }
         .product-card {
             background: white;
             border-radius: 16px;
             padding: 16px;
-            border: 1px solid #e2e8f0;
+            border: 1px solid #e5e7eb;
             transition: all 0.2s;
+            cursor: pointer;
         }
         .product-card:hover {
             transform: translateY(-2px);
-            box-shadow: 0 10px 20px -5px rgba(0,0,0,0.1);
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
+            border-color: #2563eb;
         }
         .product-header {
             display: flex;
             justify-content: space-between;
+            align-items: start;
             margin-bottom: 12px;
         }
         .product-name {
             font-weight: 700;
             font-size: 16px;
+            color: #111827;
         }
         .product-sku {
             font-size: 11px;
-            color: #94a3b8;
+            color: #6b7280;
             font-family: monospace;
         }
         .product-price {
-            font-size: 20px;
+            font-size: 22px;
             font-weight: 700;
-            color: #667eea;
+            color: #2563eb;
             margin: 8px 0;
+        }
+        .price-ex-vat {
+            font-size: 12px;
+            color: #6b7280;
         }
         .stock-badge {
             display: inline-block;
-            padding: 4px 8px;
+            padding: 4px 10px;
             border-radius: 100px;
             font-size: 11px;
             font-weight: 600;
         }
-        .stock-high { background: #d1fae5; color: #065f46; }
-        .stock-medium { background: #fef3c7; color: #92400e; }
+        .stock-high { background: #dcfce7; color: #166534; }
+        .stock-medium { background: #fef9c3; color: #854d0e; }
         .stock-low { background: #fee2e2; color: #991b1b; }
         .barcode-preview {
-            background: #f8fafc;
-            padding: 12px;
+            background: #f9fafb;
+            padding: 8px 12px;
             border-radius: 8px;
             font-family: monospace;
-            font-size: 12px;
+            font-size: 11px;
             margin-top: 12px;
             text-align: center;
+            border: 1px dashed #d1d5db;
         }
-        .loading {
+        .loading { text-align: center; padding: 60px; color: #6b7280; }
+        .vat-note {
+            font-size: 11px;
+            color: #6b7280;
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px solid #e5e7eb;
             text-align: center;
-            padding: 40px;
-            color: #94a3b8;
         }
         @media (max-width: 768px) {
             body { padding: 16px; }
@@ -147,13 +182,13 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>🔍 Product Lookup</h1>
+            <h1>🔍 Product Lookup <span class="badge-uk">VAT Registered</span></h1>
             <a href="/index.html" class="back-btn">← Back to Register</a>
         </div>
 
         <div class="search-section">
             <div class="search-bar">
-                <input type="text" id="searchInput" placeholder="Search by name, SKU, or barcode..." autofocus>
+                <input type="text" id="searchInput" placeholder="Search by name, SKU, or scan barcode..." autofocus>
                 <button id="searchBtn">Search</button>
             </div>
             <div class="filters">
@@ -166,53 +201,58 @@
                 </select>
                 <select id="stockFilter" class="filter-select">
                     <option value="all">All Stock</option>
-                    <option value="high">In Stock (>20)</option>
-                    <option value="medium">Low Stock (1-20)</option>
+                    <option value="high">In Stock (>10)</option>
+                    <option value="medium">Low Stock (1-10)</option>
                     <option value="out">Out of Stock</option>
                 </select>
+                <div class="vat-toggle">
+                    <span>💰</span>
+                    <span>VAT @ 20%</span>
+                </div>
             </div>
         </div>
 
         <div class="results-header">
             <span id="resultCount">0 products found</span>
-            <button id="scanBarcodeBtn" style="background:none; border:none; color:#667eea; cursor:pointer;">📷 Scan Barcode</button>
+            <button id="scanBarcodeBtn" style="background:none; border:none; color:#2563eb; cursor:pointer; font-weight:500;">📷 Scan Barcode</button>
         </div>
 
         <div id="productGrid" class="product-grid">
             <div class="loading">Loading products...</div>
         </div>
+        <div class="vat-note">* All prices include 20% UK VAT where applicable. Ex-VAT prices shown for business customers.</div>
     </div>
 
     <script>
         (function() {
-            // Demo product database
+            // Enhanced product database with UK VAT pricing
+            const VAT_RATE = 0.20;
+            
             const products = [
-                { id: 1, sku: 'PRD-001', name: 'Classic T-Shirt', price: 29.99, category: 'Apparel', stock: 48, barcode: '8901234567890' },
-                { id: 2, sku: 'PRD-002', name: 'Slim Fit Jeans', price: 59.99, category: 'Apparel', stock: 35, barcode: '8901234567891' },
-                { id: 3, sku: 'PRD-003', name: 'Running Shoes', price: 89.99, category: 'Footwear', stock: 12, barcode: '8901234567892' },
-                { id: 4, sku: 'PRD-004', name: 'Leather Wallet', price: 39.99, category: 'Accessories', stock: 45, barcode: '8901234567893' },
-                { id: 5, sku: 'PRD-005', name: 'Smart Watch', price: 199.99, category: 'Electronics', stock: 8, barcode: '8901234567894' },
-                { id: 6, sku: 'PRD-006', name: 'Wireless Earbuds', price: 79.99, category: 'Electronics', stock: 3, barcode: '8901234567895' },
-                { id: 7, sku: 'PRD-007', name: 'Sunglasses', price: 49.99, category: 'Accessories', stock: 28, barcode: '8901234567896' },
-                { id: 8, sku: 'PRD-008', name: 'Backpack', price: 69.99, category: 'Accessories', stock: 18, barcode: '8901234567897' },
-                { id: 9, sku: 'PRD-009', name: 'Hoodie', price: 54.99, category: 'Apparel', stock: 22, barcode: '8901234567898' },
-                { id: 10, sku: 'PRD-010', name: 'Sneakers', price: 74.99, category: 'Footwear', stock: 0, barcode: '8901234567899' },
-                { id: 11, sku: 'PRD-011', name: 'Phone Case', price: 24.99, category: 'Electronics', stock: 56, barcode: '8901234567900' },
-                { id: 12, sku: 'PRD-012', name: 'Water Bottle', price: 19.99, category: 'Accessories', stock: 38, barcode: '8901234567901' }
+                { id: 1, sku: 'NLE-APR-001', name: 'Classic Cotton T-Shirt', price_inc_vat: 29.99, price_ex_vat: 24.99, cost: 12.50, stock: 48, category: 'Apparel', barcode: '8901234567890', brand: 'Nile Basics' },
+                { id: 2, sku: 'NLE-APR-002', name: 'Slim Fit Denim Jeans', price_inc_vat: 79.99, price_ex_vat: 66.66, cost: 35.00, stock: 35, category: 'Apparel', barcode: '8901234567891', brand: 'Nile Denim' },
+                { id: 3, sku: 'NLE-FTW-003', name: 'Running Sneakers', price_inc_vat: 119.99, price_ex_vat: 99.99, cost: 55.00, stock: 12, category: 'Footwear', barcode: '8901234567892', brand: 'Nile Sport' },
+                { id: 4, sku: 'NLE-ACC-004', name: 'Leather Wallet', price_inc_vat: 49.99, price_ex_vat: 41.66, cost: 18.00, stock: 45, category: 'Accessories', barcode: '8901234567893', brand: 'Nile Leather' },
+                { id: 5, sku: 'NLE-ELC-005', name: 'Smart Watch Pro', price_inc_vat: 299.99, price_ex_vat: 249.99, cost: 150.00, stock: 8, category: 'Electronics', barcode: '8901234567894', brand: 'Nile Tech' },
+                { id: 6, sku: 'NLE-ELC-006', name: 'Wireless Earbuds', price_inc_vat: 89.99, price_ex_vat: 74.99, cost: 40.00, stock: 3, category: 'Electronics', barcode: '8901234567895', brand: 'Nile Audio' },
+                { id: 7, sku: 'NLE-ACC-007', name: 'Polarized Sunglasses', price_inc_vat: 69.99, price_ex_vat: 58.33, cost: 28.00, stock: 28, category: 'Accessories', barcode: '8901234567896', brand: 'Nile Eyewear' },
+                { id: 8, sku: 'NLE-ACC-008', name: 'Travel Backpack', price_inc_vat: 89.99, price_ex_vat: 74.99, cost: 38.00, stock: 18, category: 'Accessories', barcode: '8901234567897', brand: 'Nile Travel' }
             ];
 
+            let showIncVat = true;
             let scannerBuffer = '';
             let scannerTimeout = null;
 
             function getStockClass(stock) {
                 if (stock <= 0) return 'stock-low';
-                if (stock < 20) return 'stock-medium';
+                if (stock < 10) return 'stock-medium';
                 return 'stock-high';
             }
 
             function getStockText(stock) {
                 if (stock <= 0) return 'Out of Stock';
-                if (stock < 20) return `Low Stock (${stock} left)`;
+                if (stock < 10) return `Low Stock (${stock} left)`;
+                if (stock < 20) return `Limited Stock (${stock})`;
                 return `In Stock (${stock})`;
             }
 
@@ -226,29 +266,44 @@
                     return;
                 }
                 
-                resultCount.textContent = `${filteredProducts.length} products found`;
+                resultCount.textContent = `${filteredProducts.length} product${filteredProducts.length !== 1 ? 's' : ''} found`;
                 
-                grid.innerHTML = filteredProducts.map(product => `
-                    <div class="product-card" data-product='${JSON.stringify(product)}'>
-                        <div class="product-header">
-                            <span class="product-name">${escapeHtml(product.name)}</span>
-                            <span class="stock-badge ${getStockClass(product.stock)}">${getStockText(product.stock)}</span>
+                grid.innerHTML = filteredProducts.map(product => {
+                    const displayPrice = showIncVat ? product.price_inc_vat : product.price_ex_vat;
+                    const priceLabel = showIncVat ? 'inc. VAT' : 'ex. VAT';
+                    
+                    return `
+                        <div class="product-card" data-product='${JSON.stringify(product)}'>
+                            <div class="product-header">
+                                <div>
+                                    <div class="product-name">${escapeHtml(product.name)}</div>
+                                    <div class="product-sku">SKU: ${product.sku} | ${product.brand}</div>
+                                </div>
+                                <span class="stock-badge ${getStockClass(product.stock)}">${getStockText(product.stock)}</span>
+                            </div>
+                            <div class="product-price">£${displayPrice.toFixed(2)} <span style="font-size:12px;">${priceLabel}</span></div>
+                            ${!showIncVat ? `<div class="price-ex-vat">+ VAT: £${(product.price_inc_vat - product.price_ex_vat).toFixed(2)}</div>` : ''}
+                            <div class="product-sku" style="margin:4px 0;">Category: ${product.category}</div>
+                            <div class="barcode-preview">
+                                📷 ${product.barcode}
+                            </div>
+                            <button class="add-to-cart-btn" style="width:100%; margin-top:12px; padding:10px; background:#2563eb; color:white; border:none; border-radius:8px; cursor:pointer; font-weight:600;">
+                                + Add to Cart
+                            </button>
                         </div>
-                        <div class="product-sku">SKU: ${product.sku}</div>
-                        <div class="product-price">$${product.price.toFixed(2)}</div>
-                        <div class="product-sku">Category: ${product.category}</div>
-                        <div class="barcode-preview">
-                            📷 ${product.barcode}
-                        </div>
-                        <button class="add-to-cart-btn" style="width:100%; margin-top:12px; padding:10px; background:#667eea; color:white; border:none; border-radius:8px; cursor:pointer;">
-                            + Add to Cart
-                        </button>
-                    </div>
-                `).join('');
+                    `;
+                }).join('');
                 
-                // Add click handlers
                 document.querySelectorAll('.add-to-cart-btn').forEach((btn, idx) => {
-                    btn.addEventListener('click', () => {
+                    btn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const product = filteredProducts[idx];
+                        addToCart(product);
+                    });
+                });
+                
+                document.querySelectorAll('.product-card').forEach((card, idx) => {
+                    card.addEventListener('click', () => {
                         const product = filteredProducts[idx];
                         addToCart(product);
                     });
@@ -266,7 +321,8 @@
                     filtered = filtered.filter(p => 
                         p.name.toLowerCase().includes(searchTerm) || 
                         p.sku.toLowerCase().includes(searchTerm) ||
-                        p.barcode.includes(searchTerm)
+                        p.barcode.includes(searchTerm) ||
+                        p.brand.toLowerCase().includes(searchTerm)
                     );
                 }
                 
@@ -275,9 +331,9 @@
                 }
                 
                 if (stockFilter === 'high') {
-                    filtered = filtered.filter(p => p.stock > 20);
+                    filtered = filtered.filter(p => p.stock > 10);
                 } else if (stockFilter === 'medium') {
-                    filtered = filtered.filter(p => p.stock > 0 && p.stock <= 20);
+                    filtered = filtered.filter(p => p.stock > 0 && p.stock <= 10);
                 } else if (stockFilter === 'out') {
                     filtered = filtered.filter(p => p.stock === 0);
                 }
@@ -291,9 +347,9 @@
                     return;
                 }
                 
-                // Get existing cart from localStorage
                 let cart = JSON.parse(localStorage.getItem('pos_cart') || '[]');
                 const existing = cart.find(item => item.id === product.id);
+                const priceToUse = showIncVat ? product.price_inc_vat : product.price_ex_vat;
                 
                 if (existing) {
                     existing.quantity += 1;
@@ -303,35 +359,42 @@
                         id: product.id,
                         sku: product.sku,
                         name: product.name,
-                        price: product.price,
+                        price: priceToUse,
+                        price_inc_vat: product.price_inc_vat,
+                        price_ex_vat: product.price_ex_vat,
                         quantity: 1,
-                        lineTotal: product.price
+                        lineTotal: priceToUse,
+                        vat_rate: VAT_RATE
                     });
                 }
                 
                 localStorage.setItem('pos_cart', JSON.stringify(cart));
-                showToast(`Added ${product.name} to cart`, 'success');
-                
-                // Dispatch event for main POS
+                showToast(`Added ${product.name} to basket`, 'success');
                 window.dispatchEvent(new CustomEvent('cartUpdated'));
+                playBeep();
             }
 
-            function showToast(message, type = 'info') {
+            function showToast(message, type) {
                 const toast = document.createElement('div');
                 toast.textContent = message;
                 toast.style.cssText = `
-                    position: fixed;
-                    bottom: 20px;
-                    right: 20px;
-                    background: ${type === 'error' ? '#ef4444' : '#10b981'};
-                    color: white;
-                    padding: 12px 20px;
-                    border-radius: 12px;
-                    z-index: 1000;
-                    animation: slideIn 0.3s ease;
+                    position: fixed; bottom: 20px; right: 20px;
+                    background: ${type === 'error' ? '#dc2626' : '#10b981'};
+                    color: white; padding: 12px 20px; border-radius: 12px;
+                    z-index: 1000; animation: slideIn 0.3s ease;
+                    font-weight: 500;
                 `;
                 document.body.appendChild(toast);
                 setTimeout(() => toast.remove(), 3000);
+            }
+
+            function playBeep() {
+                // Audio feedback for barcode scan
+                try {
+                    const audio = new Audio('data:audio/wav;base64,U3RlcmVvIGlzIGRlYWQ=');
+                    audio.volume = 0.3;
+                    audio.play().catch(e => console.log('Audio not supported'));
+                } catch(e) {}
             }
 
             function escapeHtml(str) {
@@ -343,7 +406,7 @@
             // Barcode scanner via keyboard wedge
             function setupBarcodeScanner() {
                 document.addEventListener('keydown', (e) => {
-                    if (e.target.tagName === 'INPUT') return;
+                    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
                     
                     if (e.key === 'Enter') {
                         if (scannerBuffer.length > 0) {
@@ -352,13 +415,14 @@
                             scannerBuffer = '';
                             clearTimeout(scannerTimeout);
                             e.preventDefault();
+                            playBeep();
                         }
-                    } else if (e.key.length === 1) {
+                    } else if (e.key.length === 1 && e.key.match(/[0-9a-zA-Z]/)) {
                         clearTimeout(scannerTimeout);
                         scannerBuffer += e.key;
                         scannerTimeout = setTimeout(() => {
                             scannerBuffer = '';
-                        }, 50);
+                        }, 100);
                     }
                 });
             }
@@ -372,7 +436,15 @@
                 document.getElementById('categoryFilter').addEventListener('change', filterProducts);
                 document.getElementById('stockFilter').addEventListener('change', filterProducts);
                 document.getElementById('scanBarcodeBtn').addEventListener('click', () => {
-                    showToast('Scan a barcode using your scanner', 'info');
+                    showToast('Ready to scan barcode', 'success');
+                    document.getElementById('searchInput').focus();
+                });
+                
+                // VAT toggle click
+                document.querySelector('.vat-toggle').addEventListener('click', () => {
+                    showIncVat = !showIncVat;
+                    document.querySelector('.vat-toggle').style.background = showIncVat ? '#dbeafe' : '#f3f4f6';
+                    filterProducts();
                 });
             }
             
