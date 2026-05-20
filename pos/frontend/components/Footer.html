@@ -1,1 +1,51 @@
 
+<!-- ============================================
+     Nile POS - Footer Component
+     ============================================ -->
+
+<footer class="app-footer">
+    <div class="footer-content">
+        <div class="footer-copyright">
+            &copy; 2024 Nile Shopping POS. All rights reserved.
+        </div>
+        <div class="footer-links">
+            <a href="/privacy.html">Privacy Policy</a>
+            <a href="/terms.html">Terms of Service</a>
+            <a href="/support.html">Support</a>
+            <a href="/status.html">System Status</a>
+        </div>
+        <div class="footer-version">
+            Version 2.0.0 | <span id="environmentBadge">Production</span>
+        </div>
+    </div>
+</footer>
+
+<script>
+    (function() {
+        // Set environment based on hostname
+        const envBadge = document.getElementById('environmentBadge');
+        if (envBadge) {
+            const hostname = window.location.hostname;
+            if (hostname === 'localhost' || hostname === '127.0.0.1') {
+                envBadge.textContent = 'Development';
+                envBadge.style.color = '#f59e0b';
+            } else if (hostname.includes('staging')) {
+                envBadge.textContent = 'Staging';
+                envBadge.style.color = '#3b82f6';
+            } else {
+                envBadge.textContent = 'Production';
+                envBadge.style.color = '#10b981';
+            }
+        }
+        
+        // Show last login time
+        const lastLogin = localStorage.getItem('pos_last_login');
+        if (lastLogin) {
+            const lastLoginDate = new Date(lastLogin);
+            const loginInfo = document.createElement('div');
+            loginInfo.className = 'footer-login-info';
+            loginInfo.innerHTML = `Last login: ${lastLoginDate.toLocaleString()}`;
+            document.querySelector('.footer-content')?.appendChild(loginInfo);
+        }
+    })();
+</script>
