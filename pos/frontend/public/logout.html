@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nile POS - Logging Out</title>
+    <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+            background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .logout-container {
+            background: white;
+            border-radius: 32px;
+            max-width: 400px;
+            width: 100%;
+            padding: 40px;
+            text-align: center;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
+            animation: fadeIn 0.5s ease;
+        }
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+        .logout-icon { font-size: 64px; margin-bottom: 20px; }
+        h2 { margin-bottom: 12px; color: #1e293b; }
+        p { color: #64748b; margin-bottom: 24px; font-size: 14px; }
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 600;
+            margin: 0 8px;
+        }
+        .btn-primary { background: #2563eb; color: white; }
+        .btn-secondary { background: #f1f5f9; color: #475569; }
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid #e2e8f0;
+            border-top-color: #2563eb;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .hidden { display: none; }
+        .session-info {
+            background: #f8fafc;
+            padding: 12px;
+            border-radius: 12px;
+            margin: 16px 0;
+            font-size: 12px;
+            color: #475569;
+        }
+    </style>
+</head>
+<body>
+    <div class="logout-container">
+        <div id="loadingState">
+            <div class="spinner"></div>
+            <p>Logging you out securely...</p>
+        </div>
+        
+        <div id="successState" class="hidden">
+            <div class="logout-icon">👋</div>
+            <h2>Logged Out Successfully</h2>
+            <p>You have been securely logged out of Nile POS.<br>Your session has been terminated.</p>
+            <div class="session-info" id="sessionInfo"></div>
+            <a href="/login.html" class="btn btn-primary">Login Again</a>
+            <a href="/" class="btn btn-secondary">Return to Home</a>
+        </div>
+        
+        <div id="errorState" class="hidden">
+            <div class="logout-icon">⚠️</div>
+            <h2>Logout Issue</h2>
+            <p>There was a problem logging out. Your local session has been cleared.</p>
+            <a href="/login.html" class="btn btn-primary">Login Again</a>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            const loadingState = document.getElementById('loadingState');
+            const successState = document.getElementById('successState');
+            const errorState = document.getElementById('errorState');
+            const sessionInfo = document.getElementById('sessionInfo');
+            
+            async function performLogout() {
+                const user = JSON.parse(localStorage.getItem('pos_user') || '{}');
+                const jwt = localStorage.getItem('pos_jwt');
+                
+                sessionInfo.innerHTML = `
+                    <strong>Session Details:</strong><br>
+                    User: ${user.email || 'Guest'}<br>
+                    Logout Time: ${new Date().toLocaleString()}<br>
+                    IP: ${await getClientIP()}
+                `;
+                
+                try {
+                    // Attempt to notify backend
+                    if (jwt) {
+                        await fetch('/api/v1/auth/logout', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${jwt}`
+                            },
+                            body: JSON.stringify({ refresh_token: localStorage.getItem('pos_refresh_token') })
+                        }).catch(() => {});
+                    }
+                } catch (e) { console.log('Backend logout failed', e); }
+                
+                // Clear all local storage
+                const keysToKeep = ['pos_currency', 'exchange_rate', 'pos_settings'];
+                const itemsToRemove = [];
+                for (let i = 0; i < localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    if (!keysToKeep.includes(key)) itemsToRemove.push(key);
+                }
+                itemsToRemove.forEach(key => localStorage.removeItem(key));
+                
+                // Clear session storage
+                sessionStorage.clear();
+                
+                // Clear cookies
+                document.cookie.split(";").forEach(c => {
+                    document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+                });
+                
+                setTimeout(() => {
+                    loadingState.classList.add('hidden');
+                    successState.classList.remove('hidden');
+                }, 800);
+            }
+            
+            async function getClientIP() {
+                try {
+                    const response = await fetch('https://api.ipify.org?format=json');
+                    const data = await response.json();
+                    return data.ip;
+                } catch { return 'Unable to detect'; }
+            }
+            
+            performLogout();
+        })();
+    </script>
+</body>
+</html>
