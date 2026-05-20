@@ -1,1 +1,184 @@
+<!-- ============================================
+     Nile POS - Sidebar Component
+     Dynamically renders based on RBAC permissions
+     ============================================ -->
 
+<aside class="sidebar" id="appSidebar">
+    <div class="sidebar-logo">
+        <div class="logo-icon">🛍️</div>
+        <div class="logo-text">Nile<span>POS</span></div>
+    </div>
+    
+    <nav class="sidebar-nav" id="sidebarNav">
+        <!-- Menu items will be dynamically populated by RBAC -->
+        <div class="nav-section">
+            <div class="nav-section-title">Main</div>
+            <a href="/dashboard.html" class="nav-item" data-permission="dashboard.view">
+                <span class="nav-icon">📊</span>
+                <span class="nav-text">Dashboard</span>
+            </a>
+            <a href="/index.html" class="nav-item" data-permission="pos.access">
+                <span class="nav-icon">🛒</span>
+                <span class="nav-text">Point of Sale</span>
+                <span class="nav-badge" data-tier="professional">Pro</span>
+            </a>
+        </div>
+        
+        <div class="nav-section">
+            <div class="nav-section-title">Sales</div>
+            <a href="/products.html" class="nav-item" data-permission="product.view">
+                <span class="nav-icon">📦</span>
+                <span class="nav-text">Products</span>
+            </a>
+            <a href="/inventory-count.html" class="nav-item" data-permission="inventory.view">
+                <span class="nav-icon">📋</span>
+                <span class="nav-text">Inventory</span>
+            </a>
+            <a href="/returns-refunds.html" class="nav-item" data-permission="transaction.refund">
+                <span class="nav-icon">🔄</span>
+                <span class="nav-text">Returns</span>
+            </a>
+        </div>
+        
+        <div class="nav-section">
+            <div class="nav-section-title">Customers</div>
+            <a href="/customer-management.html" class="nav-item" data-permission="customer.view">
+                <span class="nav-icon">👥</span>
+                <span class="nav-text">Customers</span>
+            </a>
+            <a href="/loyalty.html" class="nav-item" data-permission="customer.loyalty" data-tier="professional">
+                <span class="nav-icon">⭐</span>
+                <span class="nav-text">Loyalty</span>
+            </a>
+            <a href="/gift-cards.html" class="nav-item" data-permission="giftcard.view" data-tier="basic">
+                <span class="nav-icon">🎁</span>
+                <span class="nav-text">Gift Cards</span>
+            </a>
+        </div>
+        
+        <div class="nav-section">
+            <div class="nav-section-title">Reports</div>
+            <a href="/reports-custom.html" class="nav-item" data-permission="report.sales">
+                <span class="nav-icon">📊</span>
+                <span class="nav-text">Reports</span>
+            </a>
+            <a href="/end-of-day.html" class="nav-item" data-permission="report.sales" data-tier="basic">
+                <span class="nav-icon">📅</span>
+                <span class="nav-text">End of Day</span>
+            </a>
+        </div>
+        
+        <div class="nav-section">
+            <div class="nav-section-title">Management</div>
+            <a href="/time-clock.html" class="nav-item" data-permission="employee.view" data-tier="professional">
+                <span class="nav-icon">👔</span>
+                <span class="nav-text">Staff</span>
+            </a>
+            <a href="/fleet-management.html" class="nav-item" data-permission="store.view" data-tier="professional">
+                <span class="nav-icon">🏢</span>
+                <span class="nav-text">Fleet</span>
+            </a>
+            <a href="/purchase-orders.html" class="nav-item" data-permission="purchaseorder.view" data-tier="professional">
+                <span class="nav-icon">📄</span>
+                <span class="nav-text">Purchase Orders</span>
+            </a>
+        </div>
+        
+        <div class="nav-section">
+            <div class="nav-section-title">System</div>
+            <a href="/settings.html" class="nav-item" data-permission="settings.view">
+                <span class="nav-icon">⚙️</span>
+                <span class="nav-text">Settings</span>
+            </a>
+            <a href="/audit-log.html" class="nav-item" data-permission="system.audit" data-tier="professional">
+                <span class="nav-icon">🔒</span>
+                <span class="nav-text">Audit Log</span>
+            </a>
+            <a href="/offline.html" class="nav-item" data-permission="offline.access" data-tier="basic">
+                <span class="nav-icon">📡</span>
+                <span class="nav-text">Offline</span>
+                <span class="nav-badge" id="offlineBadgeNav" style="display:none; background:#f59e0b;">!</span>
+            </a>
+            <a href="/tenants.html" class="nav-item" data-permission="tenant.view" data-tier="enterprise">
+                <span class="nav-icon">🏪</span>
+                <span class="nav-text">Tenants</span>
+            </a>
+            <a href="/compliance.html" class="nav-item" data-permission="compliance.view" data-tier="enterprise">
+                <span class="nav-icon">⚖️</span>
+                <span class="nav-text">Compliance</span>
+            </a>
+        </div>
+    </nav>
+    
+    <div class="sidebar-user">
+        <div class="user-avatar" id="sidebarUserAvatar">U</div>
+        <div class="user-info">
+            <div class="user-name" id="sidebarUserName">Loading...</div>
+            <div class="user-role" id="sidebarUserRole">cashier</div>
+        </div>
+    </div>
+</aside>
+
+<script>
+    // Sidebar initialization with RBAC
+    (function() {
+        // Update user info
+        const user = JSON.parse(localStorage.getItem('pos_user') || '{}');
+        const userNameSpan = document.getElementById('sidebarUserName');
+        const userRoleSpan = document.getElementById('sidebarUserRole');
+        const userAvatar = document.getElementById('sidebarUserAvatar');
+        
+        if (userNameSpan) userNameSpan.textContent = user.name || user.email?.split('@')[0] || 'User';
+        if (userRoleSpan) userRoleSpan.textContent = user.role?.toUpperCase() || 'Cashier';
+        if (userAvatar) userAvatar.textContent = (user.name?.charAt(0) || 'U').toUpperCase();
+        
+        // Apply RBAC filtering
+        if (window.rbac) {
+            // Hide menu items without permission
+            document.querySelectorAll('.nav-item[data-permission]').forEach(item => {
+                const requiredPerm = item.dataset.permission;
+                if (!window.rbac.hasPermission(requiredPerm)) {
+                    item.style.display = 'none';
+                }
+            });
+            
+            // Hide tier-locked items
+            document.querySelectorAll('.nav-item[data-tier]').forEach(item => {
+                const requiredTier = item.dataset.tier;
+                const userTier = user.tier || 'freemium';
+                const tierLevels = { freemium: 0, basic: 1, professional: 2, premium: 3, enterprise: 4 };
+                if (tierLevels[userTier] < tierLevels[requiredTier]) {
+                    item.style.display = 'none';
+                }
+            });
+            
+            // Hide role-locked items
+            document.querySelectorAll('.nav-item[data-role]').forEach(item => {
+                const requiredRole = item.dataset.role;
+                if (!window.rbac.isAtLeast(requiredRole)) {
+                    item.style.display = 'none';
+                }
+            });
+        }
+        
+        // Set active nav item based on current URL
+        const currentPath = window.location.pathname;
+        document.querySelectorAll('.nav-item').forEach(item => {
+            const href = item.getAttribute('href');
+            if (href && currentPath.includes(href)) {
+                item.classList.add('active');
+            }
+        });
+        
+        // Offline status badge
+        window.addEventListener('offline', () => {
+            const offlineBadge = document.getElementById('offlineBadgeNav');
+            if (offlineBadge) offlineBadge.style.display = 'inline-flex';
+        });
+        
+        window.addEventListener('online', () => {
+            const offlineBadge = document.getElementById('offlineBadgeNav');
+            if (offlineBadge) offlineBadge.style.display = 'none';
+        });
+    })();
+</script>
