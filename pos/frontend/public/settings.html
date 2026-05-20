@@ -1,16 +1,15 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nile POS - Settings</title>
+    <title>Nile POS - Settings | Store Configuration</title>
     <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: #f1f5f9;
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+            background: #f3f4f6;
             padding: 24px;
         }
         .container { max-width: 800px; margin: 0 auto; }
@@ -20,26 +19,27 @@
             align-items: center;
             margin-bottom: 24px;
         }
-        h1 { font-size: 24px; color: #1e293b; }
+        h1 { font-size: 24px; color: #111827; display: flex; align-items: center; gap: 12px; }
         .back-btn {
             background: white;
-            border: 1px solid #e2e8f0;
+            border: 1px solid #e5e7eb;
             padding: 8px 16px;
             border-radius: 8px;
             cursor: pointer;
             text-decoration: none;
-            color: #475569;
+            color: #374151;
         }
         .settings-card {
             background: white;
-            border-radius: 24px;
+            border-radius: 20px;
             overflow: hidden;
             margin-bottom: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
         .settings-header {
-            padding: 20px;
-            border-bottom: 1px solid #e2e8f0;
-            background: #f8fafc;
+            padding: 16px 20px;
+            border-bottom: 1px solid #e5e7eb;
+            background: #f9fafb;
             font-weight: 600;
         }
         .settings-body { padding: 20px; }
@@ -47,59 +47,41 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 16px 0;
-            border-bottom: 1px solid #f1f5f9;
+            padding: 14px 0;
+            border-bottom: 1px solid #f3f4f6;
             flex-wrap: wrap;
             gap: 12px;
         }
         .setting-label { font-weight: 500; }
-        .setting-desc { font-size: 12px; color: #64748b; margin-top: 4px; }
-        .setting-input {
-            padding: 10px;
-            border: 1px solid #e2e8f0;
+        .setting-desc { font-size: 12px; color: #6b7280; margin-top: 4px; }
+        .setting-input, .setting-select {
+            padding: 10px 14px;
+            border: 1px solid #e5e7eb;
             border-radius: 8px;
-            width: 200px;
+            width: 220px;
         }
-        .setting-select {
-            padding: 10px;
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
+        .currency-group {
+            display: flex;
+            gap: 8px;
         }
-        .toggle-switch {
-            position: relative;
-            display: inline-block;
-            width: 50px;
-            height: 24px;
-        }
-        .toggle-switch input { opacity: 0; width: 0; height: 0; }
-        .toggle-slider {
-            position: absolute;
+        .currency-radio {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            border: 1px solid #e5e7eb;
+            border-radius: 100px;
             cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: #cbd5e1;
-            transition: 0.3s;
-            border-radius: 24px;
         }
-        .toggle-slider:before {
-            position: absolute;
-            content: "";
-            height: 18px;
-            width: 18px;
-            left: 3px;
-            bottom: 3px;
-            background-color: white;
-            transition: 0.3s;
-            border-radius: 50%;
+        .currency-radio.selected {
+            background: #2563eb;
+            color: white;
+            border-color: #2563eb;
         }
-        input:checked + .toggle-slider { background-color: #667eea; }
-        input:checked + .toggle-slider:before { transform: translateX(26px); }
         .save-btn {
             width: 100%;
             padding: 14px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #2563eb;
             color: white;
             border: none;
             border-radius: 12px;
@@ -107,13 +89,12 @@
             cursor: pointer;
             margin-top: 20px;
         }
-        .tier-badge {
-            display: inline-block;
-            background: #e2e8f0;
-            padding: 4px 12px;
-            border-radius: 100px;
-            font-size: 11px;
-            font-weight: 600;
+        .exchange-rate-info {
+            background: #eff6ff;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            margin-top: 12px;
         }
     </style>
 </head>
@@ -121,41 +102,39 @@
     <div class="container">
         <div class="header">
             <h1>⚙️ Settings</h1>
-            <a href="/index.html" class="back-btn">← Back</a>
+            <a href="/index.html" class="back-btn">← Back to Register</a>
         </div>
 
         <div class="settings-card">
             <div class="settings-header">Store Information</div>
             <div class="settings-body">
-                <div class="setting-row">
-                    <div><div class="setting-label">Store Name</div><div class="setting-desc">Displayed on receipts</div></div>
-                    <input type="text" id="storeName" class="setting-input" placeholder="My Store">
-                </div>
-                <div class="setting-row">
-                    <div><div class="setting-label">Store Address</div><div class="setting-desc">Printed on receipts</div></div>
-                    <input type="text" id="storeAddress" class="setting-input" placeholder="123 Main St">
-                </div>
-                <div class="setting-row">
-                    <div><div class="setting-label">Store Phone</div><div class="setting-desc">Customer support number</div></div>
-                    <input type="text" id="storePhone" class="setting-input" placeholder="(555) 123-4567">
-                </div>
+                <div class="setting-row"><div><div class="setting-label">Store Name</div><div class="setting-desc">Displayed on receipts</div></div><input type="text" id="storeName" class="setting-input" placeholder="Nile Shopping"></div>
+                <div class="setting-row"><div><div class="setting-label">Store Address</div></div><input type="text" id="storeAddress" class="setting-input" placeholder="Kampala, Uganda"></div>
+                <div class="setting-row"><div><div class="setting-label">Phone Number</div></div><input type="text" id="storePhone" class="setting-input" placeholder="+256 XXX XXX XXX"></div>
+                <div class="setting-row"><div><div class="setting-label">Tax Registration (TIN/VAT)</div></div><input type="text" id="tinNumber" class="setting-input" placeholder="Tax Identification Number"></div>
             </div>
         </div>
 
         <div class="settings-card">
-            <div class="settings-header">Tax & Currency</div>
+            <div class="settings-header">Currency & Tax</div>
             <div class="settings-body">
                 <div class="setting-row">
-                    <div><div class="setting-label">Tax Rate (%)</div><div class="setting-desc">Default sales tax percentage</div></div>
-                    <input type="number" id="taxRate" class="setting-input" step="0.1" value="10">
+                    <div><div class="setting-label">Default Currency</div><div class="setting-desc">Display currency for POS</div></div>
+                    <div class="currency-group">
+                        <div class="currency-radio" data-currency="USD">$ USD</div>
+                        <div class="currency-radio" data-currency="UGX">UGX</div>
+                    </div>
                 </div>
                 <div class="setting-row">
-                    <div><div class="setting-label">Currency Symbol</div><div class="setting-desc">$ / € / £</div></div>
-                    <input type="text" id="currencySymbol" class="setting-input" value="$" maxlength="3">
+                    <div><div class="setting-label">Exchange Rate (USD to UGX)</div><div class="setting-desc">1 USD = ? UGX</div></div>
+                    <input type="number" id="exchangeRate" class="setting-input" step="1" value="3700">
                 </div>
                 <div class="setting-row">
-                    <div><div class="setting-label">Round Tax to Nearest Cent</div></div>
-                    <label class="toggle-switch"><input type="checkbox" id="roundTax"><span class="toggle-slider"></span></label>
+                    <div><div class="setting-label">VAT Rate (%)</div><div class="setting-desc">Standard VAT for Uganda / UK</div></div>
+                    <input type="number" id="vatRate" class="setting-input" step="0.1" value="18">
+                </div>
+                <div class="exchange-rate-info">
+                    💱 Exchange rates update daily. Contact your bank for current rates.
                 </div>
             </div>
         </div>
@@ -163,150 +142,72 @@
         <div class="settings-card">
             <div class="settings-header">Receipt Settings</div>
             <div class="settings-body">
-                <div class="setting-row">
-                    <div><div class="setting-label">Receipt Footer Message</div><div class="setting-desc">Thank you message</div></div>
-                    <input type="text" id="receiptFooter" class="setting-input" placeholder="Thank you for shopping!">
-                </div>
-                <div class="setting-row">
-                    <div><div class="setting-label">Print Customer Copy</div></div>
-                    <label class="toggle-switch"><input type="checkbox" id="printCustomerCopy"><span class="toggle-slider"></span></label>
-                </div>
-                <div class="setting-row">
-                    <div><div class="setting-label">Email Receipt by Default</div></div>
-                    <label class="toggle-switch"><input type="checkbox" id="emailReceiptDefault"><span class="toggle-slider"></span></label>
-                </div>
-            </div>
-        </div>
-
-        <div class="settings-card">
-            <div class="settings-header">Hardware</div>
-            <div class="settings-body">
-                <div class="setting-row">
-                    <div><div class="setting-label">Receipt Printer</div></div>
-                    <select id="printerType" class="setting-select">
-                        <option value="thermal">Thermal (58mm)</option>
-                        <option value="thermal80">Thermal (80mm)</option>
-                        <option value="standard">Standard Printer</option>
-                    </select>
-                </div>
-                <div class="setting-row">
-                    <div><div class="setting-label">Cash Drawer</div></div>
-                    <select id="cashDrawer" class="setting-select">
-                        <option value="usb">USB Connected</option>
-                        <option value="serial">Serial Port</option>
-                        <option value="network">Network (Ethernet)</option>
-                    </select>
-                </div>
-                <div class="setting-row">
-                    <div><div class="setting-label">Barcode Scanner</div></div>
-                    <select id="scannerType" class="setting-select">
-                        <option value="usb">USB (Keyboard Wedge)</option>
-                        <option value="bluetooth">Bluetooth</option>
-                        <option value="camera">Camera (Mobile)</option>
-                    </select>
-                </div>
-            </div>
-        </div>
-
-        <div class="settings-card">
-            <div class="settings-header">User Preferences</div>
-            <div class="settings-body">
-                <div class="setting-row">
-                    <div><div class="setting-label">Dark Mode</div></div>
-                    <label class="toggle-switch"><input type="checkbox" id="darkMode"><span class="toggle-slider"></span></label>
-                </div>
-                <div class="setting-row">
-                    <div><div class="setting-label">Sound Effects</div><div class="setting-desc">Beep on scan, payment success</div></div>
-                    <label class="toggle-switch"><input type="checkbox" id="soundEffects" checked><span class="toggle-slider"></span></label>
-                </div>
-                <div class="setting-row">
-                    <div><div class="setting-label">Auto-print Receipt</div></div>
-                    <label class="toggle-switch"><input type="checkbox" id="autoPrint" checked><span class="toggle-slider"></span></label>
-                </div>
-            </div>
-        </div>
-
-        <div class="settings-card">
-            <div class="settings-header">Subscription & Tier</div>
-            <div class="settings-body">
-                <div class="setting-row">
-                    <div><div class="setting-label">Current Plan</div><div class="setting-desc">Features available</div></div>
-                    <span id="currentTier" class="tier-badge">Freemium</span>
-                </div>
-                <div class="setting-row">
-                    <div><div class="setting-label">Upgrade Plan</div><div class="setting-desc">Get more features</div></div>
-                    <button id="upgradeBtn" style="padding:8px 16px; background:#667eea; color:white; border:none; border-radius:8px; cursor:pointer;">Upgrade →</button>
-                </div>
+                <div class="setting-row"><div><div class="setting-label">Receipt Footer Message</div></div><input type="text" id="receiptFooter" class="setting-input" placeholder="Thank you for shopping!"></div>
+                <div class="setting-row"><div><div class="setting-label">Show VAT on Receipt</div></div><label class="toggle-switch"><input type="checkbox" id="showVatOnReceipt" checked><span class="toggle-slider"></span></label></div>
+                <div class="setting-row"><div><div class="setting-label">Auto-print Receipt</div></div><label class="toggle-switch"><input type="checkbox" id="autoPrint" checked><span class="toggle-slider"></span></label></div>
             </div>
         </div>
 
         <button class="save-btn" id="saveBtn">Save All Settings</button>
     </div>
 
+    <style>
+        .toggle-switch { position: relative; display: inline-block; width: 50px; height: 24px; }
+        .toggle-switch input { opacity: 0; width: 0; height: 0; }
+        .toggle-slider {
+            position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #cbd5e1; transition: 0.3s; border-radius: 24px;
+        }
+        .toggle-slider:before {
+            position: absolute; content: ""; height: 18px; width: 18px;
+            left: 3px; bottom: 3px; background-color: white; transition: 0.3s; border-radius: 50%;
+        }
+        input:checked + .toggle-slider { background-color: #2563eb; }
+        input:checked + .toggle-slider:before { transform: translateX(26px); }
+    </style>
+
     <script>
         (function() {
-            // Load settings from localStorage
             function loadSettings() {
                 const settings = JSON.parse(localStorage.getItem('pos_settings') || '{}');
                 document.getElementById('storeName').value = settings.storeName || 'Nile Shopping';
                 document.getElementById('storeAddress').value = settings.storeAddress || '';
                 document.getElementById('storePhone').value = settings.storePhone || '';
-                document.getElementById('taxRate').value = settings.taxRate || 10;
-                document.getElementById('currencySymbol').value = settings.currencySymbol || '$';
-                document.getElementById('roundTax').checked = settings.roundTax || false;
-                document.getElementById('receiptFooter').value = settings.receiptFooter || 'Thank you for shopping with us!';
-                document.getElementById('printCustomerCopy').checked = settings.printCustomerCopy || false;
-                document.getElementById('emailReceiptDefault').checked = settings.emailReceiptDefault || false;
-                document.getElementById('printerType').value = settings.printerType || 'thermal';
-                document.getElementById('cashDrawer').value = settings.cashDrawer || 'usb';
-                document.getElementById('scannerType').value = settings.scannerType || 'usb';
-                document.getElementById('darkMode').checked = settings.darkMode || false;
-                document.getElementById('soundEffects').checked = settings.soundEffects !== false;
+                document.getElementById('tinNumber').value = settings.tinNumber || '';
+                document.getElementById('exchangeRate').value = settings.exchangeRate || 3700;
+                document.getElementById('vatRate').value = settings.vatRate || 18;
+                document.getElementById('receiptFooter').value = settings.receiptFooter || 'Thank you for shopping with Nile Shopping!';
+                document.getElementById('showVatOnReceipt').checked = settings.showVatOnReceipt !== false;
                 document.getElementById('autoPrint').checked = settings.autoPrint !== false;
                 
-                // Apply dark mode if enabled
-                if (settings.darkMode) {
-                    document.body.style.background = '#0f172a';
-                    document.body.style.color = '#f1f5f9';
-                }
+                const savedCurrency = settings.currency || localStorage.getItem('pos_currency') || 'UGX';
+                document.querySelectorAll('.currency-radio').forEach(radio => {
+                    radio.classList.toggle('selected', radio.dataset.currency === savedCurrency);
+                });
             }
             
             function saveSettings() {
+                const selectedCurrency = document.querySelector('.currency-radio.selected')?.dataset.currency || 'UGX';
                 const settings = {
                     storeName: document.getElementById('storeName').value,
                     storeAddress: document.getElementById('storeAddress').value,
                     storePhone: document.getElementById('storePhone').value,
-                    taxRate: parseFloat(document.getElementById('taxRate').value),
-                    currencySymbol: document.getElementById('currencySymbol').value,
-                    roundTax: document.getElementById('roundTax').checked,
+                    tinNumber: document.getElementById('tinNumber').value,
+                    currency: selectedCurrency,
+                    exchangeRate: parseFloat(document.getElementById('exchangeRate').value),
+                    vatRate: parseFloat(document.getElementById('vatRate').value),
                     receiptFooter: document.getElementById('receiptFooter').value,
-                    printCustomerCopy: document.getElementById('printCustomerCopy').checked,
-                    emailReceiptDefault: document.getElementById('emailReceiptDefault').checked,
-                    printerType: document.getElementById('printerType').value,
-                    cashDrawer: document.getElementById('cashDrawer').value,
-                    scannerType: document.getElementById('scannerType').value,
-                    darkMode: document.getElementById('darkMode').checked,
-                    soundEffects: document.getElementById('soundEffects').checked,
+                    showVatOnReceipt: document.getElementById('showVatOnReceipt').checked,
                     autoPrint: document.getElementById('autoPrint').checked
                 };
                 
                 localStorage.setItem('pos_settings', JSON.stringify(settings));
-                showToast('Settings saved successfully', 'success');
+                localStorage.setItem('pos_currency', selectedCurrency);
+                localStorage.setItem('exchange_rate', settings.exchangeRate);
+                localStorage.setItem('vat_rate', settings.vatRate);
                 
-                // Apply dark mode
-                if (settings.darkMode) {
-                    document.body.style.background = '#0f172a';
-                    document.body.style.color = '#f1f5f9';
-                } else {
-                    document.body.style.background = '#f1f5f9';
-                    document.body.style.color = '#1e293b';
-                }
-            }
-            
-            function loadTier() {
-                const tier = localStorage.getItem('pos_tier') || 'freemium';
-                const tierDisplay = tier.charAt(0).toUpperCase() + tier.slice(1);
-                document.getElementById('currentTier').textContent = tierDisplay;
+                showToast('Settings saved successfully', 'success');
+                setTimeout(() => location.reload(), 1000);
             }
             
             function showToast(message, type) {
@@ -314,7 +215,7 @@
                 toast.textContent = message;
                 toast.style.cssText = `
                     position: fixed; bottom: 20px; right: 20px;
-                    background: ${type === 'error' ? '#ef4444' : '#10b981'};
+                    background: ${type === 'error' ? '#dc2626' : '#10b981'};
                     color: white; padding: 12px 20px; border-radius: 12px;
                     z-index: 1000; animation: slideIn 0.3s ease;
                 `;
@@ -322,13 +223,19 @@
                 setTimeout(() => toast.remove(), 3000);
             }
             
+            function initCurrencySelector() {
+                document.querySelectorAll('.currency-radio').forEach(radio => {
+                    radio.addEventListener('click', () => {
+                        document.querySelectorAll('.currency-radio').forEach(r => r.classList.remove('selected'));
+                        radio.classList.add('selected');
+                    });
+                });
+            }
+            
             function init() {
                 loadSettings();
-                loadTier();
+                initCurrencySelector();
                 document.getElementById('saveBtn').addEventListener('click', saveSettings);
-                document.getElementById('upgradeBtn').addEventListener('click', () => {
-                    window.location.href = '/billing.html';
-                });
             }
             
             init();
