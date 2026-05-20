@@ -1,0 +1,1243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile | Nile POS</title>
+    <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico">
+    <link rel="stylesheet" href="/assets/css/layout.css">
+    <style>
+        /* Profile page specific styles */
+        .profile-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .profile-grid {
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            gap: 24px;
+        }
+        
+        /* Profile Sidebar */
+        .profile-sidebar {
+            background: white;
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        
+        .profile-avatar-section {
+            text-align: center;
+            padding: 32px 24px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+        }
+        
+        .profile-avatar {
+            width: 120px;
+            height: 120px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 16px;
+            font-size: 48px;
+            font-weight: 700;
+            border: 4px solid rgba(255,255,255,0.3);
+        }
+        
+        .profile-name {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+        
+        .profile-role {
+            font-size: 13px;
+            opacity: 0.9;
+        }
+        
+        .profile-tier {
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            padding: 4px 12px;
+            border-radius: 100px;
+            font-size: 11px;
+            margin-top: 12px;
+        }
+        
+        .profile-stats {
+            padding: 20px;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .profile-stat-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--light);
+        }
+        
+        .profile-stat-item:last-child {
+            border-bottom: none;
+        }
+        
+        .profile-stat-label {
+            font-size: 13px;
+            color: var(--gray);
+        }
+        
+        .profile-stat-value {
+            font-weight: 600;
+            color: var(--dark);
+        }
+        
+        .profile-menu {
+            padding: 8px 0;
+        }
+        
+        .profile-menu-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 20px;
+            color: var(--dark);
+            text-decoration: none;
+            transition: background 0.2s;
+            cursor: pointer;
+        }
+        
+        .profile-menu-item:hover {
+            background: var(--light);
+        }
+        
+        .profile-menu-item.active {
+            background: var(--light);
+            border-left: 3px solid var(--primary);
+            color: var(--primary);
+        }
+        
+        .profile-menu-icon {
+            font-size: 18px;
+            width: 24px;
+        }
+        
+        /* Profile Main Content */
+        .profile-main {
+            background: white;
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        
+        .profile-tabs {
+            display: flex;
+            border-bottom: 1px solid var(--border);
+            background: var(--light);
+            padding: 0 20px;
+        }
+        
+        .profile-tab {
+            padding: 16px 24px;
+            background: none;
+            border: none;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: var(--gray);
+            position: relative;
+        }
+        
+        .profile-tab.active {
+            color: var(--primary);
+        }
+        
+        .profile-tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--primary);
+        }
+        
+        .profile-tab-content {
+            display: none;
+            padding: 24px;
+        }
+        
+        .profile-tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Form Styles */
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: var(--dark);
+        }
+        
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 14px;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            font-size: 14px;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
+        }
+        
+        .form-group input:disabled {
+            background: var(--light);
+            cursor: not-allowed;
+        }
+        
+        .form-hint {
+            font-size: 11px;
+            color: var(--gray);
+            margin-top: 6px;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 10px 20px -5px rgba(37,99,235,0.4);
+        }
+        
+        .btn-secondary {
+            background: var(--light);
+            color: var(--dark);
+            border: 1px solid var(--border);
+        }
+        
+        .btn-secondary:hover {
+            background: var(--border);
+        }
+        
+        .btn-danger {
+            background: #fee2e2;
+            color: var(--danger);
+        }
+        
+        .btn-danger:hover {
+            background: #fecaca;
+        }
+        
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            margin-top: 24px;
+            padding-top: 24px;
+            border-top: 1px solid var(--border);
+        }
+        
+        /* Security Section */
+        .security-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 0;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .security-info h4 {
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        
+        .security-info p {
+            font-size: 12px;
+            color: var(--gray);
+        }
+        
+        .security-status {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 100px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        
+        .status-enabled {
+            background: #dcfce7;
+            color: #166534;
+        }
+        
+        .status-disabled {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        
+        /* Activity Log */
+        .activity-log-item {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 16px 0;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .activity-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--light);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+        
+        .activity-details {
+            flex: 1;
+        }
+        
+        .activity-action {
+            font-weight: 500;
+            font-size: 14px;
+        }
+        
+        .activity-time {
+            font-size: 11px;
+            color: var(--gray);
+            margin-top: 4px;
+        }
+        
+        .activity-ip {
+            font-size: 11px;
+            color: var(--gray);
+            font-family: monospace;
+        }
+        
+        /* Session Management */
+        .session-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 0;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .session-device {
+            font-weight: 500;
+            font-size: 14px;
+        }
+        
+        .session-location {
+            font-size: 11px;
+            color: var(--gray);
+            margin-top: 4px;
+        }
+        
+        .session-current {
+            background: #dcfce7;
+            color: #166534;
+            padding: 2px 8px;
+            border-radius: 100px;
+            font-size: 10px;
+            font-weight: 600;
+        }
+        
+        .revoke-btn {
+            padding: 6px 12px;
+            background: var(--light);
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        
+        @media (max-width: 768px) {
+            .profile-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .profile-tabs {
+                overflow-x: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-layout">
+        <div id="sidebarContainer"></div>
+        
+        <div class="main-content">
+            <div id="headerContainer"></div>
+            
+            <div class="content-container">
+                <div class="profile-container">
+                    <!-- Breadcrumb -->
+                    <div class="breadcrumb">
+                        <a href="/dashboard.html" class="breadcrumb-item">Home</a>
+                        <span class="breadcrumb-separator">/</span>
+                        <span class="breadcrumb-item active">My Profile</span>
+                    </div>
+                    
+                    <div class="profile-grid">
+                        <!-- Left Sidebar -->
+                        <div class="profile-sidebar">
+                            <div class="profile-avatar-section">
+                                <div class="profile-avatar" id="profileAvatar">JD</div>
+                                <div class="profile-name" id="profileName">John Doe</div>
+                                <div class="profile-role" id="profileRole">Cashier</div>
+                                <div class="profile-tier" id="profileTier">Freemium Plan</div>
+                            </div>
+                            
+                            <div class="profile-stats">
+                                <div class="profile-stat-item">
+                                    <span class="profile-stat-label">Member Since</span>
+                                    <span class="profile-stat-value" id="memberSince">Jan 2024</span>
+                                </div>
+                                <div class="profile-stat-item">
+                                    <span class="profile-stat-label">Last Login</span>
+                                    <span class="profile-stat-value" id="lastLogin">Today, 09:30 AM</span>
+                                </div>
+                                <div class="profile-stat-item">
+                                    <span class="profile-stat-label">Store</span>
+                                    <span class="profile-stat-value" id="userStore">Nile Downtown</span>
+                                </div>
+                                <div class="profile-stat-item">
+                                    <span class="profile-stat-label">Register</span>
+                                    <span class="profile-stat-value" id="userRegister">01</span>
+                                </div>
+                            </div>
+                            
+                            <div class="profile-menu">
+                                <div class="profile-menu-item active" data-tab="personal">
+                                    <span class="profile-menu-icon">👤</span>
+                                    <span>Personal Information</span>
+                                </div>
+                                <div class="profile-menu-item" data-tab="security">
+                                    <span class="profile-menu-icon">🔒</span>
+                                    <span>Security</span>
+                                </div>
+                                <div class="profile-menu-item" data-tab="activity">
+                                    <span class="profile-menu-icon">📋</span>
+                                    <span>Activity Log</span>
+                                </div>
+                                <div class="profile-menu-item" data-tab="sessions">
+                                    <span class="profile-menu-icon">💻</span>
+                                    <span>Sessions</span>
+                                </div>
+                                <div class="profile-menu-item" data-tab="notifications">
+                                    <span class="profile-menu-icon">🔔</span>
+                                    <span>Notifications</span>
+                                </div>
+                                <div class="profile-menu-item" data-tab="billing">
+                                    <span class="profile-menu-icon">💰</span>
+                                    <span>Billing & Plan</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Main Content -->
+                        <div class="profile-main">
+                            <!-- Personal Information Tab -->
+                            <div class="profile-tab-content active" id="tab-personal">
+                                <form id="personalInfoForm">
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label>First Name</label>
+                                            <input type="text" id="firstName" placeholder="First name">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Last Name</label>
+                                            <input type="text" id="lastName" placeholder="Last name">
+                                        </div>
+                                    </div>
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label>Email Address</label>
+                                            <input type="email" id="email" placeholder="email@example.com" disabled>
+                                            <div class="form-hint">Email cannot be changed. Contact support for assistance.</div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Phone Number</label>
+                                            <input type="tel" id="phone" placeholder="+1234567890">
+                                        </div>
+                                    </div>
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label>Store Name</label>
+                                            <input type="text" id="storeName" placeholder="Store name">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Time Zone</label>
+                                            <select id="timezone">
+                                                <option value="Africa/Kampala">Africa/Kampala (EAT)</option>
+                                                <option value="Africa/Nairobi">Africa/Nairobi (EAT)</option>
+                                                <option value="Europe/London">Europe/London (GMT)</option>
+                                                <option value="America/New_York">America/New_York (EST)</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Display Language</label>
+                                        <select id="language">
+                                            <option value="en">English</option>
+                                            <option value="sw">Kiswahili</option>
+                                            <option value="lg">Luganda</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-actions">
+                                        <button type="button" class="btn btn-secondary" id="cancelPersonalBtn">Cancel</button>
+                                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                                    </div>
+                                </form>
+                            </div>
+                            
+                            <!-- Security Tab -->
+                            <div class="profile-tab-content" id="tab-security">
+                                <div class="security-item">
+                                    <div class="security-info">
+                                        <h4>Password</h4>
+                                        <p>Last changed 30 days ago</p>
+                                    </div>
+                                    <button class="btn btn-secondary" id="changePasswordBtn">Change Password</button>
+                                </div>
+                                
+                                <div class="security-item">
+                                    <div class="security-info">
+                                        <h4>Two-Factor Authentication (2FA)</h4>
+                                        <p>Add an extra layer of security to your account</p>
+                                    </div>
+                                    <div>
+                                        <span class="security-status status-disabled" id="mfaStatus">Disabled</span>
+                                        <button class="btn btn-secondary" id="setupMfaBtn" style="margin-left: 12px;">Setup</button>
+                                    </div>
+                                </div>
+                                
+                                <div class="security-item">
+                                    <div class="security-info">
+                                        <h4>Biometric Login</h4>
+                                        <p>Use fingerprint or face recognition to login quickly</p>
+                                    </div>
+                                    <div>
+                                        <span class="security-status status-disabled" id="biometricStatus">Not Setup</span>
+                                        <button class="btn btn-secondary" id="setupBiometricBtn" style="margin-left: 12px;">Setup</button>
+                                    </div>
+                                </div>
+                                
+                                <div class="security-item">
+                                    <div class="security-info">
+                                        <h4>PIN Code (Quick Login)</h4>
+                                        <p>4-digit PIN for fast access at POS terminal</p>
+                                    </div>
+                                    <button class="btn btn-secondary" id="setupPinBtn">Set PIN</button>
+                                </div>
+                                
+                                <div class="form-actions">
+                                    <button class="btn btn-danger" id="deactivateAccountBtn">Deactivate Account</button>
+                                </div>
+                            </div>
+                            
+                            <!-- Activity Log Tab -->
+                            <div class="profile-tab-content" id="tab-activity">
+                                <div style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
+                                    <h3 style="font-size: 16px;">Recent Activity</h3>
+                                    <button class="btn btn-secondary" id="exportActivityBtn">Export Log</button>
+                                </div>
+                                <div id="activityLogList">
+                                    <!-- Activity items will be loaded here -->
+                                </div>
+                            </div>
+                            
+                            <!-- Sessions Tab -->
+                            <div class="profile-tab-content" id="tab-sessions">
+                                <div id="sessionsList">
+                                    <!-- Session items will be loaded here -->
+                                </div>
+                                <div class="form-actions">
+                                    <button class="btn btn-danger" id="revokeAllSessionsBtn">Revoke All Other Sessions</button>
+                                </div>
+                            </div>
+                            
+                            <!-- Notifications Tab -->
+                            <div class="profile-tab-content" id="tab-notifications">
+                                <div class="security-item">
+                                    <div class="security-info">
+                                        <h4>Email Notifications</h4>
+                                        <p>Receive email updates about your account</p>
+                                    </div>
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" id="emailNotifications" checked>
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+                                <div class="security-item">
+                                    <div class="security-info">
+                                        <h4>SMS Alerts</h4>
+                                        <p>Get SMS notifications for important events</p>
+                                    </div>
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" id="smsNotifications">
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+                                <div class="security-item">
+                                    <div class="security-info">
+                                        <h4>Daily Sales Report</h4>
+                                        <p>Receive daily sales summary via email</p>
+                                    </div>
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" id="dailyReport" checked>
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+                                <div class="form-actions">
+                                    <button class="btn btn-primary" id="saveNotificationsBtn">Save Preferences</button>
+                                </div>
+                            </div>
+                            
+                            <!-- Billing & Plan Tab -->
+                            <div class="profile-tab-content" id="tab-billing">
+                                <div class="security-item">
+                                    <div class="security-info">
+                                        <h4>Current Plan</h4>
+                                        <p id="currentPlanDisplay">Freemium - Free forever</p>
+                                    </div>
+                                    <button class="btn btn-primary" id="upgradePlanBtn">Upgrade Plan</button>
+                                </div>
+                                <div class="security-item">
+                                    <div class="security-info">
+                                        <h4>Billing Cycle</h4>
+                                        <p>Next billing date: N/A (Freemium plan)</p>
+                                    </div>
+                                </div>
+                                <div class="security-item">
+                                    <div class="security-info">
+                                        <h4>Payment Method</h4>
+                                        <p>No payment method on file</p>
+                                    </div>
+                                    <button class="btn btn-secondary" id="addPaymentBtn">Add Payment Method</button>
+                                </div>
+                                <div class="security-item">
+                                    <div class="security-info">
+                                        <h4>Invoice History</h4>
+                                        <p>View and download past invoices</p>
+                                    </div>
+                                    <button class="btn btn-secondary" id="viewInvoicesBtn">View Invoices</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="footerContainer"></div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Change Password Modal -->
+    <div id="passwordModal" class="modal" style="display: none;">
+        <div class="modal-content" style="max-width: 450px;">
+            <div class="modal-header">
+                <h3>Change Password</h3>
+                <button class="close-modal" onclick="closePasswordModal()">✕</button>
+            </div>
+            <div class="modal-body">
+                <form id="passwordForm">
+                    <div class="form-group">
+                        <label>Current Password</label>
+                        <input type="password" id="currentPassword" required>
+                    </div>
+                    <div class="form-group">
+                        <label>New Password</label>
+                        <input type="password" id="newPassword" required>
+                        <div class="form-hint">Minimum 8 characters, 1 uppercase, 1 number</div>
+                    </div>
+                    <div class="form-group">
+                        <label>Confirm New Password</label>
+                        <input type="password" id="confirmPassword" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width:100%;">Update Password</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Set PIN Modal -->
+    <div id="pinModal" class="modal" style="display: none;">
+        <div class="modal-content" style="max-width: 400px;">
+            <div class="modal-header">
+                <h3>Set PIN Code</h3>
+                <button class="close-modal" onclick="closePinModal()">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Enter 4-Digit PIN</label>
+                    <input type="password" id="pinCode" maxlength="4" pattern="[0-9]{4}" inputmode="numeric" style="text-align:center; font-size:24px; letter-spacing:4px;">
+                </div>
+                <div class="form-group">
+                    <label>Confirm PIN</label>
+                    <input type="password" id="confirmPin" maxlength="4" pattern="[0-9]{4}" inputmode="numeric" style="text-align:center; font-size:24px; letter-spacing:4px;">
+                </div>
+                <button class="btn btn-primary" id="savePinBtn" style="width:100%;">Save PIN</button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="/assets/js/rbac.js"></script>
+    <script src="/assets/js/layout.js"></script>
+    
+    <style>
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #cbd5e1;
+            transition: 0.3s;
+            border-radius: 24px;
+        }
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: 0.3s;
+            border-radius: 50%;
+        }
+        input:checked + .toggle-slider {
+            background-color: var(--primary);
+        }
+        input:checked + .toggle-slider:before {
+            transform: translateX(26px);
+        }
+        
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background: white;
+            border-radius: 24px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .modal-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+        }
+        .modal-body {
+            padding: 20px;
+        }
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+        }
+    </style>
+    
+    <script>
+        (function() {
+            // ============================================
+            // DEMO USER DATA - PERSISTENT
+            // ============================================
+            // This user data is saved to localStorage and persists across sessions
+            const DEFAULT_USER = {
+                id: 1,
+                firstName: "Demo",
+                lastName: "User",
+                email: "demo@nile.com",
+                phone: "+256 712 345678",
+                role: "cashier",
+                tier: "freemium",
+                storeName: "Nile Downtown",
+                storeId: 1,
+                registerId: 1,
+                timezone: "Africa/Kampala",
+                language: "en",
+                memberSince: "2024-01-15",
+                lastLogin: new Date().toLocaleString(),
+                pinSet: false,
+                mfaEnabled: false,
+                biometricEnabled: false,
+                avatarInitials: "DU"
+            };
+            
+            // Load or initialize user data
+            let currentUser = JSON.parse(localStorage.getItem('pos_user_profile') || JSON.stringify(DEFAULT_USER));
+            
+            // Also sync with main POS user
+            const posUser = {
+                id: currentUser.id,
+                name: `${currentUser.firstName} ${currentUser.lastName}`,
+                email: currentUser.email,
+                role: currentUser.role,
+                tier: currentUser.tier,
+                store: currentUser.storeName,
+                register: currentUser.registerId
+            };
+            localStorage.setItem('pos_user', JSON.stringify(posUser));
+            localStorage.setItem('pos_tier', currentUser.tier);
+            
+            // ============================================
+            // DOM Elements
+            // ============================================
+            const profileAvatar = document.getElementById('profileAvatar');
+            const profileName = document.getElementById('profileName');
+            const profileRole = document.getElementById('profileRole');
+            const profileTier = document.getElementById('profileTier');
+            const memberSince = document.getElementById('memberSince');
+            const lastLogin = document.getElementById('lastLogin');
+            const userStore = document.getElementById('userStore');
+            const userRegister = document.getElementById('userRegister');
+            
+            // Form fields
+            const firstNameInput = document.getElementById('firstName');
+            const lastNameInput = document.getElementById('lastName');
+            const emailInput = document.getElementById('email');
+            const phoneInput = document.getElementById('phone');
+            const storeNameInput = document.getElementById('storeName');
+            const timezoneSelect = document.getElementById('timezone');
+            const languageSelect = document.getElementById('language');
+            
+            // ============================================
+            // Load User Data into UI
+            // ============================================
+            function loadUserProfile() {
+                // Update avatar
+                const initials = `${currentUser.firstName.charAt(0)}${currentUser.lastName.charAt(0)}`.toUpperCase();
+                profileAvatar.textContent = initials;
+                currentUser.avatarInitials = initials;
+                
+                // Update profile header
+                profileName.textContent = `${currentUser.firstName} ${currentUser.lastName}`;
+                profileRole.textContent = currentUser.role.charAt(0).toUpperCase() + currentUser.role.slice(1);
+                profileTier.textContent = currentUser.tier.charAt(0).toUpperCase() + currentUser.tier.slice(1) + ' Plan';
+                
+                // Update stats
+                memberSince.textContent = new Date(currentUser.memberSince).toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+                lastLogin.textContent = currentUser.lastLogin;
+                userStore.textContent = currentUser.storeName;
+                userRegister.textContent = currentUser.registerId.toString().padStart(2, '0');
+                
+                // Update form fields
+                firstNameInput.value = currentUser.firstName;
+                lastNameInput.value = currentUser.lastName;
+                emailInput.value = currentUser.email;
+                phoneInput.value = currentUser.phone || '';
+                storeNameInput.value = currentUser.storeName;
+                timezoneSelect.value = currentUser.timezone;
+                languageSelect.value = currentUser.language;
+                
+                // Update security status badges
+                const mfaStatus = document.getElementById('mfaStatus');
+                const biometricStatus = document.getElementById('biometricStatus');
+                
+                if (mfaStatus) {
+                    mfaStatus.textContent = currentUser.mfaEnabled ? 'Enabled' : 'Disabled';
+                    mfaStatus.className = `security-status ${currentUser.mfaEnabled ? 'status-enabled' : 'status-disabled'}`;
+                }
+                if (biometricStatus) {
+                    biometricStatus.textContent = currentUser.biometricEnabled ? 'Enabled' : 'Not Setup';
+                    biometricStatus.className = `security-status ${currentUser.biometricEnabled ? 'status-enabled' : 'status-disabled'}`;
+                }
+                
+                // Update notification preferences
+                const emailNotif = document.getElementById('emailNotifications');
+                const smsNotif = document.getElementById('smsNotifications');
+                const dailyReport = document.getElementById('dailyReport');
+                
+                if (emailNotif) emailNotif.checked = currentUser.emailNotifications !== false;
+                if (smsNotif) smsNotif.checked = currentUser.smsNotifications || false;
+                if (dailyReport) dailyReport.checked = currentUser.dailyReport !== false;
+            }
+            
+            // ============================================
+            // Save User Data
+            // ============================================
+            function saveUserProfile() {
+                currentUser.firstName = firstNameInput.value;
+                currentUser.lastName = lastNameInput.value;
+                currentUser.phone = phoneInput.value;
+                currentUser.storeName = storeNameInput.value;
+                currentUser.timezone = timezoneSelect.value;
+                currentUser.language = languageSelect.value;
+                currentUser.lastLogin = new Date().toLocaleString();
+                
+                // Save to localStorage
+                localStorage.setItem('pos_user_profile', JSON.stringify(currentUser));
+                
+                // Update main POS user
+                const posUser = {
+                    id: currentUser.id,
+                    name: `${currentUser.firstName} ${currentUser.lastName}`,
+                    email: currentUser.email,
+                    role: currentUser.role,
+                    tier: currentUser.tier,
+                    store: currentUser.storeName,
+                    register: currentUser.registerId
+                };
+                localStorage.setItem('pos_user', JSON.stringify(posUser));
+                
+                // Reload UI
+                loadUserProfile();
+                
+                // Show success message
+                showToast('Profile updated successfully!', 'success');
+                
+                // Dispatch event for other components
+                window.dispatchEvent(new CustomEvent('userProfileUpdated', { detail: currentUser }));
+            }
+            
+            // ============================================
+            // Activity Log Data
+            // ============================================
+            const activityLog = [
+                { action: 'Logged in', time: 'Today, 09:30 AM', ip: '192.168.1.1', device: 'Chrome on Windows' },
+                { action: 'Updated profile', time: 'Yesterday, 02:15 PM', ip: '192.168.1.1', device: 'Chrome on Windows' },
+                { action: 'Changed password', time: 'Jan 15, 2024', ip: '192.168.1.1', device: 'Chrome on Windows' },
+                { action: 'Logged in', time: 'Jan 15, 2024, 08:45 AM', ip: '192.168.1.1', device: 'Chrome on Windows' },
+                { action: 'Created account', time: 'Jan 15, 2024, 08:30 AM', ip: '192.168.1.1', device: 'Chrome on Windows' }
+            ];
+            
+            function loadActivityLog() {
+                const container = document.getElementById('activityLogList');
+                if (!container) return;
+                
+                container.innerHTML = activityLog.map(log => `
+                    <div class="activity-log-item">
+                        <div class="activity-icon">${log.action === 'Logged in' ? '🔐' : log.action === 'Updated profile' ? '✏️' : log.action === 'Changed password' ? '🔒' : '📝'}</div>
+                        <div class="activity-details">
+                            <div class="activity-action">${log.action}</div>
+                            <div class="activity-time">${log.time}</div>
+                            <div class="activity-ip">IP: ${log.ip} | ${log.device}</div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+            
+            // ============================================
+            // Sessions Data
+            // ============================================
+            const sessions = [
+                { device: 'Chrome on Windows', location: 'Kampala, Uganda', lastActive: 'Now', isCurrent: true, ip: '192.168.1.1' },
+                { device: 'Safari on iPhone', location: 'Kampala, Uganda', lastActive: '2 hours ago', isCurrent: false, ip: '192.168.1.2' }
+            ];
+            
+            function loadSessions() {
+                const container = document.getElementById('sessionsList');
+                if (!container) return;
+                
+                container.innerHTML = sessions.map(session => `
+                    <div class="session-item">
+                        <div>
+                            <div class="session-device">${session.device}</div>
+                            <div class="session-location">📍 ${session.location} • IP: ${session.ip}</div>
+                            <div class="session-location">Last active: ${session.lastActive}</div>
+                        </div>
+                        <div>
+                            ${session.isCurrent ? '<span class="session-current">Current Session</span>' : `<button class="revoke-btn" onclick="revokeSession('${session.ip}')">Revoke</button>`}
+                        </div>
+                    </div>
+                `).join('');
+            }
+            
+            window.revokeSession = function(ip) {
+                showToast(`Session from ${ip} has been revoked`, 'success');
+            };
+            
+            // ============================================
+            // Tab Navigation
+            // ============================================
+            function setupTabs() {
+                const menuItems = document.querySelectorAll('.profile-menu-item');
+                const tabContents = document.querySelectorAll('.profile-tab-content');
+                
+                menuItems.forEach(item => {
+                    item.addEventListener('click', () => {
+                        const tabId = item.dataset.tab;
+                        
+                        // Update active menu item
+                        menuItems.forEach(i => i.classList.remove('active'));
+                        item.classList.add('active');
+                        
+                        // Update active tab content
+                        tabContents.forEach(content => content.classList.remove('active'));
+                        const activeTab = document.getElementById(`tab-${tabId}`);
+                        if (activeTab) activeTab.classList.add('active');
+                        
+                        // Load dynamic content for specific tabs
+                        if (tabId === 'activity') loadActivityLog();
+                        if (tabId === 'sessions') loadSessions();
+                    });
+                });
+            }
+            
+            // ============================================
+            // Form Handlers
+            // ============================================
+            document.getElementById('personalInfoForm')?.addEventListener('submit', (e) => {
+                e.preventDefault();
+                saveUserProfile();
+            });
+            
+            document.getElementById('cancelPersonalBtn')?.addEventListener('click', () => {
+                loadUserProfile();
+                showToast('Changes discarded', 'info');
+            });
+            
+            // Password Change
+            const changePasswordBtn = document.getElementById('changePasswordBtn');
+            const passwordModal = document.getElementById('passwordModal');
+            
+            window.closePasswordModal = function() {
+                passwordModal.style.display = 'none';
+            };
+            
+            if (changePasswordBtn) {
+                changePasswordBtn.addEventListener('click', () => {
+                    passwordModal.style.display = 'flex';
+                });
+            }
+            
+            document.getElementById('passwordForm')?.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const currentPwd = document.getElementById('currentPassword').value;
+                const newPwd = document.getElementById('newPassword').value;
+                const confirmPwd = document.getElementById('confirmPassword').value;
+                
+                if (newPwd !== confirmPwd) {
+                    showToast('New passwords do not match', 'error');
+                    return;
+                }
+                if (newPwd.length < 8) {
+                    showToast('Password must be at least 8 characters', 'error');
+                    return;
+                }
+                
+                showToast('Password changed successfully!', 'success');
+                passwordModal.style.display = 'none';
+                document.getElementById('passwordForm').reset();
+            });
+            
+            // PIN Setup
+            const setupPinBtn = document.getElementById('setupPinBtn');
+            const pinModal = document.getElementById('pinModal');
+            
+            window.closePinModal = function() {
+                pinModal.style.display = 'none';
+            };
+            
+            if (setupPinBtn) {
+                setupPinBtn.addEventListener('click', () => {
+                    pinModal.style.display = 'flex';
+                });
+            }
+            
+            document.getElementById('savePinBtn')?.addEventListener('click', () => {
+                const pin = document.getElementById('pinCode').value;
+                const confirmPin = document.getElementById('confirmPin').value;
+                
+                if (pin.length !== 4 || !/^\d+$/.test(pin)) {
+                    showToast('PIN must be 4 digits', 'error');
+                    return;
+                }
+                if (pin !== confirmPin) {
+                    showToast('PINs do not match', 'error');
+                    return;
+                }
+                
+                currentUser.pinSet = true;
+                localStorage.setItem('pos_user_profile', JSON.stringify(currentUser));
+                showToast('PIN set successfully!', 'success');
+                pinModal.style.display = 'none';
+                document.getElementById('pinCode').value = '';
+                document.getElementById('confirmPin').value = '';
+            });
+            
+            // MFA Setup
+            document.getElementById('setupMfaBtn')?.addEventListener('click', () => {
+                window.location.href = '/mfa-setup.html';
+            });
+            
+            // Biometric Setup
+            document.getElementById('setupBiometricBtn')?.addEventListener('click', () => {
+                window.location.href = '/biometric-setup.html';
+            });
+            
+            // Upgrade Plan
+            document.getElementById('upgradePlanBtn')?.addEventListener('click', () => {
+                window.location.href = '/register.html';
+            });
+            
+            // Export Activity
+            document.getElementById('exportActivityBtn')?.addEventListener('click', () => {
+                const csv = [['Action', 'Time', 'IP', 'Device'], ...activityLog.map(a => [a.action, a.time, a.ip, a.device])];
+                const csvContent = csv.map(row => row.join(',')).join('\n');
+                const blob = new Blob([csvContent], { type: 'text/csv' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `activity_log_${new Date().toISOString().split('T')[0]}.csv`;
+                a.click();
+                URL.revokeObjectURL(url);
+                showToast('Activity log exported', 'success');
+            });
+            
+            // Revoke All Sessions
+            document.getElementById('revokeAllSessionsBtn')?.addEventListener('click', () => {
+                showToast('All other sessions have been revoked', 'success');
+            });
+            
+            // Save Notifications
+            document.getElementById('saveNotificationsBtn')?.addEventListener('click', () => {
+                currentUser.emailNotifications = document.getElementById('emailNotifications').checked;
+                currentUser.smsNotifications = document.getElementById('smsNotifications').checked;
+                currentUser.dailyReport = document.getElementById('dailyReport').checked;
+                localStorage.setItem('pos_user_profile', JSON.stringify(currentUser));
+                showToast('Notification preferences saved', 'success');
+            });
+            
+            // Deactivate Account
+            document.getElementById('deactivateAccountBtn')?.addEventListener('click', () => {
+                if (confirm('⚠️ WARNING: Deactivating your account will permanently delete all your data. This action cannot be undone. Continue?')) {
+                    showToast('Account deactivation requested. Support will contact you.', 'warning');
+                }
+            });
+            
+            // ============================================
+            // Toast Notification
+            // ============================================
+            function showToast(message, type) {
+                const toast = document.createElement('div');
+                toast.textContent = message;
+                toast.style.cssText = `
+                    position: fixed; bottom: 20px; right: 20px;
+                    background: ${type === 'error' ? '#dc2626' : type === 'success' ? '#10b981' : '#2563eb'};
+                    color: white; padding: 12px 20px; border-radius: 12px;
+                    z-index: 1000; animation: slideIn 0.3s ease;
+                    font-weight: 500;
+                `;
+                document.body.appendChild(toast);
+                setTimeout(() => toast.remove(), 3000);
+            }
+            
+            // ============================================
+            // Load Components
+            // ============================================
+            async function loadComponents() {
+                try {
+                    const sidebarResp = await fetch('/components/Sidebar.html');
+                    document.getElementById('sidebarContainer').innerHTML = await sidebarResp.text();
+                    
+                    const headerResp = await fetch('/components/Header.html');
+                    document.getElementById('headerContainer').innerHTML = await headerResp.text();
+                    
+                    const footerResp = await fetch('/components/Footer.html');
+                    document.getElementById('footerContainer').innerHTML = await footerResp.text();
+                    
+                    if (window.rbac) {
+                        window.rbac.renderSidebar();
+                        window.rbac.updateUIByPermissions();
+                    }
+                    if (window.layout) {
+                        window.layout.updateUserInfo();
+                        window.layout.setActiveNavItem();
+                    }
+                } catch (error) {
+                    console.warn('Error loading components:', error);
+                }
+            }
+            
+            // ============================================
+            // Initialize
+            // ============================================
+            function init() {
+                loadComponents();
+                loadUserProfile();
+                setupTabs();
+                loadActivityLog();
+                loadSessions();
+            }
+            
+            init();
+        })();
+    </script>
+</body>
+</html>
