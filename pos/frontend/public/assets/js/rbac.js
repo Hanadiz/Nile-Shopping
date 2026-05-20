@@ -1,12 +1,14 @@
 /**
- * Nile POS - Role-Based Access Control (RBAC)
- * Version: 2.0.0
+ * Nile POS - Role-Based Access Control (RBAC) System
+ * Manages user roles, permissions, and menu visibility
  */
 
 class RBACManager {
     constructor() {
         this.currentUser = null;
         this.permissions = [];
+        
+        // Role hierarchy (higher number = more permissions)
         this.roleHierarchy = {
             'admin': 100,
             'manager': 80,
@@ -16,6 +18,7 @@ class RBACManager {
             'viewer': 10
         };
         
+        // Tier levels
         this.tierLevels = {
             'freemium': 0,
             'basic': 1,
@@ -24,37 +27,80 @@ class RBACManager {
             'enterprise': 4
         };
         
+        // Complete permission matrix
         this.permissionMatrix = {
+            // Dashboard
             'dashboard.view': { roles: ['admin', 'manager', 'supervisor', 'cashier', 'stock_clerk', 'viewer'], tier: 'freemium' },
+            'dashboard.real_time': { roles: ['admin', 'manager', 'supervisor'], tier: 'professional' },
+            
+            // POS / Transactions
             'pos.access': { roles: ['admin', 'manager', 'supervisor', 'cashier'], tier: 'freemium' },
             'transaction.create': { roles: ['admin', 'manager', 'supervisor', 'cashier'], tier: 'freemium' },
             'transaction.view_own': { roles: ['admin', 'manager', 'supervisor', 'cashier'], tier: 'freemium' },
             'transaction.view_all': { roles: ['admin', 'manager', 'supervisor'], tier: 'professional' },
             'transaction.void': { roles: ['admin', 'manager', 'supervisor'], tier: 'basic' },
             'transaction.refund': { roles: ['admin', 'manager', 'supervisor'], tier: 'basic' },
+            'transaction.refund_max_500': { roles: ['admin', 'manager', 'supervisor'], tier: 'professional' },
+            'transaction.refund_unlimited': { roles: ['admin'], tier: 'premium' },
+            
+            // Products
             'product.view': { roles: ['admin', 'manager', 'supervisor', 'cashier', 'stock_clerk', 'viewer'], tier: 'freemium' },
             'product.create': { roles: ['admin', 'manager', 'stock_clerk'], tier: 'basic' },
             'product.update': { roles: ['admin', 'manager', 'stock_clerk'], tier: 'basic' },
             'product.delete': { roles: ['admin', 'manager'], tier: 'professional' },
+            'product.import': { roles: ['admin', 'manager', 'stock_clerk'], tier: 'professional' },
+            'product.export': { roles: ['admin', 'manager'], tier: 'professional' },
+            
+            // Inventory
             'inventory.view': { roles: ['admin', 'manager', 'supervisor', 'stock_clerk'], tier: 'basic' },
             'inventory.count': { roles: ['admin', 'manager', 'stock_clerk'], tier: 'basic' },
             'inventory.adjust': { roles: ['admin', 'manager', 'stock_clerk'], tier: 'professional' },
+            'inventory.transfer': { roles: ['admin', 'manager'], tier: 'professional' },
+            
+            // Customers
             'customer.view': { roles: ['admin', 'manager', 'supervisor', 'cashier'], tier: 'freemium' },
             'customer.create': { roles: ['admin', 'manager', 'supervisor', 'cashier'], tier: 'freemium' },
             'customer.update': { roles: ['admin', 'manager', 'supervisor', 'cashier'], tier: 'freemium' },
+            'customer.delete': { roles: ['admin', 'manager'], tier: 'professional' },
+            'customer.loyalty': { roles: ['admin', 'manager'], tier: 'professional' },
+            
+            // Reports
             'report.sales': { roles: ['admin', 'manager', 'supervisor'], tier: 'basic' },
             'report.inventory': { roles: ['admin', 'manager', 'stock_clerk'], tier: 'professional' },
-            'settings.view': { roles: ['admin', 'manager'], tier: 'basic' },
-            'settings.update': { roles: ['admin'], tier: 'professional' },
+            'report.employee': { roles: ['admin', 'manager'], tier: 'professional' },
+            'report.advanced': { roles: ['admin', 'manager'], tier: 'premium' },
+            'report.export': { roles: ['admin', 'manager'], tier: 'professional' },
+            
+            // User Management
             'user.view': { roles: ['admin', 'manager'], tier: 'professional' },
             'user.create': { roles: ['admin'], tier: 'premium' },
-            'offline.access': { roles: ['admin', 'manager', 'supervisor', 'cashier'], tier: 'basic' },
-            'loyalty.view': { roles: ['admin', 'manager'], tier: 'professional' },
-            'giftcard.view': { roles: ['admin', 'manager', 'cashier'], tier: 'basic' },
-            'system.audit': { roles: ['admin'], tier: 'professional' },
+            'user.update': { roles: ['admin', 'manager'], tier: 'professional' },
+            'user.delete': { roles: ['admin'], tier: 'premium' },
+            'user.role_assign': { roles: ['admin'], tier: 'premium' },
+            
+            // Settings
+            'settings.view': { roles: ['admin', 'manager'], tier: 'basic' },
+            'settings.update': { roles: ['admin'], tier: 'professional' },
+            'settings.system': { roles: ['admin'], tier: 'enterprise' },
+            
+            // Store Management
+            'store.view': { roles: ['admin', 'manager'], tier: 'professional' },
+            'store.create': { roles: ['admin'], tier: 'enterprise' },
+            'store.update': { roles: ['admin'], tier: 'enterprise' },
+            
+            // Security
+            'security.mfa': { roles: ['admin', 'manager'], tier: 'premium' },
+            'security.biometric': { roles: ['admin', 'manager', 'cashier'], tier: 'professional' },
+            'security.audit': { roles: ['admin'], tier: 'professional' },
+            
+            // API
             'api.access': { roles: ['admin', 'manager'], tier: 'professional' },
-            'tenant.view': { roles: ['admin'], tier: 'enterprise' },
-            'compliance.view': { roles: ['admin'], tier: 'enterprise' }
+            'webhook.manage': { roles: ['admin'], tier: 'premium' },
+            
+            // System
+            'system.backup': { roles: ['admin'], tier: 'premium' },
+            'system.restore': { roles: ['admin'], tier: 'enterprise' },
+            'system.tenant': { roles: ['admin'], tier: 'enterprise' }
         };
         
         this.init();
@@ -69,15 +115,6 @@ class RBACManager {
         const userStr = localStorage.getItem('pos_user');
         if (userStr) {
             this.currentUser = JSON.parse(userStr);
-        } else {
-            // Demo user for testing
-            this.currentUser = {
-                id: 1,
-                name: 'Demo User',
-                email: 'demo@nile.com',
-                role: 'cashier',
-                tier: 'freemium'
-            };
         }
     }
     
@@ -111,6 +148,10 @@ class RBACManager {
         return permissions.some(perm => this.hasPermission(perm));
     }
     
+    hasAllPermissions(permissions) {
+        return permissions.every(perm => this.hasPermission(perm));
+    }
+    
     getRoleLevel() {
         return this.roleHierarchy[this.currentUser?.role] || 0;
     }
@@ -127,34 +168,34 @@ class RBACManager {
         return this.getTierLevel() >= (this.tierLevels[requiredTier] || 0);
     }
     
-    getSidebarMenu() {
-        const allMenuItems = [
-            { icon: '📊', text: 'Dashboard', path: '/dashboard.html', permission: 'dashboard.view' },
-            { icon: '🛒', text: 'Point of Sale', path: '/index.html', permission: 'pos.access' },
-            { icon: '📦', text: 'Products', path: '/products.html', permission: 'product.view' },
-            { icon: '📋', text: 'Inventory', path: '/inventory-count.html', permission: 'inventory.view' },
-            { icon: '👥', text: 'Customers', path: '/customer-management.html', permission: 'customer.view' },
-            { icon: '🔄', text: 'Returns', path: '/returns-refunds.html', permission: 'transaction.refund' },
-            { icon: '🎁', text: 'Gift Cards', path: '/gift-cards.html', permission: 'giftcard.view', tier: 'basic' },
-            { icon: '⭐', text: 'Loyalty', path: '/loyalty.html', permission: 'loyalty.view', tier: 'professional' },
-            { icon: '📊', text: 'Reports', path: '/reports-custom.html', permission: 'report.sales' },
-            { icon: '👔', text: 'Time Clock', path: '/time-clock.html', permission: 'employee.view', tier: 'professional' },
-            { icon: '🏢', text: 'Fleet', path: '/fleet-management.html', permission: 'store.view', tier: 'professional' },
-            { icon: '🔧', text: 'Settings', path: '/settings.html', permission: 'settings.view' },
-            { icon: '🔒', text: 'Audit Log', path: '/audit-log.html', permission: 'system.audit', tier: 'professional' },
-            { icon: '📡', text: 'Offline', path: '/offline.html', permission: 'offline.access', tier: 'basic' },
-            { icon: '🏪', text: 'Tenants', path: '/tenants.html', permission: 'tenant.view', tier: 'enterprise' },
-            { icon: '⚖️', text: 'Compliance', path: '/compliance.html', permission: 'compliance.view', tier: 'enterprise' }
-        ];
-        
-        return allMenuItems.filter(item => {
-            if (item.permission && !this.hasPermission(item.permission)) return false;
-            if (item.tier && !this.hasTierAccess(item.tier)) return false;
-            return true;
-        });
+    getCurrentUser() {
+        return this.currentUser;
+    }
+    
+    getUserRole() {
+        return this.currentUser?.role || 'guest';
+    }
+    
+    getUserTier() {
+        return this.currentUser?.tier || 'freemium';
+    }
+    
+    isAuthenticated() {
+        return !!this.currentUser && !!localStorage.getItem('pos_jwt');
+    }
+    
+    logout() {
+        localStorage.removeItem('pos_jwt');
+        localStorage.removeItem('pos_refresh_token');
+        localStorage.removeItem('pos_user');
+        localStorage.removeItem('pos_permissions');
+        localStorage.removeItem('pos_session_expiry');
+        localStorage.removeItem('pos_tier');
+        window.location.href = '/login.html';
     }
     
     updateUIByPermissions() {
+        // Hide elements based on permission
         document.querySelectorAll('[data-permission]').forEach(el => {
             const perm = el.dataset.permission;
             if (!this.hasPermission(perm)) {
@@ -162,6 +203,7 @@ class RBACManager {
             }
         });
         
+        // Hide elements based on role
         document.querySelectorAll('[data-role]').forEach(el => {
             const role = el.dataset.role;
             if (!this.isAtLeast(role)) {
@@ -169,84 +211,36 @@ class RBACManager {
             }
         });
         
+        // Hide elements based on tier
         document.querySelectorAll('[data-tier]').forEach(el => {
             const tier = el.dataset.tier;
             if (!this.hasTierAccess(tier)) {
                 el.style.display = 'none';
             }
         });
-        
-        // Update active nav item
-        const currentPath = window.location.pathname;
-        document.querySelectorAll('.nav-item').forEach(item => {
-            const href = item.getAttribute('href');
-            if (href && currentPath.includes(href)) {
-                item.classList.add('active');
-            }
-        });
     }
     
-    renderSidebar() {
-        const menuItems = this.getSidebarMenu();
-        const sidebarNav = document.querySelector('.sidebar-nav');
-        if (!sidebarNav) return;
-        
-        const sections = {
-            main: { title: 'Main', items: [] },
-            sales: { title: 'Sales', items: [] },
-            inventory: { title: 'Inventory', items: [] },
-            customers: { title: 'Customers', items: [] },
-            reports: { title: 'Reports', items: [] },
-            settings: { title: 'Settings', items: [] },
-            system: { title: 'System', items: [] }
+    canAccessRoute(route) {
+        const routePermissions = this.getRoutePermissions(route);
+        if (!routePermissions || routePermissions.length === 0) return true;
+        return this.hasAnyPermission(routePermissions);
+    }
+    
+    getRoutePermissions(route) {
+        const routeMap = {
+            '/dashboard.html': ['dashboard.view'],
+            '/index.html': ['pos.access'],
+            '/products.html': ['product.view'],
+            '/customers.html': ['customer.view'],
+            '/inventory.html': ['inventory.view'],
+            '/reports.html': ['report.sales'],
+            '/settings.html': ['settings.view'],
+            '/users.html': ['user.view'],
+            '/api-debug.html': ['api.access']
         };
-        
-        menuItems.forEach(item => {
-            if (item.text === 'Dashboard') sections.main.items.push(item);
-            else if (item.text === 'Point of Sale') sections.sales.items.push(item);
-            else if (['Products', 'Inventory'].includes(item.text)) sections.inventory.items.push(item);
-            else if (['Customers', 'Loyalty', 'Gift Cards'].includes(item.text)) sections.customers.items.push(item);
-            else if (['Reports', 'Returns'].includes(item.text)) sections.reports.items.push(item);
-            else if (['Settings', 'Time Clock', 'Fleet'].includes(item.text)) sections.settings.items.push(item);
-            else sections.system.items.push(item);
-        });
-        
-        let html = '';
-        for (const [key, section] of Object.entries(sections)) {
-            if (section.items.length > 0) {
-                html += `
-                    <div class="nav-section">
-                        <div class="nav-section-title">${section.title}</div>
-                        ${section.items.map(item => `
-                            <a href="${item.path}" class="nav-item">
-                                <span class="nav-icon">${item.icon}</span>
-                                <span class="nav-text">${item.text}</span>
-                            </a>
-                        `).join('')}
-                    </div>
-                `;
-            }
-        }
-        
-        sidebarNav.innerHTML = html;
-        this.updateUIByPermissions();
-    }
-    
-    getCurrentUser() {
-        return this.currentUser;
-    }
-    
-    getTierLimits() {
-        const limits = {
-            freemium: { maxProducts: 500, maxTransactions: 100, maxRegisters: 1, offline: false },
-            basic: { maxProducts: 5000, maxTransactions: 5000, maxRegisters: 2, offline: true },
-            professional: { maxProducts: 50000, maxTransactions: 50000, maxRegisters: 5, offline: true },
-            premium: { maxProducts: 500000, maxTransactions: 999999, maxRegisters: 999, offline: true },
-            enterprise: { maxProducts: 9999999, maxTransactions: 9999999, maxRegisters: 9999, offline: true }
-        };
-        return limits[this.currentUser?.tier || 'freemium'];
+        return routeMap[route] || [];
     }
 }
 
-// Initialize globally
+// Initialize RBAC globally
 window.rbac = new RBACManager();
