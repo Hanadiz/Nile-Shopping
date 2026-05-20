@@ -1,6 +1,6 @@
 /* ============================================
    Nile POS - Complete Layout System
-   Includes: Header, Sidebar, Footer, Main Content
+   Version: 2.0.0
    ============================================ */
 
 :root {
@@ -31,7 +31,6 @@
     /* Transitions */
     --transition-fast: 0.15s ease;
     --transition-normal: 0.25s ease;
-    --transition-slow: 0.4s ease;
     
     /* Shadows */
     --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
@@ -40,9 +39,6 @@
     --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1);
 }
 
-/* ============================================
-   RESET & BASE
-   ============================================ */
 * {
     margin: 0;
     padding: 0;
@@ -101,7 +97,7 @@ body {
     display: block;
 }
 
-/* Sidebar Toggle Button */
+/* Sidebar Toggle */
 .sidebar-toggle {
     position: absolute;
     top: 20px;
@@ -116,6 +112,8 @@ body {
     cursor: pointer;
     z-index: 101;
     transition: transform var(--transition-fast);
+    color: white;
+    font-size: 12px;
 }
 
 .sidebar.collapsed .sidebar-toggle {
@@ -211,7 +209,7 @@ body {
     font-weight: 600;
 }
 
-/* User Profile in Sidebar */
+/* Sidebar User */
 .sidebar-user {
     position: absolute;
     bottom: 0;
@@ -373,7 +371,7 @@ body {
     background: var(--white);
     border-radius: 12px;
     box-shadow: var(--shadow-lg);
-    min-width: 200px;
+    min-width: 220px;
     opacity: 0;
     visibility: hidden;
     transition: all var(--transition-fast);
@@ -406,9 +404,7 @@ body {
     margin: 8px 0;
 }
 
-/* ============================================
-   FOOTER
-   ============================================ */
+/* Footer */
 .app-footer {
     background: var(--white);
     border-top: 1px solid var(--border);
@@ -441,13 +437,11 @@ body {
     color: var(--primary);
 }
 
-/* ============================================
-   HERO SECTION
-   ============================================ */
+/* Hero Section */
 .hero-section {
     background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
     border-radius: 20px;
-    padding: 40px;
+    padding: 32px 40px;
     margin-bottom: 24px;
     color: white;
     position: relative;
@@ -497,9 +491,7 @@ body {
     opacity: 0.8;
 }
 
-/* ============================================
-   BREADCRUMB
-   ============================================ */
+/* Breadcrumb */
 .breadcrumb {
     display: flex;
     align-items: center;
@@ -522,9 +514,12 @@ body {
     color: var(--gray-light);
 }
 
-/* ============================================
-   RESPONSIVE
-   ============================================ */
+/* Content Container */
+.content-container {
+    padding: 24px;
+}
+
+/* Responsive */
 @media (max-width: 768px) {
     .sidebar {
         transform: translateX(-100%);
@@ -565,6 +560,10 @@ body {
         flex-direction: column;
         text-align: center;
     }
+    
+    .content-container {
+        padding: 16px;
+    }
 }
 
 @media (max-width: 480px) {
@@ -575,4 +574,45 @@ body {
     .page-title {
         font-size: 18px;
     }
+}
+
+/* Utility Classes */
+.hidden {
+    display: none !important;
+}
+
+.text-center {
+    text-align: center;
+}
+
+.mt-2 { margin-top: 8px; }
+.mt-3 { margin-top: 12px; }
+.mt-4 { margin-top: 16px; }
+.mb-2 { margin-bottom: 8px; }
+.mb-3 { margin-bottom: 12px; }
+.mb-4 { margin-bottom: 16px; }
+
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.fade-in {
+    animation: fadeIn 0.3s ease;
+}
+
+.slide-in {
+    animation: slideIn 0.3s ease;
 }
