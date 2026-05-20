@@ -652,7 +652,14 @@
             document.getElementById('pageTitle').textContent = pageTitle;
             document.getElementById('currentPage').textContent = pageTitle;
         }
-        
+        // Add to the header script section
+const profileLink = document.getElementById('profileLink');
+if (profileLink) {
+    profileLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        window.location.href = '/profile.html';
+    });
+}
         // Logout handler
         const logoutBtn = document.getElementById('logoutBtn');
         if (logoutBtn) {
