@@ -190,3 +190,97 @@ class LayoutController {
         const badge = document.querySelector('.notification-badge');
         if (badge) {
             const count = Math.floor(Math.random() * 5);
+            badge.textContent = count > 0 ? count : '';
+            badge.style.display = count > 0 ? 'block' : 'none';
+        }
+    }
+    
+    showNotifications() {
+        const notifications = [
+            { title: 'New order #12345', time: '2 min ago', unread: true },
+            { title: 'Low stock alert: Running Shoes', time: '1 hour ago', unread: true },
+            { title: 'Daily sales report ready', time: '3 hours ago', unread: false }
+        ];
+        
+        const notifHtml = notifications.map(n => 
+            `<div style="padding: 12px; border-bottom: 1px solid #e2e8f0; ${n.unread ? 'background: #eff6ff;' : ''}">
+                <div style="font-weight: 500;">${n.title}</div>
+                <div style="font-size: 11px; color: #64748b;">${n.time}</div>
+            </div>`
+        ).join('');
+        
+        const modal = document.createElement('div');
+        modal.className = 'notification-modal';
+        modal.style.cssText = `
+            position: fixed; top: 70px; right: 20px; width: 300px;
+            background: white; border-radius: 12px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
+            z-index: 1000; overflow: hidden;
+        `;
+        modal.innerHTML = `<div style="padding: 12px; background: #f1f5f9; font-weight: 600;">Notifications</div>${notifHtml}<div style="padding: 8px; text-align: center;"><a href="#" style="color: #2563eb; text-decoration: none; font-size: 12px;">View all</a></div>`;
+        document.body.appendChild(modal);
+        
+        setTimeout(() => modal.remove(), 5000);
+        modal.addEventListener('click', () => modal.remove());
+    }
+    
+    setupBreadcrumb() {
+        const breadcrumb = document.querySelector('.breadcrumb');
+        if (breadcrumb) {
+            const path = window.location.pathname;
+            const pageName = path.split('/').pop().replace('.html', '').replace(/-/g, ' ');
+            const pageTitle = pageName.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+            
+            const titleEl = document.querySelector('.page-title');
+            if (titleEl) titleEl.textContent = pageTitle;
+        }
+    }
+    
+    handleGlobalSearch(query) {
+        if (query.length < 2) return;
+        window.location.href = `/search.html?q=${encodeURIComponent(query)}`;
+    }
+    
+    setupResponsive() {
+        window.addEventListener('resize', () => {
+            if (window.innerWidth > 768 && this.isMobileMenuOpen) {
+                this.closeMobileMenu();
+            }
+        });
+    }
+    
+    closeMobileMenu() {
+        this.isMobileMenuOpen = false;
+        if (this.sidebar) {
+            this.sidebar.classList.remove('mobile-open');
+        }
+        document.body.style.overflow = '';
+    }
+    
+    applyStoredState() {
+        if (this.isSidebarCollapsed) {
+            this.sidebar?.classList.add('collapsed');
+            this.mainContent?.classList.add('expanded');
+        }
+    }
+    
+    updatePageTitle(title) {
+        document.title = `${title} | Nile POS`;
+        const pageTitleEl = document.querySelector('.page-title');
+        if (pageTitleEl) pageTitleEl.textContent = title;
+    }
+}
+
+// Initialize layout when DOM ready
+document.addEventListener('DOMContentLoaded', () => {
+    window.layout = new LayoutController();
+});
+
+// Keyboard shortcut: Ctrl+Shift+L for logout
+document.addEventListener('keydown', (e) => {
+    if (e.ctrlKey && e.shiftKey && e.key === 'L') {
+        e.preventDefault();
+        if (confirm('Quick logout?')) {
+            window.location.href = '/logout.html';
+        }
+    }
+});
