@@ -1,6 +1,6 @@
 /**
  * Nile POS - Layout Controller
- * Manages sidebar, header, and overall layout behavior
+ * Version: 2.0.0
  */
 
 class LayoutController {
@@ -21,23 +21,77 @@ class LayoutController {
         this.setupResponsive();
         this.setupBreadcrumb();
         this.applyStoredState();
+        
+        // Load components if using dynamic loading
+        if (document.getElementById('sidebarContainer')) {
+            this.loadComponents();
+        }
+    }
+    
+    async loadComponents() {
+        try {
+            // Load sidebar if container exists
+            if (document.getElementById('sidebarContainer') && !document.querySelector('.sidebar')) {
+                const sidebarResp = await fetch('/components/Sidebar.html');
+                const sidebarHtml = await sidebarResp.text();
+                document.getElementById('sidebarContainer').innerHTML = sidebarHtml;
+                this.sidebar = document.querySelector('.sidebar');
+                this.setupSidebar();
+            }
+            
+            // Load header if container exists
+            if (document.getElementById('headerContainer') && !document.querySelector('.app-header')) {
+                const headerResp = await fetch('/components/Header.html');
+                const headerHtml = await headerResp.text();
+                document.getElementById('headerContainer').innerHTML = headerHtml;
+                this.setupHeader();
+                this.setupUserDropdown();
+            }
+            
+            // Load footer if container exists
+            if (document.getElementById('footerContainer') && !document.querySelector('.app-footer')) {
+                const footerResp = await fetch('/components/Footer.html');
+                const footerHtml = await footerResp.text();
+                document.getElementById('footerContainer').innerHTML = footerHtml;
+            }
+            
+            // Load hero if container exists
+            if (document.getElementById('heroContainer') && !document.querySelector('.hero-section')) {
+                const heroResp = await fetch('/components/Hero.html');
+                const heroHtml = await heroResp.text();
+                document.getElementById('heroContainer').innerHTML = heroHtml;
+            }
+            
+            // Reinitialize RBAC after components load
+            if (window.rbac) {
+                window.rbac.renderSidebar();
+                window.rbac.updateUIByPermissions();
+            }
+            
+            // Update user info
+            this.updateUserInfo();
+            
+        } catch (error) {
+            console.warn('Could not load components:', error);
+        }
     }
     
     setupSidebar() {
-        // Create sidebar toggle button
-        const toggleBtn = document.createElement('div');
-        toggleBtn.className = 'sidebar-toggle';
-        toggleBtn.innerHTML = '◀';
-        toggleBtn.addEventListener('click', () => this.toggleSidebar());
-        this.sidebar?.appendChild(toggleBtn);
+        if (!this.sidebar) return;
         
-        // Mobile close button
-        const closeBtn = document.createElement('div');
-        closeBtn.className = 'mobile-close';
-        closeBtn.innerHTML = '✕';
-        closeBtn.style.cssText = 'display:none; position:absolute; top:16px; right:16px; font-size:24px; cursor:pointer;';
-        closeBtn.addEventListener('click', () => this.closeMobileMenu());
-        this.sidebar?.appendChild(closeBtn);
+        // Create toggle button if not exists
+        if (!document.querySelector('.sidebar-toggle')) {
+            const toggleBtn = document.createElement('div');
+            toggleBtn.className = 'sidebar-toggle';
+            toggleBtn.innerHTML = '◀';
+            toggleBtn.addEventListener('click', () => this.toggleSidebar());
+            this.sidebar.appendChild(toggleBtn);
+        }
+        
+        // Render sidebar menu if RBAC available
+        if (window.rbac) {
+            window.rbac.renderSidebar();
+        }
     }
     
     toggleSidebar() {
@@ -53,13 +107,11 @@ class LayoutController {
     }
     
     setupHeader() {
-        // Mobile menu toggle
         const mobileToggle = document.querySelector('.mobile-menu-toggle');
         if (mobileToggle) {
             mobileToggle.addEventListener('click', () => this.toggleMobileMenu());
         }
         
-        // Header search
         const searchInput = document.querySelector('.header-search input');
         if (searchInput) {
             searchInput.addEventListener('keypress', (e) => {
@@ -78,14 +130,6 @@ class LayoutController {
         document.body.style.overflow = this.isMobileMenuOpen ? 'hidden' : '';
     }
     
-    closeMobileMenu() {
-        this.isMobileMenuOpen = false;
-        if (this.sidebar) {
-            this.sidebar.classList.remove('mobile-open');
-        }
-        document.body.style.overflow = '';
-    }
-    
     setupUserDropdown() {
         const userDropdown = document.querySelector('.user-dropdown');
         if (userDropdown) {
@@ -99,20 +143,38 @@ class LayoutController {
             });
         }
         
-        // Populate user info
+        // Setup logout button
+        const logoutBtn = document.getElementById('logoutBtn');
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                if (confirm('Are you sure you want to logout?')) {
+                    window.location.href = '/logout.html';
+                }
+            });
+        }
+        
         this.updateUserInfo();
     }
     
     updateUserInfo() {
         const user = window.rbac?.getCurrentUser();
         if (user) {
-            const userNameSpan = document.querySelector('.user-name');
-            const userRoleSpan = document.querySelector('.user-role');
-            const userAvatar = document.querySelector('.user-avatar');
+            const userNameSpans = document.querySelectorAll('.user-name');
+            const userRoleSpans = document.querySelectorAll('.user-role');
+            const userAvatars = document.querySelectorAll('.user-avatar');
             
-            if (userNameSpan) userNameSpan.textContent = user.name || user.email?.split('@')[0];
-            if (userRoleSpan) userRoleSpan.textContent = user.role?.toUpperCase() || 'User';
-            if (userAvatar) userAvatar.textContent = (user.name?.charAt(0) || 'U').toUpperCase();
+            userNameSpans.forEach(span => {
+                span.textContent = user.name || user.email?.split('@')[0] || 'User';
+            });
+            
+            userRoleSpans.forEach(span => {
+                span.textContent = user.role?.toUpperCase() || 'Cashier';
+            });
+            
+            userAvatars.forEach(avatar => {
+                avatar.textContent = (user.name?.charAt(0) || 'U').toUpperCase();
+            });
         }
     }
     
@@ -121,90 +183,10 @@ class LayoutController {
         if (notificationBtn) {
             notificationBtn.addEventListener('click', () => this.showNotifications());
         }
-        
-        // Fetch notification count
         this.updateNotificationBadge();
     }
     
     updateNotificationBadge() {
         const badge = document.querySelector('.notification-badge');
         if (badge) {
-            // Demo: random count or fetch from API
             const count = Math.floor(Math.random() * 5);
-            badge.textContent = count > 0 ? count : '';
-            badge.style.display = count > 0 ? 'block' : 'none';
-        }
-    }
-    
-    showNotifications() {
-        // Show notification panel
-        const notifications = [
-            { title: 'New order #12345', time: '2 min ago', unread: true },
-            { title: 'Low stock alert: Running Shoes', time: '1 hour ago', unread: true },
-            { title: 'Daily sales report ready', time: '3 hours ago', unread: false }
-        ];
-        
-        // Create modal or dropdown
-        alert('Notifications:\n' + notifications.map(n => `• ${n.title} (${n.time})`).join('\n'));
-    }
-    
-    setupBreadcrumb() {
-        const breadcrumb = document.querySelector('.breadcrumb');
-        if (breadcrumb) {
-            const path = window.location.pathname;
-            const pageName = path.split('/').pop().replace('.html', '').replace(/-/g, ' ');
-            const pageTitle = pageName.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
-            
-            const titleEl = document.querySelector('.page-title');
-            if (titleEl) titleEl.textContent = pageTitle;
-        }
-    }
-    
-    handleGlobalSearch(query) {
-        if (query.length < 2) return;
-        
-        // Search through products, customers, transactions
-        console.log('Searching for:', query);
-        // Implement search functionality
-        alert(`Search results for "${query}" would appear here`);
-    }
-    
-    setupResponsive() {
-        window.addEventListener('resize', () => {
-            if (window.innerWidth > 768 && this.isMobileMenuOpen) {
-                this.closeMobileMenu();
-            }
-        });
-    }
-    
-    applyStoredState() {
-        if (this.isSidebarCollapsed) {
-            this.sidebar?.classList.add('collapsed');
-            this.mainContent?.classList.add('expanded');
-        }
-    }
-    
-    updatePageTitle(title) {
-        document.title = `${title} | Nile POS`;
-        const pageTitleEl = document.querySelector('.page-title');
-        if (pageTitleEl) pageTitleEl.textContent = title;
-    }
-    
-    setActiveNavItem() {
-        const currentPath = window.location.pathname;
-        document.querySelectorAll('.nav-item').forEach(item => {
-            const href = item.getAttribute('href');
-            if (href && currentPath.includes(href)) {
-                item.classList.add('active');
-            } else {
-                item.classList.remove('active');
-            }
-        });
-    }
-}
-
-// Initialize layout when DOM ready
-document.addEventListener('DOMContentLoaded', () => {
-    window.layout = new LayoutController();
-    window.layout.setActiveNavItem();
-});
