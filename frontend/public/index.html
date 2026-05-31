@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nile POS</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #2563eb 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .entry-container {
+            text-align: center;
+            color: white;
+            animation: fadeIn 0.5s ease;
+        }
+        .logo { font-size: 48px; font-weight: 700; margin-bottom: 16px; }
+        .logo span { color: #60a5fa; }
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 24px auto;
+        }
+        .message { font-size: 14px; opacity: 0.8; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+    <div class="entry-container">
+        <div class="logo">Nile<span>POS</span></div>
+        <div class="spinner"></div>
+        <div class="message">Redirecting to secure login...</div>
+    </div>
+    <script>
+        const token = localStorage.getItem('pos_jwt');
+        const sessionExpiry = localStorage.getItem('pos_session_expiry');
+        if (token && sessionExpiry && new Date(sessionExpiry) > new Date()) {
+            window.location.href = '/dashboard.html';
+        } else {
+            localStorage.removeItem('pos_jwt');
+            localStorage.removeItem('pos_user');
+            localStorage.removeItem('pos_session_expiry');
+            window.location.href = '/login.html';
+        }
+    </script>
+</body>
+</html>
